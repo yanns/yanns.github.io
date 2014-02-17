@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Play Framework | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/play-framework/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2013-10-13T21:24:44+02:00</updated>
+  <updated>2014-02-17T16:18:58+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -29,18 +29,18 @@ My source was a file containing the geographical coordinates of Wikipedia articl
 <p>Play2 architecture is based on event, and gives us some tools to work with streams of data:</p>
 
 <ul>
-    <li><a href="http://www.playframework.com/documentation/2.2.x/Enumerators">Enumerators</a> produce chunk of data</li>
-    <li><a href="http://www.playframework.com/documentation/2.2.x/Enumeratees">Enumeratees</a> transform these chunks</li>
-    <li><a href="http://www.playframework.com/documentation/2.2.x/Iteratees">Iteratees</a> consumes these chunks</li>
+    <li><a target="_blank" href="http://www.playframework.com/documentation/2.2.x/Enumerators">Enumerators</a> produce chunk of data</li>
+    <li><a target="_blank" href="http://www.playframework.com/documentation/2.2.x/Enumeratees">Enumeratees</a> transform these chunks</li>
+    <li><a target="_blank" href="http://www.playframework.com/documentation/2.2.x/Iteratees">Iteratees</a> consumes these chunks</li>
 </ul>
 
 
 <p>(For more information, you can read:</p>
 
 <ul>
-    <li><a href="https://gist.github.com/sadache/3072893">Is socket.push(bytes) all you need to program Realtime Web apps?</a> from <a href="https://twitter.com/Sadache">Sadek Drobi, CTO Zenexity</a>.</li>
-    <li><a href="http://greweb.me/2012/08/zound-a-playframework-2-audio-streaming-experiment-using-iteratees/">Zound, a PlayFramework 2 audio streaming experiment using Iteratees</a> from <a href="https://twitter.com/greweb">Gaetan Renaudeau</a></li>
-    <li>If you understand french, you can read <a href="http://www.touilleur-express.fr/2012/08/05/realtime-web-application-un-exemple-avec-play2/">Realtime Web Application, un exemple avec Play2</a> from <a href="https://twitter.com/nmartignole">Nicolas Martignole</a>)
+    <li><a target="_blank" href="https://gist.github.com/sadache/3072893">Is socket.push(bytes) all you need to program Realtime Web apps?</a> from <a href="https://twitter.com/Sadache">Sadek Drobi, CTO Zenexity</a>.</li>
+    <li><a target="_blank" href="http://greweb.me/2012/08/zound-a-playframework-2-audio-streaming-experiment-using-iteratees/">Zound, a PlayFramework 2 audio streaming experiment using Iteratees</a> from <a target="_blank" href="https://twitter.com/greweb">Gaetan Renaudeau</a></li>
+    <li>If you understand french, you can read <a target="_blank" href="http://www.touilleur-express.fr/2012/08/05/realtime-web-application-un-exemple-avec-play2/">Realtime Web Application, un exemple avec Play2</a> from <a target="_blank" href="https://twitter.com/nmartignole">Nicolas Martignole</a>)
 </li>
 </ul>
 
@@ -115,9 +115,9 @@ The Enumerator is reading a file, but you can imagine it could read data from a 
 
 <ul>
     <li>polling: the browser pools the server every x milliseconds to check if there is a new message. This method is not very efficient, because a lot of requests are necessary to give the illusion to update the application in real time.</li>
-    <li>long-polling (or <a href="http://en.wikipedia.org/wiki/Comet_(programming)">Comet</a>): the browser opens a connection to the server (for example in a iframe), and the server keeps the connection opened. When the server wants to push data to the client, it sends this data with the opened connection. The client receives the data, and opens a connection again for further messages. With this method, the browser is always showing that it is waiting for data. This technology does not scale on threaded system, as each opened connection uses a thread. In JEE environment, we need an asynchronous servlet 3.1 not to make the server exploding.</li>
-    <li><a href="http://dev.w3.org/html5/eventsource/">Server-Send Events (SSE)</a> are quite similar to Comet. The main difference is that the browser manages this connection. For example, it opens the connection again if it falls.</li>
-    <li><a href="http://dev.w3.org/html5/websockets/">WebSockets</a> provide a bi-directional, full-duplex communications channels. It is a different protocol than HTTP.</li>
+    <li>long-polling (or <a target="_blank" href="http://en.wikipedia.org/wiki/Comet_(programming)">Comet</a>): the browser opens a connection to the server (for example in a iframe), and the server keeps the connection opened. When the server wants to push data to the client, it sends this data with the opened connection. The client receives the data, and opens a connection again for further messages. With this method, the browser is always showing that it is waiting for data. This technology does not scale on threaded system, as each opened connection uses a thread. In JEE environment, we need an asynchronous servlet 3.1 not to make the server exploding.</li>
+    <li><a target="_blank" href="http://dev.w3.org/html5/eventsource/">Server-Send Events (SSE)</a> are quite similar to Comet. The main difference is that the browser manages this connection. For example, it opens the connection again if it falls.</li>
+    <li><a target="_blank" href="http://dev.w3.org/html5/websockets/">WebSockets</a> provide a bi-directional, full-duplex communications channels. It is a different protocol than HTTP.</li>
 </ul>
 
 
@@ -125,7 +125,7 @@ The Enumerator is reading a file, but you can imagine it could read data from a 
 
 <ul>
     <li>I've already played with WebSockets and wanted to try something new.</li>
-    <li>WebSockets are great and can communicate in both directions. But this technology is a new protocol, sometimes difficult to integrate in an existing infrastructure (Proxy, Load-Balancer, Firewall...) Server-Send Events, on the other hand, use the HTTP protocol. The PaaS <a href="https://www.heroku.com/">Heroku</a> does not support WebSockets yet, but support SSE. When pushing data from the server to clients is all what you need, SSE can be what is the most appropriate and is <a href="http://caniuse.com/#search=eventsource">well supported</a> (except in IE for the moment)</li>
+    <li>WebSockets are great and can communicate in both directions. But this technology is a new protocol, sometimes difficult to integrate in an existing infrastructure (Proxy, Load-Balancer, Firewall...) Server-Send Events, on the other hand, use the HTTP protocol. The PaaS <a target="_blank" href="https://www.heroku.com/">Heroku</a> does not support WebSockets yet, but support SSE. When pushing data from the server to clients is all what you need, SSE can be what is the most appropriate and is <a target="_blank" href="http://caniuse.com/#search=eventsource">well supported</a> (except in IE for the moment)</li>
 </ul>
 
 

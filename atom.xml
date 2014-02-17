@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2013-10-13T21:24:44+02:00</updated>
+  <updated>2014-02-17T16:18:58+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -12,6 +12,126 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[DevOpsDays Berlin 2013]]></title>
+    <link href="http://yanns.github.io/blog/2013/05/08/devopsdays-berlin-2013/"/>
+    <updated>2013-05-08T12:47:00+02:00</updated>
+    <id>http://yanns.github.io/blog/2013/05/08/devopsdays-berlin-2013</id>
+    <content type="html"><![CDATA[<p>direct from DevOpsDay Berlin 2013, my notices:</p>
+
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/program/">Program</a>
+<a target="_blank" href="http://new.livestream.com/accounts/4051563">Videos</a></p>
+
+<h2 id="day1"><a href="#day1">Day #1</a></h2>
+
+
+<p>From the <a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/DevOps3.0/">presentation from Immobilienscout</a> &ndash; <i>Marcel Wolf, <a target="_blank" href="https://twitter.com/felixsperling">Felix Sperling</a></i></p>
+
+<ul>
+    <li>Dev AM rotation: exchange between Dev and Ops</li>
+    <li>Self service VM</li>
+    <li>unique configuration server, accessible to anyone</li>
+</ul>
+
+
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/DevOps3.0/">DevTools team at Etsy</a> &ndash; <a target="_blank" href="https://twitter.com/mrtazz">Daniel Schauenberg</a></p>
+
+<ul>
+    <li><a target="_blank" href="http://fr.slideshare.net/mrtazz/devtools-at-etsy">Slides</a></li>
+    <li><a target="_blank" href="https://github.com/etsy/deployinator">deployinator</a></li>
+    <li>Each new employee should deploy on her first day.</li>
+    <li><a target="_blank" href="http://lxc.sourceforge.net/">LXC container</a> for tests</li>
+    <li>Statistics with <a target="_blank" href="https://github.com/etsy/statsd/">statsd</a>, <a target="_blank" href="https://github.com/etsy/logster">logster</a> and <a target="_blank" href="http://graphite.wikidot.com/">graphite</a></li>
+    <li>Log streamer with <a target="_blank" href="https://github.com/etsy/supergrep">supergrep</a></li>
+    <li><a target="_blank" href="https://github.com/etsy">Open Source projects</a></li>
+</ul>
+
+
+
+
+<h2 id="day2"><a href="#day2">Day #2</a></h2>
+
+
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/How%20the%20QA%20team%20got%20Prezi%20ready%20for%20DevOps/">How the QA team got Prezi ready for DevOps</a> &ndash; <a target="_blank" href="https://twitter.com/pneumark">Peter Neumark</a></p>
+
+<ul>
+    <li><a target="_blank" href="http://prezi.com/qmrekeeqqvyf/how-the-qa-team-got-prezi-ready-for-devops/">presentation</a></li>
+    <li>Like the <a target="_blank" href="https://twitter.com/simon_yann/status/339462592315682816/photo/1">error handling</a>: &#8220;When blame inevitably arises, the most senior people in the room should repeat this mantra: if a mistake happens, shame on us for making it so easy to make that mistake&#8221;. Very similar to risk management culture.</li>
+</ul>
+
+
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/Podularity%20FTW/">Podularity FTW!</a> &ndash; <a target="_blank" href="https://twitter.com/tlossen">Tim Lossen</a></p>
+
+<ul>
+    <li><a target="_blank" href="http://fr.slideshare.net/tim.lossen.de/podularity-ftw">slides</a></li>
+    <li>team = autonomous cell (even technological stack, product&#8230;)</li>
+    <li>The organization is a supercell, bindings autonomous cells together.</li>
+    <li><a target="_blank" href="https://twitter.com/simon_yann/status/339461227552047104/photo/1">Lunch roulette</a></li>
+    <li>Interesting question from the audience about the business continuity: if each team can choose its technological stack, is not it a problem then the team change, and when the new members do not know the new stack he is working with? Tim answered that it was indeed a problem the organization though of, but in practice, it never happened.<br/>I like this approach that I could try to summarize like this: do not spend your time trying to avoid problems, but solve real problem that exist.</li>
+</ul>
+
+
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/How%20we%20built%20and%20deployed%20the%20Honshu%20way/">Island Life: How we built and deployed the Honshū way</a> &ndash; Wes Mason</p>
+
+<ul>
+    <li>from one monolith app to several islands like components</li>
+</ul>
+
+
+
+
+<h2 id="other-notices"><a href="#other-notices">Other notices:</a></h2>
+
+
+<ul>
+    <li><a target="_blank" href="http://hubot.github.com/">robot for chat room</a> to post more information</li>
+    <li>secrets are hard to deploy in a secure way</li>
+    <li>distributed file system: <a target="_blank" href="http://ceph.com/">ceph</a><br/>more info: <a target="_blank" href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.110.4574&rep=rep1&type=pdf">Ceph: A scalable, high-performance distributed file system (2006)</a>
+</li>
+    <li><a target="_blank" href="http://www.docker.io/">doker.io</a> to manage linux containers. The demo was impressive, deploying one version and then another one in a few minutes.</li>
+    <li>Discussion with <a target="_blank" href="http://www.gutefrage.net/">gutefrage.net</a> who use Scala / <a target="_blank" href="https://github.com/twitter/finagle">Finagle</a> with <a target="_blank" href="http://thrift.apache.org/">Thrift</a>.<br>Storage of statistics with <a target="_blank" href="http://opentsdb.net/">OpenTSDB</a></li>
+    <li><a target="_blank" href="http://zeroturnaround.com/software/liverebel/">LiveRebel</a>: ZeroTurnaround made a presentation of LiveRebel<br/>
+LiveRebel contains some versions of the application.<br/>
+These versions can be uploaded, manually or automatically (maven plugin, command line tool&#8230;)<br/><br/>
+Then LiveRebel can deploy a specific version on production (or staging&#8230;)<br/>
+For this, an agent is running on each server.<br/><br/>
+LiveRebel can deploy to one server, check it with some configured smoke test.<br/>
+If the test is successful, the server is activated on the cluster, and the deployment process continues with the next server.<br/><br/>
+Liquibase is used to deploy a version to a database.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[G+ or blog?]]></title>
+    <link href="http://yanns.github.io/blog/2012/08/20/g-plus-or-blog/"/>
+    <updated>2012-08-20T06:17:00+02:00</updated>
+    <id>http://yanns.github.io/blog/2012/08/20/g-plus-or-blog</id>
+    <content type="html"><![CDATA[<p>Why having opened a blog, while I regularly post on G+?</p>
+
+<p>I like posting on G+, it fells spontaneous.</p>
+
+<p>But I felt frustrated about the formatting possibilities on G+, especially for code.
+I&rsquo;ve also opened this blog to experiment a new possibility.
+It is possible that I move this blog to another platform if I am not happy with it.</p>
+
+<p>To reduce the gap with G+, I compiled some of my posts:</p>
+
+<ul>
+    <li><a target="_blank" href="https://plus.google.com/u/0/108788785914419775677/posts/QgyUF9cXPkv">Using LESS CSS with Play! framework 2</a></li>
+    <li><a target="_blank" href="https://plus.google.com/u/0/108788785914419775677/posts/RxohCRp52J5">Starting staged Play application under windows</a></li>
+    <li><a target="_blank" href="https://plus.google.com/u/0/108788785914419775677/posts/LKjmmANJBNo">And starting staged Play application as linux service</a></li>
+    <li><a target="_blank" href="https://plus.google.com/u/0/108788785914419775677/posts/6RUZaCxYi7V">Why using google chrome frame?</a></li>
+    <li><a target="_blank" href="https://plus.google.com/u/0/108788785914419775677/posts/YvB97rnbSiG">Reverse routing in javascript with Play!</a></li>
+    <li><a target="_blank" href="https://plus.google.com/u/0/108788785914419775677/posts/PpRUjgHhXzK">Finding who deleted this function with GIT</a></li>
+</ul>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Handling data streams with Play2 and Server-Send Events]]></title>
@@ -29,18 +149,18 @@ My source was a file containing the geographical coordinates of Wikipedia articl
 <p>Play2 architecture is based on event, and gives us some tools to work with streams of data:</p>
 
 <ul>
-    <li><a href="http://www.playframework.com/documentation/2.2.x/Enumerators">Enumerators</a> produce chunk of data</li>
-    <li><a href="http://www.playframework.com/documentation/2.2.x/Enumeratees">Enumeratees</a> transform these chunks</li>
-    <li><a href="http://www.playframework.com/documentation/2.2.x/Iteratees">Iteratees</a> consumes these chunks</li>
+    <li><a target="_blank" href="http://www.playframework.com/documentation/2.2.x/Enumerators">Enumerators</a> produce chunk of data</li>
+    <li><a target="_blank" href="http://www.playframework.com/documentation/2.2.x/Enumeratees">Enumeratees</a> transform these chunks</li>
+    <li><a target="_blank" href="http://www.playframework.com/documentation/2.2.x/Iteratees">Iteratees</a> consumes these chunks</li>
 </ul>
 
 
 <p>(For more information, you can read:</p>
 
 <ul>
-    <li><a href="https://gist.github.com/sadache/3072893">Is socket.push(bytes) all you need to program Realtime Web apps?</a> from <a href="https://twitter.com/Sadache">Sadek Drobi, CTO Zenexity</a>.</li>
-    <li><a href="http://greweb.me/2012/08/zound-a-playframework-2-audio-streaming-experiment-using-iteratees/">Zound, a PlayFramework 2 audio streaming experiment using Iteratees</a> from <a href="https://twitter.com/greweb">Gaetan Renaudeau</a></li>
-    <li>If you understand french, you can read <a href="http://www.touilleur-express.fr/2012/08/05/realtime-web-application-un-exemple-avec-play2/">Realtime Web Application, un exemple avec Play2</a> from <a href="https://twitter.com/nmartignole">Nicolas Martignole</a>)
+    <li><a target="_blank" href="https://gist.github.com/sadache/3072893">Is socket.push(bytes) all you need to program Realtime Web apps?</a> from <a href="https://twitter.com/Sadache">Sadek Drobi, CTO Zenexity</a>.</li>
+    <li><a target="_blank" href="http://greweb.me/2012/08/zound-a-playframework-2-audio-streaming-experiment-using-iteratees/">Zound, a PlayFramework 2 audio streaming experiment using Iteratees</a> from <a target="_blank" href="https://twitter.com/greweb">Gaetan Renaudeau</a></li>
+    <li>If you understand french, you can read <a target="_blank" href="http://www.touilleur-express.fr/2012/08/05/realtime-web-application-un-exemple-avec-play2/">Realtime Web Application, un exemple avec Play2</a> from <a target="_blank" href="https://twitter.com/nmartignole">Nicolas Martignole</a>)
 </li>
 </ul>
 
@@ -148,9 +268,9 @@ The Enumerator is reading a file, but you can imagine it could read data from a 
 
 <ul>
     <li>polling: the browser pools the server every x milliseconds to check if there is a new message. This method is not very efficient, because a lot of requests are necessary to give the illusion to update the application in real time.</li>
-    <li>long-polling (or <a href="http://en.wikipedia.org/wiki/Comet_(programming)">Comet</a>): the browser opens a connection to the server (for example in a iframe), and the server keeps the connection opened. When the server wants to push data to the client, it sends this data with the opened connection. The client receives the data, and opens a connection again for further messages. With this method, the browser is always showing that it is waiting for data. This technology does not scale on threaded system, as each opened connection uses a thread. In JEE environment, we need an asynchronous servlet 3.1 not to make the server exploding.</li>
-    <li><a href="http://dev.w3.org/html5/eventsource/">Server-Send Events (SSE)</a> are quite similar to Comet. The main difference is that the browser manages this connection. For example, it opens the connection again if it falls.</li>
-    <li><a href="http://dev.w3.org/html5/websockets/">WebSockets</a> provide a bi-directional, full-duplex communications channels. It is a different protocol than HTTP.</li>
+    <li>long-polling (or <a target="_blank" href="http://en.wikipedia.org/wiki/Comet_(programming)">Comet</a>): the browser opens a connection to the server (for example in a iframe), and the server keeps the connection opened. When the server wants to push data to the client, it sends this data with the opened connection. The client receives the data, and opens a connection again for further messages. With this method, the browser is always showing that it is waiting for data. This technology does not scale on threaded system, as each opened connection uses a thread. In JEE environment, we need an asynchronous servlet 3.1 not to make the server exploding.</li>
+    <li><a target="_blank" href="http://dev.w3.org/html5/eventsource/">Server-Send Events (SSE)</a> are quite similar to Comet. The main difference is that the browser manages this connection. For example, it opens the connection again if it falls.</li>
+    <li><a target="_blank" href="http://dev.w3.org/html5/websockets/">WebSockets</a> provide a bi-directional, full-duplex communications channels. It is a different protocol than HTTP.</li>
 </ul>
 
 
@@ -158,7 +278,7 @@ The Enumerator is reading a file, but you can imagine it could read data from a 
 
 <ul>
     <li>I&#8217;ve already played with WebSockets and wanted to try something new.</li>
-    <li>WebSockets are great and can communicate in both directions. But this technology is a new protocol, sometimes difficult to integrate in an existing infrastructure (Proxy, Load-Balancer, Firewall&#8230;) Server-Send Events, on the other hand, use the HTTP protocol. The PaaS <a href="https://www.heroku.com/">Heroku</a> does not support WebSockets yet, but support SSE. When pushing data from the server to clients is all what you need, SSE can be what is the most appropriate and is <a href="http://caniuse.com/#search=eventsource">well supported</a> (except in IE for the moment)</li>
+    <li>WebSockets are great and can communicate in both directions. But this technology is a new protocol, sometimes difficult to integrate in an existing infrastructure (Proxy, Load-Balancer, Firewall&#8230;) Server-Send Events, on the other hand, use the HTTP protocol. The PaaS <a target="_blank" href="https://www.heroku.com/">Heroku</a> does not support WebSockets yet, but support SSE. When pushing data from the server to clients is all what you need, SSE can be what is the most appropriate and is <a target="_blank" href="http://caniuse.com/#search=eventsource">well supported</a> (except in IE for the moment)</li>
 </ul>
 
 
