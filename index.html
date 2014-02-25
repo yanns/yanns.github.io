@@ -9,8 +9,7 @@
   <meta name="author" content="Yann Simon">
 
   
-  <meta name="description" content="direct from DevOpsDay Berlin 2013, my notices: Program
-Videos Day #1 From the presentation from Immobilienscout &ndash; Marcel Wolf, Felix Sperling &hellip;">
+  <meta name="description" content="In January, I had the pleasure to participate and to give a talk at the ping conf. Ping conf was the first world wide community conference about the &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +65,145 @@ Videos Day #1 From the presentation from Immobilienscout &ndash; Marcel Wolf, Fe
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/02/17/ping-conf-2014/">Ping Conf 2014</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-17T16:49:00+01:00" pubdate data-updated="true">Feb 17<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In January, I had the pleasure to participate and to give a talk at the <a href="http://www.ping-conf.com/">ping conf</a>.</p>
+
+<p>Ping conf was the first world wide community conference about the <a href="http://www.playframework.com/">Play Framework!</a>.</p>
+
+<p>This conference was very well organized. I&rsquo;d like to thanks all the organizers one more time for this.
+It was a good opportunity to meet people I knew only on the mailing list or on twitter.</p>
+
+<p>The talks were very interesting. Some notices:</p>
+
+<h4>&ldquo;Javascript functionality coming to Play 2.3&rdquo; from <a href="@huntchr">Christopher Hunt</a></h4>
+
+<p>Typesafe take the JavaScript build chain very seriously and the new <a href="https://github.com/sbt/sbt-web">sbt-web</a> offers a lot of new functionalities.
+IMO, one of the most important is the possibility to use NodeJS as JavaScript engine to have a very performance JavaScript build.<br/>
+<a href="http://huntc.github.io/sbt-web-presentation/#/step-1">slides</a></p>
+
+<h4>&ldquo;Typesafing your blobs with Scala&rdquo; from <a href="@skaalf">Julien Tournay</a> and Pascal Voitot</h4>
+
+<p>Julien and Pascal show us the new <a href="https://github.com/jto/Play20/tree/new_validation_api/documentation/manual/scalaGuide/main/validation">validation API</a>, unifying the Form and JSON validation.
+This new API should appear in Play 2.3.<br/>
+<a href="http://jto.github.io/articles/play_new_validation_api/">More info</a><br/>
+<a href="https://docs.google.com/presentation/d/1bc4437zIO3dUD0cYoSFDbNjrSErY3soURfE5QUErbgw/pub?start=false&amp;loop=false&amp;delayms=3000#slide=id.g11c889a6e_23">slides</a></p>
+
+<h4>&ldquo;Writing a reactive web app with Scala.js and ReactJS&rdquo; from <a href="@matthiasnehlsen">Matthias Nehlsen</a></h4>
+
+<p>Matthias, famous for his <a href="http://matthiasnehlsen.com/">blog</a> and his <a href="http://birdwatch.matthiasnehlsen.com/">realtime reactive tweet analysing application</a> talked about the <a href="http://facebook.github.io/react/">ReactJS UI library</a> combined with <a href="http://www.scala-js.org/">ScalaJS</a>.
+These two tools can be well combined, as ReactJS like immutable data structure, that ScalaJS can provide.</p>
+
+<h4>&ldquo;Play2 and Redis : when simplicity meets productivity&rdquo; from <a href="@nmartignole">Nicolas Martignole</a></h4>
+
+<p>Nicolas talked about his experience with Redis and Play. This combination is looking very simple and performant.</p>
+
+<h4>&ldquo;Building composable, streaming, testable Play apps&rdquo; from <a href="@brikis98">Yevgeniy Brikman</a></h4>
+
+<p>The &ldquo;Jim&rdquo; from LinkedIn talked about how to compose web pages together, using the <a href="https://www.facebook.com/note.php?note_id=389414033919">Facebook&rsquo;s BigPipe concept</a>.
+Very interesting to decompose a big portal into small web components.<br/>
+<a href="http://de.slideshare.net/brikis98/composable-and-streamable-play-apps">slides</a></p>
+
+<h4>&ldquo;Play is for Performance&rdquo; from <a href="@jroper">James Roper</a>, tech lead for Play! framework</h4>
+
+<p>Very interesting talk about how to optimize (or not) an asynchronous play! application.<br/>
+<a href="https://github.com/jroper/play-is-for-performance">slides as play application</a> (simply check it out and start the play application, it is very impressive)</p>
+
+<h4>&ldquo;Making the case for Play&rdquo; from <a href="@ajevans85">Adam Evans</a> and <a href="@asherglynn">Asher Glynn</a>, BBC</h4>
+
+<p>Adam and Asher talked about change in an organization like the BBC, how they introduced the Play Framework!<br/>
+<a href="http://pt.slideshare.net/ajevans/making-the-30191542">slides</a></p>
+
+<h4><a href="@grantklopper">Grant Klopper</a>, Software engineer at The Guardian.</h4>
+
+<p>Grant made a change during the talk and push it into production, very impressive.</p>
+
+<h4><a href="@tobnee">Tobias Neef</a></h4>
+
+<p>Tobias talk about action composition and filter in Play, when to use the first ones and when to use the others.</p>
+
+<h4>&ldquo;Async: Reacting instead of waiting for better times&rdquo; from <a href="@apnylle">Johan Andrén</a></h4>
+
+<p>Johan talk about asynchronous programming and how it works with Play. A very good introduction!<br/>
+<a href="http://de.slideshare.net/johanandren/async-react-dont-wait-ping-conf">slides</a></p>
+
+<hr/>
+
+
+<p>My talk was about &ldquo;Structure your Play application with the cake pattern (and test it)&rdquo;</p>
+
+<p>I talked about how to organize a Play! application written in Scala into components with the cake pattern.
+The main goal of these components is to expose service only to others components, and to declare dependencies if needed.</p>
+
+<p>As a side effect, the cake pattern allows to inject dependencies at compile time.
+A particularity is that this &ldquo;dependency injection&rdquo; mechanism does not need any container like Spring or Guice at runtime.</p>
+
+<p><a href="http://www.ping-conf.com/#yannsimon">Video of my talk &ldquo;Structure your Play application with the cake pattern (and test it)&rdquo;</a>
+<a href="http://de.slideshare.net/yann_s/play-withcake-export2">slides</a></p>
+
+<p>I had a lot of good feedbacks, like these ones:<br/></p>
+
+<blockquote><p>Leanovate Software Engineer Yann Simon gives the best presentation on the cake pattern I’ve ever seen.</p><footer><strong>Gilt,</strong> <cite><a href='http://tech.gilt.com/post/74733533436/a-few-things-about-ping-a-play-framework-conference'>tech.gilt.com/post/74733533436/&hellip;</a></cite></footer></blockquote>
+
+
+<blockquote><p>it was great that Yann pointed out the disadvantages as well every step along the way and made it clear how far it’s worth going in various cases.</p><footer><strong>Csaba Palfi,</strong> <cite><a href='http://csaba.palfi.me/ping-conf-day-1/'>csaba.palfi.me/ping-conf-day-1/&hellip;</a></cite></footer></blockquote>
+
+
+<blockquote><p>Currently talking, is astounding the audience with live baking an application, slam dunk videos feat. Sulley - of Monsters fame - and hand drawn presentation slides!</p><footer><strong>kinja,</strong> <cite><a href='http://pingconference.kinja.com/yann-simon-1502530900'>pingconference.kinja.com/&hellip;</a></cite></footer></blockquote>
+
+
+<blockquote><p>All this was presented using funny monster videos and a French-German accent.</p><footer><strong>Marius Soutier,</strong> <cite><a href='http://www.mariussoutier.com/blog/2014/01/20/ping-conference-play-edition-day-1/'>www.mariussoutier.com/blog/2014/&hellip;</a></cite></footer></blockquote>
+
+
+
+
+<blockquote class="twitter-tweet" lang="en"><p>the infamous Totoro-defense! <a href="https://twitter.com/search?q=%23pingconf&amp;src=hash">#pingconf</a> <a href="http://t.co/EnJhauj8tw">pic.twitter.com/EnJhauj8tw</a></p>&mdash; serif (@_serif) <a href="https://twitter.com/_serif/statuses/423793818857930752">January 16, 2014</a></blockquote>
+
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+
+<hr/>
+
+
+<p>Some people saw that I was using my phone to controll the slideshow and asked me how I did that.
+I was simply using the <a href="https://www.libreoffice.org/">LibreOffice Impress</a> with <a href="https://play.google.com/store/apps/details?id=org.libreoffice.impressremote&amp;hl=en">Impress Remote app</a> on my phone.
+It works very well. You can see on your phone the duration of your talk, the current, previous and next slide.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -465,6 +603,10 @@ You can run it by yourself with Play and let heroku sleeping.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/02/17/ping-conf-2014/">Ping Conf 2014</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/05/08/devopsdays-berlin-2013/">DevOpsDays Berlin 2013</a>
