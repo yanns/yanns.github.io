@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-02-26T10:57:56+01:00</updated>
+  <updated>2014-03-15T22:42:18+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -12,6 +12,255 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Server side rendering for JavaScript ReactJS framework]]></title>
+    <link href="http://yanns.github.io/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework/"/>
+    <updated>2014-03-15T09:44:00+01:00</updated>
+    <id>http://yanns.github.io/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework</id>
+    <content type="html"><![CDATA[<h2>Flicker effect with JavaScript applications</h2>
+
+<p>A lot of web applications are nowadays build with a JavaScript framework, rendering the HTML in the browser (client side).
+There are a few reasons for this, like:</p>
+
+<ul>
+<li>avoiding server-browser round-trips to modify one HTML element</li>
+<li>it is easier to keep the server side stateless if you maintain the state in the browser</li>
+<li>the server can expose a public REST API for partners. And your own JavaScript application can use this API, encouraging <a href="http://en.wikipedia.org/wiki/Eating_your_own_dog_food">eating our own dog food</a></li>
+</ul>
+
+
+<p>Building a client side JavaScript application is not always easy for teams used to server side code, and a few frameworks can help there, like <a href="http://angularjs.org/">AngularJS</a>, <a href="http://emberjs.com/">Ember</a> or <a href="http://facebook.github.io/react/">React</a></p>
+
+<p>We will look at an <a href="http://play-react.herokuapp.com/clientSide">example with React</a></p>
+
+<p>To display the HTML, a few steps are needed:</p>
+
+<ol>
+<li><p>The browser loads HTML, CSS and JavaScript.<br>
+It can then display some HTML delivered directly by the server.<br>
+ <img src="http://yanns.github.io/assets/2014-03-15/server.png" alt="The browser shows the HTML coming from the server" /></p>
+
+<p> With AngularJS, if <a href="http://docs.angularjs.org/guide/expression">inline expression</a> are used, the user can see the following for a few milliseconds:<br/>
+ hello {{firstname}}<br/>
+ before AngularJS replaces this expression with its computed value.</p></li>
+<li><p>The JavaScript framework manipulates the DOM and the user can then see the application.
+ <img src="http://yanns.github.io/assets/2014-03-15/server_and_client.png" alt="The JavaScript application has changed the DOM" /></p></li>
+<li><p>If the application needs to display some data from the server, it must first request it with Ajax. The data is displayed only after being received by the browser.
+ <img src="http://yanns.github.io/assets/2014-03-15/server_and_client_and_data.png" alt="The JavaScript application has received data and changed the DOM accordingly" /></p></li>
+</ol>
+
+
+<p>(to make the <a href="http://play-react.herokuapp.com/clientSide">flicker</a> more visible, I introduced a latency of 500 ms to simulate a slow backend)</p>
+
+<p>The user experience is not optimal. The application flickers at each step, as the DOM is changed several times in a few seconds.</p>
+
+<h2>Avoiding the flicker effect</h2>
+
+<h3>On the client side</h3>
+
+<p>In the browser, we can mitigate the flicker effect.
+Some applications show a spinner as long as the page is not ready to be shown.
+The not-yet-completed DOM is hidden before being shown in one final step.</p>
+
+<p>For example, AngularJS provides the <a href="http://docs.angularjs.org/api/ng/directive/ngCloak">ng-cloak directive</a>.
+With this directive, AngularJS can hide the HTML as long as it is not ready.</p>
+
+<h3>Welcome back to server side rendering</h3>
+
+<p>Another option is to pre-render the HTML on the server side and to serve a completely ready HTML to the browser.
+That seems quite contradictary to the essence of JavaScript applications, but it is an interesting way.</p>
+
+<p>Form example, React can render a UI component without any browser with <a href="http://facebook.github.io/react/docs/top-level-api.html#react.rendercomponenttostring">React.renderComponentToString</a>.</p>
+
+<p>With this function, the complete page can be prepared on the server side, send under this form to the browser that can directly display the ready application. On the client side, the same JavaScript code can dynamically manipulate this DOM as a normal client side application.</p>
+
+<p>The <a href="https://github.com/mhart/react-server-example">React server rendering example</a> demonstrates how to use React&rsquo;s server rendering capabilities. Rendering a JavaScript application on the server side is technically possible because the JavaScript is executed by <a href="http://nodejs.org/">Node.js</a>.</p>
+
+<h3>And what about the JVM?</h3>
+
+<p>If you are not using NodeJS, but the Java Virtual Machine (JVM), you might be disappointed at this time.
+Pre-render a JavaScript application is only possible with Node.js?</p>
+
+<p>In Java, there are a few projects that can save us:</p>
+
+<ul>
+<li><p><a href="https://github.com/apigee/trireme">trireme</a> provides a Node.js API and can run node.js scripts inside Java. It uses Rhino, the current JavaScript implementation for the JVM. (With Java 8, let&rsquo;s see if trireme will use the new JavaScript implementation, Nashorn, or whether Nashorn will implement the node.js API itself.)</p></li>
+<li><p><a href="https://github.com/typesafehub/js-engine">js-engine</a> provides <a href="http://akka.io/">Akka Actors</a> to execute JavaScript code with trireme or with node.js</p></li>
+</ul>
+
+
+<p>As a proof of concept, I implemented a little play application that uses these projects to pre-render a React component on the server side.</p>
+
+<p>The JavaScript is loaded:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">val</span> <span class="n">serverside</span> <span class="k">=</span> <span class="nc">Play</span><span class="o">.</span><span class="n">getFile</span><span class="o">(</span><span class="s">&quot;public/javascripts/serverside.js&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>An actor is created for a JavaScript engine (trireme or node.js)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">val</span> <span class="n">engine</span> <span class="k">=</span> <span class="nc">Akka</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">actorOf</span><span class="o">(</span><span class="n">jsEngine</span><span class="o">,</span> <span class="n">s</span><span class="s">&quot;engine-${request.id}&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We receive the data from the database:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">data</span> <span class="k">&lt;-</span> <span class="n">initialData</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and let the JavaScript code execute with that data as parameter</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="n">result</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="n">engine</span> <span class="o">?</span> <span class="nc">Engine</span><span class="o">.</span><span class="nc">ExecuteJs</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">serverside</span><span class="o">.</span><span class="n">toURI</span><span class="o">),</span> <span class="nc">List</span><span class="o">(</span><span class="n">data</span><span class="o">))).</span><span class="n">mapTo</span><span class="o">[</span><span class="kt">JsExecutionResult</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The result is send to the browser</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="nc">Ok</span><span class="o">(</span><span class="n">views</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">index</span><span class="o">(</span><span class="nc">Html</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">toArray</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">))))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>complete controller code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'>  <span class="c1">// with js-engine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">serverSideTrireme</span> <span class="k">=</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="nc">Trireme</span><span class="o">.</span><span class="n">props</span><span class="o">())</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// with node</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">serverSideNode</span> <span class="k">=</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="nc">Node</span><span class="o">.</span><span class="n">props</span><span class="o">())</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">private</span> <span class="k">def</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="n">jsEngine</span><span class="k">:</span> <span class="kt">Props</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Action</span><span class="o">.</span><span class="n">async</span> <span class="o">{</span> <span class="n">request</span> <span class="k">=&gt;</span>
+</span><span class='line'>    <span class="k">import</span> <span class="nn">akka.pattern.ask</span>
+</span><span class='line'>    <span class="k">import</span> <span class="nn">scala.concurrent.duration._</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">val</span> <span class="n">serverside</span> <span class="k">=</span> <span class="nc">Play</span><span class="o">.</span><span class="n">getFile</span><span class="o">(</span><span class="s">&quot;public/javascripts/serverside.js&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">implicit</span> <span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="nc">Timeout</span><span class="o">(</span><span class="mf">5.</span><span class="n">seconds</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">val</span> <span class="n">engine</span> <span class="k">=</span> <span class="nc">Akka</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">actorOf</span><span class="o">(</span><span class="n">jsEngine</span><span class="o">,</span> <span class="n">s</span><span class="s">&quot;engine-${request.id}&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">for</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">data</span> <span class="k">&lt;-</span> <span class="n">initialData</span>
+</span><span class='line'>      <span class="n">result</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="n">engine</span> <span class="o">?</span> <span class="nc">Engine</span><span class="o">.</span><span class="nc">ExecuteJs</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">serverside</span><span class="o">.</span><span class="n">toURI</span><span class="o">),</span> <span class="nc">List</span><span class="o">(</span><span class="n">data</span><span class="o">))).</span><span class="n">mapTo</span><span class="o">[</span><span class="kt">JsExecutionResult</span><span class="o">]</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">yield</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">Ok</span><span class="o">(</span><span class="n">views</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">index</span><span class="o">(</span><span class="nc">Html</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">toArray</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">))))</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The code <code>serverside.js</code> uses the node.js API to render our main component (CommentBox).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./react&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">CommentBox</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./CommentBox&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It then loads the data given as first parameter in the controller</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">// take data from parameters</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It renders the CommentBox component to a String and output it to console.log so that the scala controller can receive the result with <code>result.output.toArray</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">React</span><span class="p">.</span><span class="nx">renderComponentToString</span><span class="p">(</span><span class="nx">CommentBox</span><span class="p">(</span><span class="nx">backend</span><span class="p">)({</span><span class="nx">data</span><span class="o">:</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">onServerSide</span><span class="o">:</span> <span class="kc">true</span><span class="p">})));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Complete code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./react&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">CommentBox</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./CommentBox&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// take data from parameters</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">backend</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">loadCommentsFromServer</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nx">handleCommentSubmit</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">React</span><span class="p">.</span><span class="nx">renderComponentToString</span><span class="p">(</span><span class="nx">CommentBox</span><span class="p">(</span><span class="nx">backend</span><span class="p">)({</span><span class="nx">data</span><span class="o">:</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">onServerSide</span><span class="o">:</span> <span class="kc">true</span><span class="p">})));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://play-react.herokuapp.com/serverSide">This page</a> does not flicker anymore compared to the <a href="http://play-react.herokuapp.com/clientSide">first version</a>.</p>
+
+<h3>Drawback with server side rendering</h3>
+
+<p>The drawback with pre-rendering the page on the server side is that we have to wait to have all the data before sending the page.
+In the <a href="http://play-react.herokuapp.com/serverSide">sample application</a>, I introduced a latency when requesting the data to simulate a slow database.</p>
+
+<p>The browser must also wait long before getting any HTML. The following diagram shows that the application deployed on Heroku delivers the page in more than 1s!
+<img src="http://yanns.github.io/assets/2014-03-15/wait_for_server.png" alt="The browser is waiting for the server" /></p>
+
+<h3>Can we optimize more?</h3>
+
+<p>We can optimize this version by sending the first bytes of the HTML page before having any data.
+When the data is there, we can send the rest of the page.</p>
+
+<p>With <a href="http://play-react.herokuapp.com/serverSideStream">that variant</a>, we can include the CSS and part of the JavaScript in the &lt;HEAD> section of the HTML page.
+The browser receives this information very quickly and can begin downloading these assets.
+The server lets the connection open and when the rest of the page is ready, it is send to the browser.</p>
+
+<p><img src="http://yanns.github.io/assets/2014-03-15/browser_loads_assets.png" alt="The browser can load the CSS and JavaScript" /></p>
+
+<p>To implement this, I used the Facebook’s BigPipe concept as presented in the <a href="http://de.slideshare.net/brikis98/composable-and-streamable-play-apps">talk “Building composable, streaming, testable Play apps” from Yevgeniy Brikman</a></p>
+
+<p>It is not a &ldquo;Silver Bullet&rdquo; as we are still waiting for the data before displaying it to the user (that makes sense).
+But the browser can load the stylesheets, the JavaScripts very quickly, leading to a more responsive page.</p>
+
+<p>If you need more information, the <a href="https://github.com/yanns/play-react">code is available on github</a>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ping conf 2014]]></title>
