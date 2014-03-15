@@ -142,7 +142,7 @@ With this directive, AngularJS can hide the HTML as long as it is not ready.</p>
 <h3>Welcome back to server side rendering</h3>
 
 <p>Another option is to pre-render the HTML on the server side and to serve a completely ready HTML to the browser.
-That seems quite contradictary to the essence of JavaScript applications, but it is an interesting way.</p>
+That seems quite contradictory to the essence of JavaScript applications, but it is an interesting way.</p>
 
 <p>Form example, React can render a UI component without any browser with <a href="http://facebook.github.io/react/docs/top-level-api.html#react.rendercomponenttostring">React.renderComponentToString</a>.</p>
 
@@ -265,7 +265,7 @@ Pre-render a JavaScript application is only possible with Node.js?</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>It renders the CommentBox component to a String and output it to console.log so that the scala controller can receive the result with <code>result.output.toArray</code></p>
+<p>It renders the CommentBox component to a String and output it to console.log so that the Scala controller can receive the result with <code>result.output.toArray</code></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">React</span><span class="p">.</span><span class="nx">renderComponentToString</span><span class="p">(</span><span class="nx">CommentBox</span><span class="p">(</span><span class="nx">backend</span><span class="p">)({</span><span class="nx">data</span><span class="o">:</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">onServerSide</span><span class="o">:</span> <span class="kc">true</span><span class="p">})));</span>

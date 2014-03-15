@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Play Framework | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/play-framework/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-03-15T22:42:18+01:00</updated>
+  <updated>2014-03-15T22:45:22+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -69,7 +69,7 @@ With this directive, AngularJS can hide the HTML as long as it is not ready.</p>
 <h3>Welcome back to server side rendering</h3>
 
 <p>Another option is to pre-render the HTML on the server side and to serve a completely ready HTML to the browser.
-That seems quite contradictary to the essence of JavaScript applications, but it is an interesting way.</p>
+That seems quite contradictory to the essence of JavaScript applications, but it is an interesting way.</p>
 
 <p>Form example, React can render a UI component without any browser with <a href="http://facebook.github.io/react/docs/top-level-api.html#react.rendercomponenttostring">React.renderComponentToString</a>.</p>
 
@@ -157,7 +157,7 @@ var React = require(&lsquo;./react&rsquo;),</p>
 var data = JSON.parse(process.argv[2]);
 </code></p>
 
-<p>It renders the CommentBox component to a String and output it to console.log so that the scala controller can receive the result with <code>result.output.toArray</code></p>
+<p>It renders the CommentBox component to a String and output it to console.log so that the Scala controller can receive the result with <code>result.output.toArray</code></p>
 
 <p><code>javascript
 console.log(React.renderComponentToString(CommentBox(backend)({data: data, onServerSide: true})));
