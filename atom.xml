@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-03-15T22:45:22+01:00</updated>
+  <updated>2014-03-16T09:20:11+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -38,7 +38,7 @@ There are a few reasons for this, like:</p>
 
 <ol>
 <li><p>The browser loads HTML, CSS and JavaScript.<br>
-It can then display some HTML delivered directly by the server.<br>
+It displays the HTML delivered directly by the server.<br>
  <img src="http://yanns.github.io/assets/2014-03-15/server.png" alt="The browser shows the HTML coming from the server" /></p>
 
 <p> With AngularJS, if <a href="http://docs.angularjs.org/guide/expression">inline expression</a> are used, the user can see the following for a few milliseconds:<br/>
@@ -68,10 +68,11 @@ With this directive, AngularJS can hide the HTML as long as it is not ready.</p>
 
 <h3>Welcome back to server side rendering</h3>
 
-<p>Another option is to pre-render the HTML on the server side and to serve a completely ready HTML to the browser.
-That seems quite contradictory to the essence of JavaScript applications, but it is an interesting way.</p>
+<p>Instead of rendering everything in the browser, it is also possible to first render the page on on the server side, serve it when ready, and when updating it on the client side when necessary.</p>
 
-<p>Form example, React can render a UI component without any browser with <a href="http://facebook.github.io/react/docs/top-level-api.html#react.rendercomponenttostring">React.renderComponentToString</a>.</p>
+<p>(Please notice that this technic allows the HTML to be indexed for search engines that do not execute the JavaScript.)</p>
+
+<p>From example, React can render a UI component without any browser with <a href="http://facebook.github.io/react/docs/top-level-api.html#react.rendercomponenttostring">React.renderComponentToString</a>.</p>
 
 <p>With this function, the complete page can be prepared on the server side, send under this form to the browser that can directly display the ready application. On the client side, the same JavaScript code can dynamically manipulate this DOM as a normal client side application.</p>
 
@@ -174,7 +175,7 @@ Pre-render a JavaScript application is only possible with Node.js?</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>The code <code>serverside.js</code> uses the node.js API to render our main component (CommentBox).</p>
+<p>The code <code>serverside.js</code> uses the <a href="http://nodejs.org/api/modules.html#modules_module_require_id">node.js modules API</a> to render our main component (CommentBox).</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
