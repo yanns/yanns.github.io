@@ -4,7 +4,7 @@
   <title><![CDATA[Category: JavaScript | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-03-16T09:20:11+01:00</updated>
+  <updated>2014-03-17T11:12:13+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -212,6 +212,58 @@ The server lets the connection open and when the rest of the page is ready, it i
 
 <p>It is not a &ldquo;Silver Bullet&rdquo; as we are still waiting for the data before displaying it to the user (that makes sense).
 But the browser can load the stylesheets, the JavaScripts very quickly, leading to a more responsive page.</p>
+
+<h2>Integrate Play and trireme</h2>
+
+<p>To resolve node.js modules, trireme needs to access the JavaScripts directly on the file system.
+But Play Framework package all the public assets in the jar, making the JavaScript assets not available with <a href="http://www.playframework.com/documentation/2.2.x/api/scala/index.html#play.api.Play$">Play.getFile</a></p>
+
+<p>It would be easier if trireme would use a <a href="http://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html">FileSystem</a> object, but this API is only available from Java 7.</p>
+
+<p>To wordaround this, I configured the <a href="https://github.com/sbt/sbt-native-packager">SBT Universal plugin</a> to deploy the public assets to the file system:</p>
+
+<ul>
+<li>in build.sbt:
+<code>scala
+PublicOnFileSystem.settings
+</code></li>
+<li>project/PublicOnFileSystem.scala
+```scala
+import sbt.<em>
+import sbt.Keys.</em>
+import play.Keys.playAssetsDirectories
+import com.typesafe.sbt.SbtNativePackager._</li>
+</ul>
+
+
+<p>object PublicOnFileSystem {</p>
+
+<p>  val settings = Seq(</p>
+
+<pre><code>mappings in Universal &lt;++= playAssetsDirectories map { directories: Seq[File] =&gt;
+  directories.flatMap { dir: File =&gt;
+    val directoryLen = dir.getCanonicalPath.length
+    val pathFinder = dir ** "*"
+    pathFinder.get map {
+      publicFile: File =&gt;
+        publicFile -&gt; ("public/" + publicFile.getCanonicalPath.substring(directoryLen))
+    }
+  }
+}
+</code></pre>
+
+<p>  )
+}
+```</p>
+
+<h2>Conclusion</h2>
+
+<p>I personaly think that we will more and more use JavaScript even on the server side.
+Projects like <a href="http://vertx.io/">Vert.x</a> are interesting because they support this from the beginning.
+With Play Framework on the JVM, there is currently <a href="http://openjdk.java.net/projects/nashorn/">a</a> <a href="https://github.com/typesafehub/webdriver">lot</a> <a href="https://github.com/typesafehub/js-engine">of</a> <a href="https://github.com/sbt/sbt-web">effort</a> <a href="http://www.webjars.org/">put</a> to support that.</p>
+
+<p>This proof of concept shows that it is already possible to achieve that.
+And I guess it will be even easier in the future.</p>
 
 <p>If you need more information, the <a href="https://github.com/yanns/play-react">code is available on github</a>.</p>
 ]]></content>
