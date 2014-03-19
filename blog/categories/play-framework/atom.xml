@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Play Framework | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/play-framework/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-03-19T13:43:40+01:00</updated>
+  <updated>2014-03-19T15:56:23+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -357,7 +357,7 @@ A particularity of this &ldquo;dependency injection&rdquo; mechanism is that it 
 <blockquote class="twitter-tweet" lang="en"><p>the infamous Totoro-defense! <a href="https://twitter.com/search?q=%23pingconf&amp;src=hash">#pingconf</a> <a href="http://t.co/EnJhauj8tw">pic.twitter.com/EnJhauj8tw</a></p>&mdash; serif (@_serif) <a href="https://twitter.com/_serif/statuses/423793818857930752">January 16, 2014</a></blockquote>
 
 
-<script async src="http://yanns.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 <p>Thanks everybody!</p>

@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-03-19T13:43:40+01:00</updated>
+  <updated>2014-03-19T15:56:23+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Server side rendering for JavaScript ReactJS framework]]></title>
+    <title type="html"><![CDATA[Server Side Rendering for JavaScript ReactJS Framework]]></title>
     <link href="http://yanns.github.io/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework/"/>
     <updated>2014-03-15T09:44:00+01:00</updated>
     <id>http://yanns.github.io/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework</id>
@@ -340,7 +340,7 @@ And I guess it will be even easier in the future.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[ping conf 2014]]></title>
+    <title type="html"><![CDATA[Ping Conf 2014]]></title>
     <link href="http://yanns.github.io/blog/2014/02/17/ping-conf-2014/"/>
     <updated>2014-02-17T16:49:00+01:00</updated>
     <id>http://yanns.github.io/blog/2014/02/17/ping-conf-2014</id>
@@ -437,7 +437,7 @@ A particularity of this &ldquo;dependency injection&rdquo; mechanism is that it 
 <blockquote class="twitter-tweet" lang="en"><p>the infamous Totoro-defense! <a href="https://twitter.com/search?q=%23pingconf&amp;src=hash">#pingconf</a> <a href="http://t.co/EnJhauj8tw">pic.twitter.com/EnJhauj8tw</a></p>&mdash; serif (@_serif) <a href="https://twitter.com/_serif/statuses/423793818857930752">January 16, 2014</a></blockquote>
 
 
-<script async src="http://yanns.github.io//platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 <p>Thanks everybody!</p>
@@ -543,7 +543,7 @@ Liquibase is used to deploy a version to a database.</li>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[G+ or blog?]]></title>
+    <title type="html"><![CDATA[G+ or Blog?]]></title>
     <link href="http://yanns.github.io/blog/2012/08/20/g-plus-or-blog/"/>
     <updated>2012-08-20T06:17:00+02:00</updated>
     <id>http://yanns.github.io/blog/2012/08/20/g-plus-or-blog</id>
@@ -572,7 +572,7 @@ It is possible that I move this blog to another platform if I am not happy with 
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Handling data streams with Play2 and Server-Send Events]]></title>
+    <title type="html"><![CDATA[Handling Data Streams With Play2 and Server-Send Events]]></title>
     <link href="http://yanns.github.io/blog/2012/08/12/handling-data-streams-with-play2-and-server-send-events/"/>
     <updated>2012-08-12T09:42:00+02:00</updated>
     <id>http://yanns.github.io/blog/2012/08/12/handling-data-streams-with-play2-and-server-send-events</id>
