@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ReactJS | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/reactjs/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-03-17T11:12:13+01:00</updated>
+  <updated>2014-03-19T13:43:40+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -68,7 +68,7 @@ With this directive, AngularJS can hide the HTML as long as it is not ready.</p>
 
 <h3>Welcome back to server side rendering</h3>
 
-<p>Instead of rendering everything in the browser, it is also possible to first render the page on on the server side, serve it when ready, and when updating it on the client side when necessary.</p>
+<p>Instead of rendering everything in the browser, it is also possible to first render the page on the server side, serve it when ready, and when updating it on the client side when necessary.</p>
 
 <p>(Please notice that this technic allows the HTML to be indexed for search engines that do not execute the JavaScript.)</p>
 
@@ -194,7 +194,7 @@ handleCommentSubmit: function(settings) {
 <p>The drawback with pre-rendering the page on the server side is that we have to wait to have all the data before sending the page.
 In the <a href="http://play-react.herokuapp.com/serverSide">sample application</a>, I introduced a latency when requesting the data to simulate a slow database.</p>
 
-<p>The browser must also wait long before getting any HTML. The following diagram shows that the application deployed on Heroku delivers the page in more than 1s!
+<p>The browser must also wait long before getting any HTML. The following diagram shows that the application (deployed on Heroku) needs more than one second to deliver the page!
 <img src="/assets/2014-03-15/wait_for_server.png" alt="The browser is waiting for the server" /></p>
 
 <h3>Can we optimize more?</h3>
