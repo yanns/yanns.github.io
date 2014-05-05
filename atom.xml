@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-03-19T15:56:23+01:00</updated>
+  <updated>2014-05-05T11:02:05+02:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -12,6 +12,288 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SLF4J Mapped Diagnostic Context (MDC) With Play Framework]]></title>
+    <link href="http://yanns.github.io/blog/2014/05/04/slf4j-mapped-diagnostic-context-mdc-with-play-framework/"/>
+    <updated>2014-05-04T11:45:52+02:00</updated>
+    <id>http://yanns.github.io/blog/2014/05/04/slf4j-mapped-diagnostic-context-mdc-with-play-framework</id>
+    <content type="html"><![CDATA[<p>I&rsquo;d like the share with this post one solution I found to use a Mapped Diagnostic Context (MDC) in an asynchronous environment like the play framework.</p>
+
+<h2>tl;dr</h2>
+
+<p>This solution uses a custom <code>ExecutionContext</code> that propagates the MDC from the caller&rsquo;s thread to the callee&rsquo;s one.
+A custom <code>ActionBuilder</code> is necessary as well to completely use this custom <code>ExectionContext</code>.</p>
+
+<h2>The Mapped Diagnostic Context (MDC)</h2>
+
+<p>The play framework uses for logging <a href="http://logback.qos.ch/">Logback</a> behind <a href="http://www.slf4j.org/">SLF4J (&ldquo;Simple Logging Facade for Java&rdquo;)</a>.<br/>
+This library provides a convenient feature: the <a href="http://logback.qos.ch/manual/mdc.html">Mapped Diagnostic Context (MDC)</a>.
+This context can be used to store values that can be displayed in every Logging statement.<br/>
+For example, if we want to display the current user ID:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">org.slf4j.MDC</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">val</span> <span class="n">id</span> <span class="k">=</span> <span class="n">currentUser</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'><span class="nc">MDC</span><span class="o">.</span><span class="n">put</span><span class="o">(</span><span class="s">&quot;X-UserId&quot;</span><span class="o">,</span> <span class="n">currentUser</span><span class="o">.</span><span class="n">id</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// the block of code that uses the Logger</span>
+</span><span class='line'>  <span class="c1">// for example:</span>
+</span><span class='line'>  <span class="n">play</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="nc">Logger</span><span class="o">.</span><span class="n">info</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// clean up the MDC</span>
+</span><span class='line'>  <span class="nc">MDC</span><span class="o">.</span><span class="n">remove</span><span class="o">(</span><span class="s">&quot;X-UserId&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(This code could be in a <a href="http://www.playframework.com/documentation/2.2.x/ScalaHttpFilters">filter</a>, run for each request)</p>
+
+<p>Logback must be configured to display the <code>X-UserId</code> value:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;appender</span> <span class="na">name=</span><span class="s">&quot;stdout&quot;</span> <span class="na">class=</span><span class="s">&quot;ch.qos.logback.core.ConsoleAppender&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;encoder&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;pattern&gt;</span>%d{HH:mm:ss.SSS} %coloredLevel %logger{35} %mdc{X-UserId:--} - %msg%n%rootException<span class="nt">&lt;/pattern&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/encoder&gt;</span>
+</span><span class='line'><span class="nt">&lt;/appender&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In the log file, the MDC value for <code>X-UserId</code> is now printed out.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>10:50:54.773 [info] application jean.leloup - test
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Limitation of the default implementation of the MDC</h2>
+
+<p>To record the values in the MDC, Logback uses a <code>ThreadLocal</code> variable.
+This strategy works when one thread is used for one request, like in servlet container before the 3.1 specification.</p>
+
+<p>Play framework, on the other hand, is <a href="http://www.playframework.com/documentation/2.2.x/ScalaAsync">asynchronous</a>. The processing of a request is composed of several function calls, and each call can be run on a different thread. (&ldquo;Don&rsquo;t call me, I&rsquo;ll call you&rdquo;)</p>
+
+<p>The implementation of the MDC with a <code>ThreadLocal</code> cannot work with this non-blocking asynchronous threading model.</p>
+
+<h2>Defining a custom execution context</h2>
+
+<p>The dispatching of the jobs on different threads in done with an <code>ExecutionContext</code>. Each <code>ExecutionContext</code> manages a <a href="http://www.playframework.com/documentation/2.2.x/ThreadPools">thread pool</a>.</p>
+
+<p>To use the MDC, we just have to use a custom <code>ExecutionContext</code> that propagates the MDC from the caller&rsquo;s thread to the callee&rsquo;s one.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">org.slf4j.MDC</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">scala.concurrent.</span><span class="o">{</span><span class="nc">ExecutionContextExecutor</span><span class="o">,</span> <span class="nc">ExecutionContext</span><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * slf4j provides a MDC [[http://logback.qos.ch/manual/mdc.html Mapped Diagnostic Context]]</span>
+</span><span class='line'><span class="cm"> * based on a [[ThreadLocal]]. In an asynchronous environment, the callbacks can be called</span>
+</span><span class='line'><span class="cm"> * in another thread, where the local thread variable does not exist anymore.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * This execution context fixes this problem:</span>
+</span><span class='line'><span class="cm"> * it propagates the MDC from the caller&#39;s thread to the callee&#39;s one.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="k">object</span> <span class="nc">MDCHttpExecutionContext</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/**</span>
+</span><span class='line'><span class="cm">   * Create an MDCHttpExecutionContext with values from the current thread.</span>
+</span><span class='line'><span class="cm">   */</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">fromThread</span><span class="o">(</span><span class="n">delegate</span><span class="k">:</span> <span class="kt">ExecutionContext</span><span class="o">)</span><span class="k">:</span> <span class="kt">ExecutionContextExecutor</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">new</span> <span class="nc">MDCHttpExecutionContext</span><span class="o">(</span><span class="nc">MDC</span><span class="o">.</span><span class="n">getCopyOfContextMap</span><span class="o">,</span> <span class="n">delegate</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Manages execution to ensure that the given MDC context are set correctly</span>
+</span><span class='line'><span class="cm"> * in the current thread. Actual execution is performed by a delegate ExecutionContext.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">MDCHttpExecutionContext</span><span class="o">(</span><span class="n">mdcContext</span><span class="k">:</span> <span class="kt">java.util.Map</span><span class="o">[</span><span class="k">_</span>, <span class="k">_</span><span class="o">],</span> <span class="n">delegate</span><span class="k">:</span> <span class="kt">ExecutionContext</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">ExecutionContextExecutor</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">execute</span><span class="o">(</span><span class="n">runnable</span><span class="k">:</span> <span class="kt">Runnable</span><span class="o">)</span> <span class="k">=</span> <span class="n">delegate</span><span class="o">.</span><span class="n">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">def</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">val</span> <span class="n">oldMDCContext</span> <span class="k">=</span> <span class="nc">MDC</span><span class="o">.</span><span class="n">getCopyOfContextMap</span>
+</span><span class='line'>      <span class="n">setContextMap</span><span class="o">(</span><span class="n">mdcContext</span><span class="o">)</span>
+</span><span class='line'>      <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">runnable</span><span class="o">.</span><span class="n">run</span><span class="o">()</span>
+</span><span class='line'>      <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">setContextMap</span><span class="o">(</span><span class="n">oldMDCContext</span><span class="o">)</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">})</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">def</span> <span class="n">setContextMap</span><span class="o">(</span><span class="n">context</span><span class="k">:</span> <span class="kt">java.util.Map</span><span class="o">[</span><span class="k">_</span>, <span class="k">_</span><span class="o">])</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">context</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">MDC</span><span class="o">.</span><span class="n">clear</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">MDC</span><span class="o">.</span><span class="n">setContextMap</span><span class="o">(</span><span class="n">context</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">reportFailure</span><span class="o">(</span><span class="n">t</span><span class="k">:</span> <span class="kt">Throwable</span><span class="o">)</span> <span class="k">=</span> <span class="n">delegate</span><span class="o">.</span><span class="n">reportFailure</span><span class="o">(</span><span class="n">t</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then we can define the default ExecutionContext in our application:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">package</span> <span class="nn">concurrent</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * The standard [[play.api.libs.concurrent.Execution.defaultContext]] loses the MDC context.</span>
+</span><span class='line'><span class="cm"> *</span>
+</span><span class='line'><span class="cm"> * This custom [[ExecutionContext]] propagates the MDC context, so that the request</span>
+</span><span class='line'><span class="cm"> * and the correlation IDs can be logged.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="k">object</span> <span class="nc">Execution</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">object</span> <span class="nc">Implicits</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">implicit</span> <span class="k">def</span> <span class="n">defaultContext</span><span class="k">:</span> <span class="kt">ExecutionContext</span> <span class="o">=</span> <span class="nc">Execution</span><span class="o">.</span><span class="n">defaultContext</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">defaultContext</span><span class="k">:</span> <span class="kt">ExecutionContext</span> <span class="o">=</span> <span class="nc">MDCHttpExecutionContext</span><span class="o">.</span><span class="n">fromThread</span><span class="o">(</span><span class="n">play</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">libs</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Execution</span><span class="o">.</span><span class="n">defaultContext</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we will use the <code>concurrent.Execution.defaultContext</code> instead of the one from play (<code>play.api.libs.concurrent.Execution.defaultContext</code>)</p>
+
+<h2>Using a custom execution context everywhere</h2>
+
+<p>Using a custom execution context is sometimes as easy as replacing
+<code>import play.api.libs.concurrent.Execution.Implicits._</code> with <code>import concurrent.Execution.Implicits._</code></p>
+
+<p>The default <a href="http://www.playframework.com/documentation/2.2.x/ScalaActions"><code>Action</code></a> uses the default <code>play.api.libs.concurrent.Execution.defaultContext</code>.
+We must define a custom <code>ActionBuilder</code> that uses our new <code>ExecutionContext</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">package</span> <span class="nn">controllers</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">object</span> <span class="nc">Action</span> <span class="k">extends</span> <span class="nc">ActionBuilder</span><span class="o">[</span><span class="kt">Request</span><span class="o">]</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">invokeBlock</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">request</span><span class="k">:</span> <span class="kt">Request</span><span class="o">[</span><span class="kt">A</span><span class="o">],</span> <span class="n">block</span><span class="k">:</span> <span class="o">(</span><span class="kt">Request</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span> <span class="k">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">SimpleResult</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">block</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/**</span>
+</span><span class='line'><span class="cm">   * The standard [[play.api.mvc.Action]] loses the MDC context.</span>
+</span><span class='line'><span class="cm">   *</span>
+</span><span class='line'><span class="cm">   * This action builder sets the [[ExecutionContext]] so that the</span>
+</span><span class='line'><span class="cm">   * MDC context is propagated.</span>
+</span><span class='line'><span class="cm">   * With this custom [[ExecutionContext]], the request and the correlation IDs</span>
+</span><span class='line'><span class="cm">   * can be logged.</span>
+</span><span class='line'><span class="cm">   */</span>
+</span><span class='line'>  <span class="k">override</span> <span class="k">def</span> <span class="n">executionContext</span><span class="k">:</span> <span class="kt">ExecutionContext</span> <span class="o">=</span> <span class="nc">Execution</span><span class="o">.</span><span class="n">defaultContext</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Instead of using of <code>play.api.mvc.Action</code>, we just have to use the newly defined <code>controllers.Action</code>.</p>
+
+<p>With these customizations, we are now able to use the Mapped Diagnostic Context (MDC) with asynchronous actions written in Scala.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Server Side Rendering for JavaScript ReactJS Framework]]></title>
