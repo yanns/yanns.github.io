@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Play Framework | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/play-framework/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-05-05T11:02:05+02:00</updated>
+  <updated>2014-05-31T21:40:48+02:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -12,6 +12,184 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[enlarge your test scope]]></title>
+    <link href="http://yanns.github.io/blog/2014/05/30/enlarge-your-test-scope/"/>
+    <updated>2014-05-30T22:00:22+02:00</updated>
+    <id>http://yanns.github.io/blog/2014/05/30/enlarge-your-test-scope</id>
+    <content type="html"><![CDATA[<p>At the beginning at the year, I had the chance to present <a href="blog/2014/02/17/ping-conf-2014/">how to organize a play application with the Cake pattern</a> at <a href="http://www.ping-conf.com/">Ping Conf</a>.
+I showed how this pattern enable designing the application as components, how to reduce visibility of specific gateway&rsquo;s model only to components that need it. One side-effect of the cake pattern is that it allows a dependency injection resolved at compilation time.</p>
+
+<p>In one of my last slides, I warned against abusing a dependency injection mechanism to write too much unit tests.
+To stay within the time slot, I have not developed so much my concerns about that point.</p>
+
+<p><img class="<a" src="href="http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-66-638.jpg">http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-66-638.jpg</a>"></p>
+
+<p>During the talk, I implemented an application to demonstrate my points. This application consumes two external web services to render HTML pages. It is quite a typical application we can see in an infrastructure build with micro-services.</p>
+
+<p>I&rsquo;ve now took the time to write a new version of this application I used in the demo.
+<a href="https://github.com/yanns/TPA/tree/master/frontend/TBA_07">And This new version is not using any unit tests but only some sort of component tests.</a></p>
+
+<p>Let&rsquo;s dig into the details how this new version differs from the ones build around the Cake pattern.</p>
+
+<h3>Traditional view of unit tests</h3>
+
+<p>When building an application, we usually structure the code into layers to separate responsibilities, thus enabling re-use of logic, and avoiding repetition.</p>
+
+<p>In the demo I used for the talk, the application is for example layered into views, controllers, services and gateways. All these layers have access to a common model.</p>
+
+<p><img class="<a" src="href="http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-10-638.jpg">http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-10-638.jpg</a>"" title="&lsquo;code structured in layers&rsquo;" ></p>
+
+<p>A traditional approach of unit test is to consider one class or function of one layer as a unit to test. The other dependent layers are mocked.</p>
+
+<p>For example, to test the service layers, we use mocks for the gateways, simulating responses from external web services.</p>
+
+<p><img class="<a" src="href="http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-21-638.jpg">http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-21-638.jpg</a>"></p>
+
+<p>This approach works well, but has several downsides:</p>
+
+<ul>
+<li>the unit tests prove that one layer is working as expected, but they said nothing about all the layers used together.</li>
+<li>the unit tests use the internal details of the implementation. Re-factoring the code implies then to change a lot of tests.</li>
+</ul>
+
+
+<p>By using dependency injection and mocks, it is nowadays very easy to write unit tests. The effect if some applications are tested almost only with unit tests:</p>
+
+<p><img class="<a" src="href="http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-65-638.jpg">http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-65-638.jpg</a>"></p>
+
+<h3>Traditional view of component tests</h3>
+
+<p>To complement the unit tests, a team can decide to implement some component tests.</p>
+
+<p>For the sample used in the talk, the component is the font end application we are currently implementing.</p>
+
+<p>The most common way to run component tests is to start the tested application. The application is configured not to use the real external web services, but some local mock implementations. The local mock implementations are started as http servers as well, running on different ports.</p>
+
+<p><img class="<a" src="href="http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-13-638.jpg">http://image.slidesharecdn.com/play-with-cake-export2-140121150250-phpapp01/95/slide-13-638.jpg</a>"></p>
+
+<p>When the application and all the mocks are started, we can test the application by sending some http requests and by analyzing the responses.</p>
+
+<p>Setting up the test environment with this approach is quite complex. For each external web service, a mock must be implemented as a real local http server. We must start all mock implementations, and then the new configured application. At the end of the tests, we must shutdown all services, even in case of exceptions.</p>
+
+<p>But the main drawback with this approach in my opinion is that running the tests take a lot of time, too much to be integrated in a normal development flow (write code &ndash;> compile &ndash;> test)</p>
+
+<h3>An alternative approach between component and unit tests</h3>
+
+<p>To strictly adhere to the definition of component tests, we should treat the tested application as a black box, and simulate all external web services. We saw that this approach is somewhat heavy to use: each external web service must be mock with a real http server.</p>
+
+<p>Starting and running the tests in that configuration take time. Debugging an error can be difficult.</p>
+
+<p>The strategy I used in new version of the demo application (<a href="https://github.com/yanns/TPA/tree/master/frontend/TBA_07">TBA_07</a>) is a little bit different.
+The idea is still to use a request / response to test the application, but without having to run the application and any external web services.</p>
+
+<p>Implementing that is actually quite easy: each layer declared as dependency an HTTP client (a <a href="http://www.playframework.com/documentation/2.3.x/api/scala/index.html#play.api.libs.ws.WSClient">WSClient</a> in play framework 2.3)</p>
+
+<ul>
+<li>The http client is a dependency at the top (controllers' layer):
+```scala
+package controllers</li>
+</ul>
+
+
+<p>class Application(ws: WSClient, app: play.api.Application) extends Controller {</p>
+
+<p>  val topVideoService = new TopVideoService(ws, app)
+//&hellip;</p>
+
+<p>}
+```
+(a second &ldquo;dependency&rdquo; is the current play application. This approach is very convenient to simulate different configurations)</p>
+
+<ul>
+<li><p>The real implementation of the http client is then &ldquo;injected&rdquo; at the last time, when we construct the controller singleton:
+<code>
+def playCurrent = play.api.Play.current
+object Application extends Application(WS.client(playCurrent), playCurrent)
+</code></p></li>
+<li><p>To test the application, we then simply have to instantiate the controller with an <a href="https://github.com/yanns/TPA/blob/master/frontend/TBA_07/test/httpclient/MockWS.scala">alternative implementation of the http client capable of simulating external web services</a>:
+<code>scala
+class ApplicationControllerFixture
+extends Application(MockWS(playerRoute), FakeApplication())
+</code></p></li>
+<li><p>The <code>playerRoute</code> simulate the external player web service:
+```scala
+val playerId = PlayerId(34)</p></li>
+</ul>
+
+
+<p>val playerRoute: MockWS.Routes = {
+  case (&ldquo;GET&rdquo;, u) if u == s"<a href="http://localhost:9001/players/$playerId">http://localhost:9001/players/$playerId</a>" =></p>
+
+<pre><code>Action { Ok(Json.parse(playerJson(playerId))) }
+</code></pre>
+
+<p>  case _ => Action { NotFound }
+}</p>
+
+<p>def playerJson(playerId: PlayerId) =
+  s"&ldquo;&rdquo;{</p>
+
+<pre><code>   |  "id": $playerId,
+   |  "name": "ze name",
+   |  "height": "ze height",
+   |  "weight": "ze weight",
+   |  "team": "ze team"
+   |}
+ """.stripMargin
+</code></pre>
+
+<p>```</p>
+
+<p>The <code>MockWS.Routes</code> type defines a partial function <code>PartialFunction[(String, String), EssentialAction]</code>, making really easy to combine different routes together with <code>orElse</code>:
+<code>scala
+SimulatedVideoBackend.videoRoute orElse SimulatedPlayerBackend.playerRoute
+</code></p>
+
+<ul>
+<li>and we can test the response by calling the controller with a <a href="http://www.playframework.com/documentation/2.3.x/api/scala/index.html#play.api.test.FakeRequest"><code>FakeRequest</code></a>:
+<code>scala
+val result = index.apply(FakeRequest())
+status(result) mustEqual OK
+</code></li>
+</ul>
+
+
+<p>The application is constructed as if it was depending from the http client and the current play application.</p>
+
+<p>These tests are not strictly component tests, as we are not testing the real implementation of the http client.
+The application is not entirely treated as a black box. But most of the code is tested like in production.</p>
+
+<h4>Drawbacks of this approach:</h4>
+
+<ul>
+<li>writing a test is more complicated than testing a little unit of code</li>
+<li>writing unit test can help avoiding code mixing responsibilities. We do not profit from that.</li>
+<li>when a test suddenly fails, it is more difficult to find out why.</li>
+<li>we do not test the complete application stack. For example, the <a href="http://www.playframework.com/documentation/2.3.x/ScalaHttpFilters">play filters</a> and the real http client is not tested.</li>
+</ul>
+
+
+<h4>Advantages of this approach:</h4>
+
+<ul>
+<li>a developer must understand how the application works in general to be able to write good tests</li>
+<li>the application can be re-factored without modifying the tests</li>
+<li>the user functions are better tested</li>
+<li>the integration of all layers together is tested</li>
+<li>we do not need any running server to check all the tests. The tests run very fast.</li>
+<li>the code is simple (compare the <a href="https://github.com/yanns/TPA/blob/master/frontend/TBA_07/app/services/TopVideoService.scala">TopVideoService in that version</a> with the <a href="https://github.com/yanns/TPA/blob/master/frontend/TBA_05_final/app/services/TopVideoServiceComp.scala">one using the Cake pattern</a>)</li>
+</ul>
+
+
+<h3>Experience with that approach</h3>
+
+<p>With one team, we are currently testing this approach. The results are quite encouraging: more than 80 % of the statements are covered by tests. We have more than 200 tests running in 10 seconds on my machine.</p>
+
+<p>And I could deeply change the code with almost no impact on the tests. ;)</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SLF4J Mapped Diagnostic Context (MDC) with play framework]]></title>
