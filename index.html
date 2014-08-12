@@ -98,7 +98,7 @@
 
 <p>However some organizations prefer to run play applications within a servlet container and can use for this the <a href="https://github.com/play2war/play2-war-plugin">WAR Plugin</a>.</p>
 
-<p>I am very pleased to share you that this plugin is now compatible with servlet 3.1 containers. It can now use the new asynchronous IO possibilities.</p>
+<p>I am very pleased to share that this plugin is now compatible with servlet 3.1 containers. It can now use the new asynchronous IO possibilities.</p>
 
 <p>Let me explain why and when it is important.</p>
 
@@ -106,16 +106,18 @@
 
 <p>The Play Framework is build to be totally asynchronous and reactive. It uses no blocking IO. A Play application scales very well, using very few threads.</p>
 
-<h3>Servlet containers use blocking IO.</h3>
+<p>This reactive consuming or construction of IO stream is designed in play with <a href="http://www.playframework.com/documentation/2.3.x/Iteratees">Iteratees</a>. It will progressively be completed with <a href="http://typesafe.com/blog/typesafe-announces-akka-streams">Akka Streams</a>, the implementation in Akka of the reactive stream project (<a href="http://www.reactive-streams.org/">http://www.reactive-streams.org/</a>)</p>
 
-<p>On the other hand, servlet containers traditionally use a <a href="http://www.slideshare.net/brikis98/the-play-framework-at-linkedin/62">thread per request</a>. When doing IO (database access, external web request), the thread waits for the IO completion (blocking IO).</p>
+<h3>Servlet containers use blocking IO</h3>
 
-<h4>asynchronous 3.0 servlet</h4>
+<p>On the other hand, servlet containers traditionally use a <a href="http://www.slideshare.net/brikis98/the-play-framework-at-linkedin/62">thread per request</a>. When doing IO (database access, external web request), the thread waits for the IO completion (blocking IO). That&rsquo;s why servlet containers needs a lot of working threads to handle requests in parallel (<a href="http://tomcat.apache.org/tomcat-7.0-doc/config/executor.html">default 200 threads max for tomcat</a>)</p>
+
+<h4>Asynchronous 3.0 servlet</h4>
 
 <p>Servlet 3.0 containers introduced the possibility to “suspend” a request.
 For example, if an application makes an HTTP request to another web service using the <a href="http://www.playframework.com/documentation/2.3.x/ScalaWS">WS client</a>, the play2 war plugin is able to suspend the servlet request until the external web service answers. It means that with the same number of servlet threads, a servlet 3.0 container can support more requests in parallel than a servlet 2.x container. It does not need that a thread waits for an HTTP request, this thread can be used for other requests.</p>
 
-<h4>limitations of asynchronous 3.0 servlet</h4>
+<h4>Limitations of asynchronous 3.0 servlet</h4>
 
 <p>When uploading or downloading a big file, the servlet container is able to stream the data. But between each chunks, the servlet thread is blocking, waiting for the next one.
 It is not possible to consume one chunk, and later when we are ready to consume another one, tell the container: “now I am ready, you can send me the next chunk as soon as you receive one from the browser”.</p>
@@ -123,8 +125,6 @@ It is not possible to consume one chunk, and later when we are ready to consume 
 <p>If a browser needs an hour to upload a file with a slow Internet connection, the container needs a thread during an hour, even if the application does not do anything, just waiting for the upload completion.</p>
 
 <h3>Play applications deployed as war are limited by the servlet container</h3>
-
-<p>Play on the other hand uses asynchronous IO. This reactive consuming or construction of IO stream is designed in play with <a href="http://www.playframework.com/documentation/2.3.x/Iteratees">Iteratees</a>. It will progressively be completed with <a href="http://typesafe.com/blog/typesafe-announces-akka-streams">Akka Streams</a>, the implementation in Akka of the reactive stream project (<a href="http://www.reactive-streams.org/">http://www.reactive-streams.org/</a>)</p>
 
 <p>A Play application deployed in a war container are also limited by the technical possibilites of the servlet API. With a servlet 2.x or 3.0, a Play application does not scale as well as when run natively.</p>
 
@@ -140,7 +140,7 @@ It is not possible to consume one chunk, and later when we are ready to consume 
 
 <h4>When to use this feature?</h4>
 
-<p>This feature should be use especially if the application is using big download/upload. The servlet 3.1 will help to scale much better.</p>
+<p>This feature should be used especially if the application is using big download/upload. The servlet 3.1 will help to scale much better.</p>
 
 <p>During my tests, I could upload and download files from several GB in parallel. The container and the JVM garbage collection could support that without any problems. The memory usage was very low.</p>
 
@@ -150,11 +150,11 @@ It is not possible to consume one chunk, and later when we are ready to consume 
 
 <p>To scale as much as possible, the application should not block. It should always use asynchronous IO API like in the WS client.</p>
 
-<p>But in the Java World, a lot a drivers are still designed for a one-thread-per-request model and do not provide asynchronous API. It is for example the case for a JDBC driver. In that case, a separate dispatcher should be configured to handle especially blocking IO. More Information for this can be found in the <a href="http://www.playframework.com/documentation/2.3.x/ThreadPools">Play Framework documentation</a>.</p>
+<p>But in the Java World, a lot a librairies are still designed for a one-thread-per-request model and do not provide asynchronous API. It is for example the case for a JDBC driver. In that case, a separate dispatcher should be configured to handle especially blocking IO. More Information for this can be found in the <a href="http://www.playframework.com/documentation/2.3.x/ThreadPools">Play Framework documentation</a>.</p>
 
 <h3>Implementation history</h3>
 
-<p>The implementation of this feature lasted a few months.
+<p>The implementation of asynchronous IO in the WAR plugin lasted a few months.
 The <a href="https://github.com/play2war/play2-war-plugin/pull/204">first pull request</a> introduced the asynchronous download, and <a href="https://github.com/play2war/play2-war-plugin/pull/235">the second one</a> the asynchronous upload.
 I&rsquo;d like to thank <a href="https://twitter.com/jroper">James Roper</a> and <a href="https://twitter.com/viktorklang">Viktor Klang</a> for their reviews.</p>
 
