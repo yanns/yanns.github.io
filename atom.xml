@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2014-11-14T16:34:47+01:00</updated>
+  <updated>2015-01-25T15:56:32+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -1338,7 +1338,7 @@ The main goal of these components is to encaspulate and expose services only to 
 <p>As a side effect, the cake pattern allows to inject dependencies at compile time.
 A particularity of this &ldquo;dependency injection&rdquo; mechanism is that it does not need any container like Spring or Guice at runtime.</p>
 
-<p><a href="http://www.ping-conf.com/#yannsimon">Video of my talk &ldquo;Structure your Play application with the cake pattern (and test it)&rdquo;</a><br/>
+<p><a href="http://www.ustream.tv/recorded/42775808">Video of my talk &ldquo;Structure your Play application with the cake pattern (and test it)&rdquo;</a><br/>
 <a href="http://de.slideshare.net/yann_s/play-withcake-export2">slides</a></p>
 
 <p>I had great feedbacks, like these ones:<br/></p>

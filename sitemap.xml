@@ -4,56 +4,56 @@
         <loc>
             http://yanns.github.io/blog/2012/08/12/handling-data-streams-with-play2-and-server-send-events/
         </loc>
-        <lastmod>2014-03-19T15:47:26+01:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>http://yanns.github.io/blog/2012/08/20/g-plus-or-blog/</loc>
-        <lastmod>2014-03-19T15:47:26+01:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>http://yanns.github.io/blog/2013/05/08/devopsdays-berlin-2013/</loc>
-        <lastmod>2014-03-19T15:47:26+01:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>http://yanns.github.io/blog/2014/02/17/ping-conf-2014/</loc>
-        <lastmod>2014-03-19T15:47:26+01:00</lastmod>
+        <lastmod>2015-01-25T15:48:03+01:00</lastmod>
     </url>
     <url>
         <loc>
             http://yanns.github.io/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework/
         </loc>
-        <lastmod>2014-08-10T18:52:18+02:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>
             http://yanns.github.io/blog/2014/05/04/slf4j-mapped-diagnostic-context-mdc-with-play-framework/
         </loc>
-        <lastmod>2014-09-22T06:01:57+02:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>http://yanns.github.io/blog/2014/05/30/enlarge-your-test-scope/</loc>
-        <lastmod>2014-05-31T21:40:15+02:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>
             http://yanns.github.io/blog/2014/08/10/complete-asynchronous-io-for-play-applications-in-servlet-3-dot-1-containers-with-the-play2-war-plugin/
         </loc>
-        <lastmod>2014-08-13T16:07:20+02:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>http://yanns.github.io/blog/2014/11/10/goto-conference-2014/</loc>
-        <lastmod>2014-11-14T16:33:05+01:00</lastmod>
-    </url>
-    <url>
-        <loc>http://yanns.github.io/</loc>
-        <lastmod>2014-11-14T16:33:05+01:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
     <url>
         <loc>http://yanns.github.io/blog/archives/</loc>
-        <lastmod>2014-11-14T16:33:05+01:00</lastmod>
+        <lastmod>2015-01-25T15:48:03+01:00</lastmod>
+    </url>
+    <url>
+        <loc>http://yanns.github.io/</loc>
+        <lastmod>2015-01-25T15:48:03+01:00</lastmod>
     </url>
     <url>
         <loc>http://yanns.github.io/robots.txt</loc>
-        <lastmod>2014-03-19T15:47:26+01:00</lastmod>
+        <lastmod>2015-01-25T15:46:14+01:00</lastmod>
     </url>
 </urlset>
