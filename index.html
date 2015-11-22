@@ -9,7 +9,7 @@
   <meta name="author" content="Yann Simon">
 
   
-  <meta name="description" content="My notes from the goto conference Berlin 2014: Thursday Opening Keynote: Software Design in the 21st Century &ndash; Martin Fowler We, developers, &hellip;">
+  <meta name="description" content="During the play framework meetup in Berlin in November 2015: for a better workflow between designers and developers Laura made a very good talk about &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,64 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/17/introduction-to-type-classes-in-scala/">Play Framework Meetup in Berlin in November 2015</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-17T21:43:55+01:00" pubdate data-updated="true">Nov 17<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>During the <a href="http://www.meetup.com/Play-Berlin-Brandenburg/events/226561633/">play framework meetup in Berlin in November 2015</a>:</p>
+
+<h2>for a better workflow between designers and developers</h2>
+
+<p><a href="https://twitter.com/lluizesc">Laura</a> made a very good talk about how to better organize the work between front-end designers and developers.</p>
+
+<p>For that, her team build some tools:</p>
+
+<ul>
+<li><p>the designer uses an assets pipeline in nodejs to build a website. The templates are written with <a href="http://handlebarsjs.com/">handlebars</a>. When the website is ready, a release is made and all assets are packaged as a <a href="http://www.webjars.org/">webjar</a>: <a href="https://github.com/lauraluiz/handlebars-webjars-demo">https://github.com/lauraluiz/handlebars-webjars-demo</a></p></li>
+<li><p>the developer uses a play framework application that is capable of using directly the assets released by the designer: <a href="https://github.com/lauraluiz/play-handlebars-demo">https://github.com/lauraluiz/play-handlebars-demo</a></p></li>
+</ul>
+
+
+<p>Slides: <a href="http://slides.com/lauraluiz/handlebarsplay">http://slides.com/lauraluiz/handlebarsplay</a></p>
+
+<p>Project using this workflow: <a href="https://github.com/sphereio/sphere-sunrise">https://github.com/sphereio/sphere-sunrise</a></p>
+
+<h2>type classes in Scala</h2>
+
+<p>I introduced type classes in Scala: <a href="http://www.slideshare.net/yann_s/introduction-to-type-classes-in-scala">http://www.slideshare.net/yann_s/introduction-to-type-classes-in-scala</a></p>
+
+<p>Step by step, I explained how the Json Reads/Writes/Formats work in the <a href="https://www.playframework.com/documentation/2.4.x/ScalaJson">scala API of the play framework</a>.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1989,6 +2047,10 @@ You can run it by yourself with Play and let heroku sleeping.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/17/introduction-to-type-classes-in-scala/">Play Framework Meetup in Berlin in November 2015</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/11/10/goto-conference-2014/">Goto Conference 2014</a>
       </li>
     
@@ -2002,10 +2064,6 @@ You can run it by yourself with Play and let heroku sleeping.</p>
     
       <li class="post">
         <a href="/blog/2014/05/04/slf4j-mapped-diagnostic-context-mdc-with-play-framework/">SLF4J Mapped Diagnostic Context (MDC) With Play Framework</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework/">Server Side Rendering for JavaScript ReactJS Framework</a>
       </li>
     
   </ul>

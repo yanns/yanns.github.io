@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: SLF4J - yann's Blog</title>
+  <title>Play Framework Meetup in Berlin in November 2015 - yann's Blog</title>
   <meta name="author" content="Yann Simon">
 
   
-  <meta name="description" content="Category: SLF4J">
+  <meta name="description" content="During the play framework meetup in Berlin in November 2015: for a better workflow between designers and developers Laura made a very good talk about &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://yanns.github.ioblog/categories/slf4j">
+  <link rel="canonical" href="http://yanns.github.io/blog/2015/11/17/introduction-to-type-classes-in-scala">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="yann's Blog" type="application/atom+xml">
@@ -64,35 +64,100 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: SLF4J</h1>
+    
+      <h1 class="entry-title">Play Framework Meetup in Berlin in November 2015</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-17T21:43:55+01:00" pubdate data-updated="true">Nov 17<span>th</span>, 2015</time>
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>During the <a href="http://www.meetup.com/Play-Berlin-Brandenburg/events/226561633/">play framework meetup in Berlin in November 2015</a>:</p>
 
-  
-  <h2>2014</h2>
+<h2>for a better workflow between designers and developers</h2>
 
-<article>
-  
-<h1><a href="/blog/2014/05/04/slf4j-mapped-diagnostic-context-mdc-with-play-framework/">SLF4J Mapped Diagnostic Context (MDC) With Play Framework</a></h1>
-<time datetime="2014-05-04T11:45:52+02:00" pubdate><span class='month'>May</span> <span class='day'>04</span> <span class='year'>2014</span></time>
+<p><a href="https://twitter.com/lluizesc">Laura</a> made a very good talk about how to better organize the work between front-end designers and developers.</p>
 
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/mdc/'>MDC</a>, <a class='category' href='/blog/categories/play-framework/'>Play Framework</a>, <a class='category' href='/blog/categories/slf4j/'>SLF4J</a></span>
-</footer>
+<p>For that, her team build some tools:</p>
+
+<ul>
+<li><p>the designer uses an assets pipeline in nodejs to build a website. The templates are written with <a href="http://handlebarsjs.com/">handlebars</a>. When the website is ready, a release is made and all assets are packaged as a <a href="http://www.webjars.org/">webjar</a>: <a href="https://github.com/lauraluiz/handlebars-webjars-demo">https://github.com/lauraluiz/handlebars-webjars-demo</a></p></li>
+<li><p>the developer uses a play framework application that is capable of using directly the assets released by the designer: <a href="https://github.com/lauraluiz/play-handlebars-demo">https://github.com/lauraluiz/play-handlebars-demo</a></p></li>
+</ul>
 
 
-</article>
+<p>Slides: <a href="http://slides.com/lauraluiz/handlebarsplay">http://slides.com/lauraluiz/handlebarsplay</a></p>
 
+<p>Project using this workflow: <a href="https://github.com/sphereio/sphere-sunrise">https://github.com/sphereio/sphere-sunrise</a></p>
+
+<h2>type classes in Scala</h2>
+
+<p>I introduced type classes in Scala: <a href="http://www.slideshare.net/yann_s/introduction-to-type-classes-in-scala">http://www.slideshare.net/yann_s/introduction-to-type-classes-in-scala</a></p>
+
+<p>Step by step, I explained how the Json Reads/Writes/Formats work in the <a href="https://www.playframework.com/documentation/2.4.x/ScalaJson">scala API of the play framework</a>.</p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
+
+<span class="byline author vcard">Posted by <span class="fn">Yann Simon</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-17T21:43:55+01:00" pubdate data-updated="true">Nov 17<span>th</span>, 2015</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://yanns.github.io/blog/2015/11/17/introduction-to-type-classes-in-scala/" data-via="simon_yann" data-counturl="http://yanns.github.io/blog/2015/11/17/introduction-to-type-classes-in-scala/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/11/10/goto-conference-2014/" title="Previous Post: goto conference 2014">&laquo; goto conference 2014</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
 </div>
