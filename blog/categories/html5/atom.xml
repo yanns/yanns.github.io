@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: HTML5 | yann's Blog]]></title>
+  <title><![CDATA[Category: html5 | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/html5/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2015-12-14T09:46:41+01:00</updated>
+  <updated>2016-02-10T21:19:16+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -46,40 +46,59 @@ My source was a file containing the geographical coordinates of Wikipedia articl
 
 
 <p>The production of data is an Enumerator, sending line after line of the input file:
-```scala
-def lineEnumerator(source: Source) : Enumerator[String] = {
-  val lines = source.getLines()</p>
-
-<p>  Enumerator.fromCallback1[String] ( _ => {</p>
-
-<pre><code>val line = if (lines.hasNext) {
-  Some(lines.next())
-} else {
-  None
-}
-Future.successful(line)
-</code></pre>
-
-<p>  }, source.close)
-}
-<code>
-With an Enumeratee, each line can be possibly parsed into a Coordinate class:
-</code>scala
-val lineParser: Enumeratee[String, Option[Coordinate]] = Enumeratee.map[String] { line =>
-  line.split(&ldquo;\t&rdquo;) match {</p>
-
-<pre><code>case Array(_, IsDouble(latitude), IsDouble(longitude)) =&gt; Some(Coordinate(latitude, longitude))
-case _ =&gt; None
-</code></pre>
-
-<p>  }
-}
-<code>
-The Enumerator can be composed with an Enumeratee with:
-</code>scala
-val source = scala.io.Source.fromFile(Play.getExistingFile(&ldquo;conf/coosbyid.txt&rdquo;).get)
-lineEnumerator(source) &amp;> lineParser
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">def</span> <span class="n">lineEnumerator</span><span class="o">(</span><span class="n">source</span><span class="k">:</span> <span class="kt">Source</span><span class="o">)</span> <span class="k">:</span> <span class="kt">Enumerator</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">val</span> <span class="n">lines</span> <span class="k">=</span> <span class="n">source</span><span class="o">.</span><span class="n">getLines</span><span class="o">()&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="nc">Enumerator</span><span class="o">.</span><span class="n">fromCallback1</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="o">(</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">val</span> <span class="n">line</span> <span class="k">=</span> <span class="k">if</span> <span class="o">(</span><span class="n">lines</span><span class="o">.</span><span class="n">hasNext</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">Some</span><span class="o">(</span><span class="n">lines</span><span class="o">.</span><span class="n">next</span><span class="o">())</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">None</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="nc">Future</span><span class="o">.</span><span class="n">successful</span><span class="o">(</span><span class="n">line</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">},</span> <span class="n">source</span><span class="o">.</span><span class="n">close</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span>
+</span><span class='line'><span class="nc">With</span> <span class="n">an</span> <span class="nc">Enumeratee</span><span class="o">,</span> <span class="n">each</span> <span class="n">line</span> <span class="n">can</span> <span class="n">be</span> <span class="n">possibly</span> <span class="n">parsed</span> <span class="n">into</span> <span class="n">a</span> <span class="nc">Coordinate</span> <span class="n">class</span><span class="k">:</span>
+</span><span class='line'><span class="kt">&lt;/code&gt;scala</span>
+</span><span class='line'><span class="k">val</span> <span class="n">lineParser</span><span class="k">:</span> <span class="kt">Enumeratee</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Option</span><span class="o">[</span><span class="kt">Coordinate</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">Enumeratee</span><span class="o">.</span><span class="n">map</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="o">{</span> <span class="n">line</span> <span class="k">=&gt;</span>
+</span><span class='line'>  <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;\</span><span class="n">t</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;)</span> <span class="k">match</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">case</span> <span class="nc">Array</span><span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">IsDouble</span><span class="o">(</span><span class="n">latitude</span><span class="o">),</span> <span class="nc">IsDouble</span><span class="o">(</span><span class="n">longitude</span><span class="o">))</span> <span class="k">=&gt;</span> <span class="nc">Some</span><span class="o">(</span><span class="nc">Coordinate</span><span class="o">(</span><span class="n">latitude</span><span class="o">,</span> <span class="n">longitude</span><span class="o">))</span>
+</span><span class='line'>    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">None</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">code</span><span class="o">&gt;</span>
+</span><span class='line'><span class="nc">The</span> <span class="nc">Enumerator</span> <span class="n">can</span> <span class="n">be</span> <span class="n">composed</span> <span class="k">with</span> <span class="n">an</span> <span class="nc">Enumeratee</span> <span class="k">with:</span>
+</span><span class='line'><span class="kt">&lt;/code&gt;scala</span>
+</span><span class='line'><span class="k">val</span> <span class="n">source</span> <span class="k">=</span> <span class="n">scala</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="nc">Source</span><span class="o">.</span><span class="n">fromFile</span><span class="o">(</span><span class="nc">Play</span><span class="o">.</span><span class="n">getExistingFile</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">conf</span><span class="o">/</span><span class="n">coosbyid</span><span class="o">.</span><span class="n">txt</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;).</span><span class="n">get</span><span class="o">)</span>
+</span><span class='line'><span class="n">lineEnumerator</span><span class="o">(</span><span class="n">source</span><span class="o">)</span> <span class="o">&amp;</span><span class="n">amp</span><span class="o">;&gt;</span> <span class="n">lineParser</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p>I know, the method&rsquo;s name &ldquo;&amp;>&rdquo; can make some of you go away. Please stay! This sign is like the pipe in bash. It is very easy to understand:
 <code>scala
@@ -135,18 +154,21 @@ The Enumerator is reading a file, but you can imagine it could read data from a 
 
 
 <p>The Javascript API is very simple:
-```javascript
-feed = new EventSource(&lsquo;/stream&rsquo;);</p>
-
-<p>// receive message
-feed.addEventListener(&lsquo;message&rsquo;, function(e) {</p>
-
-<pre><code>var data = JSON.parse(e.data);
-// do something with data
-</code></pre>
-
-<p>}, false);
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">feed</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">EventSource</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="err">/stream&amp;rsquo;);&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="c1">// receive message</span>
+</span><span class='line'><span class="nx">feed</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;</span><span class="nx">message</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+</span><span class='line'>    <span class="c1">// do something with data</span>
+</span><span class='line'><span class="p">},</span> <span class="kc">false</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <h2 id="Visualizing-results"><a href="#Visualizing-results">Visualizing the results</a></h2>
 

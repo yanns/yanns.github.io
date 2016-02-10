@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2015-12-14T09:46:41+01:00</updated>
+  <updated>2016-02-10T21:19:16+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -12,6 +12,178 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Trampoline Execution Context With Scala Futures]]></title>
+    <link href="http://yanns.github.io/blog/2016/02/10/trampoline-execution-context-with-scala-futures/"/>
+    <updated>2016-02-10T21:19:33+01:00</updated>
+    <id>http://yanns.github.io/blog/2016/02/10/trampoline-execution-context-with-scala-futures</id>
+    <content type="html"><![CDATA[<p>Disclaimer: I am continually learning, and this post reflects my current understanding of the topic. I may be wrong. Do not believe directly what I write. Test what you need. If you want to provide me some precisions, some corrections, please contact me on <a href="https://twitter.com/simon_yann">twitter</a>, and I&rsquo;ll fix this post.</p>
+
+<p><a href="https://twitter.com/runarorama">Rúnar</a> showed in a <a href="http://blog.higher-order.com/blog/2015/06/18/easy-performance-wins-with-scalaz/">blog post how Scalaz Tasks can perform better than the Scala Futures</a>.</p>
+
+<p>He explains the details very well. If you have not read that post, I recommand it highly.</p>
+
+<p>The main point if that Scala <code>Future</code> adds a context switching for each <code>map</code> or <code>flatMap</code>.
+With Scalaz <code>Task</code>, we have to describe which tasks need a new thread, the other ones are called on the same thread as the previous computation, avoiding these context switchings.</p>
+
+<p>With Scala Futures, if you want to multiply the result of a <code>Future[Int]</code> by 2, you need an <code>ExecutionContext</code> (EC):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext.global</span>
+</span><span class='line'><span class="k">val</span> <span class="n">futureCount</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span> <span class="n">futureCountOfUsers</span><span class="o">()</span>
+</span><span class='line'><span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">futureCount</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">i</span> <span class="k">=&gt;</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="o">)(</span><span class="n">global</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>or with an implicit resolution:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext.Implicits.global</span>
+</span><span class='line'><span class="k">val</span> <span class="n">futureCount</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span> <span class="n">futureCountOfUsers</span><span class="o">()</span>
+</span><span class='line'><span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">futureCount</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">i</span> <span class="k">=&gt;</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>To compute the <code>i =&gt; i * 2</code>, the ExecutionContext may use a different thread than the one having the result of the <code>futureCountOfUsers</code>. We observe a context switching between the future and the callback in the <code>map</code>. And the thread executing <code>i =&gt; i * 2</code> can run on a different CPU/core than the one having the result of <code>futureCount</code>, meaning that the CPU cache is missed.</p>
+
+<p>This overhead is not problematic for simple computations. But if we do 100 or 1000 of them, then it can have a significant impact on performances.</p>
+
+<p>And in my opinion, Scala Futures have other downsides.</p>
+
+<p>For example, with the following code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">for</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">value1</span> <span class="k">&lt;-</span> <span class="n">functionThatReturnsFutureValue1</span>
+</span><span class='line'>  <span class="n">value2</span> <span class="k">&lt;-</span> <span class="n">functionThatReturnsFutureValue2</span>
+</span><span class='line'><span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>functionThatReturnsFutureValue1</code> and <code>functionThatReturnsFutureValue2</code> runs sequentially, even if there is no dependency between the two.</p>
+
+<p>On the other hand:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">val</span> <span class="n">futureValue1</span> <span class="k">=</span> <span class="n">functionThatReturnsFutureValue1</span>
+</span><span class='line'><span class="k">val</span> <span class="n">futureValue2</span> <span class="k">=</span> <span class="n">functionThatReturnsFutureValue2</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">value1</span> <span class="k">&lt;-</span> <span class="n">futureValue1</span>
+</span><span class='line'>  <span class="n">value2</span> <span class="k">&lt;-</span> <span class="n">futureValue2</span>
+</span><span class='line'><span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">value1</span><span class="o">,</span> <span class="n">value2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>computes <code>functionThatReturnsFutureValue1</code> and <code>functionThatReturnsFutureValue2</code> in parallel.</p>
+
+<p>It means that Scala Futures do not respect the principe of <a href="https://en.wikipedia.org/wiki/Referential_transparency">&ldquo;referential transparency&rdquo;</a>.
+It&rsquo;s not only a theoretical problem, new users of Scala Futures often have problems with that.</p>
+
+<p>And what I do not like about Scala Future is that we always need an ExecutionContext, even for small non-blocking computations.</p>
+
+<p>For example, instead of writing:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">def</span> <span class="n">multiplyBy2</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span> <span class="o">*</span> <span class="mi">2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We need either to import a ExecutionContext that is always used, or leave the liberty to the caller of the function and write:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">def</span> <span class="n">multiplyBy2</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">])(</span><span class="k">implicit</span> <span class="n">ec</span><span class="k">:</span> <span class="kt">ExecutionContext</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span> <span class="o">*</span> <span class="mi">2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>My first impression with Scalaz Tasks is that they have a better design than the Scala Futures.
+But I have not used Scalaz Tasks extensively and cannot say if they have other problems.</p>
+
+<p>But all in all, Scala Futures are here to stay. They are part of the standard API and are used everywhere.</p>
+
+<p>I&rsquo;m still wondering why the Scala Futures were designed that way.
+I can only guess, but I think this avoids some common pitfalls:</p>
+
+<ul>
+<li>&ldquo;easy&rdquo; for new-comers: simply import the default execution context and that’s all</li>
+<li>safe by default: If a callback takes a long time (blocking IO and expensive computation), this callback will not block other ones. The execution context will be able to use a different thread for other computations.</li>
+<li>and a design like Scala Tasks works well if all parts of the system are non-blocking and using one thread pool. The reality is more complex. Each driver/http client can use its own thread pool. For example, an asynchronous http client may have its own thread pool because some parts of the networking API in Java is blocking like the standard ns lookup <code>InetAddress.getByName()</code>. Running a computation directly on the thread without forking it will run the computation of the thread pool of the http client. And that can lead to an exhaustion of the thread pool of the http client, and the http client cannot function anymore.</li>
+</ul>
+
+
+<h3>Introducing the trampoline execution context</h3>
+
+<p>This performance problem with the standard execution context is not new. The play framework team had this problem, especially with Iteratees that compute everything with a Future and uses callbacks extensively on stream of data.
+To solve this problem, James Roper introduced the <a href="https://github.com/playframework/playframework/blob/master/framework/src/iteratees/src/main/scala/play/api/libs/iteratee/Execution.scala#L31-L128">trampoline Execution Context</a>.
+This trampoline execution context is a great piece of software:</p>
+
+<ul>
+<li>it makes sure the callbacks are run on the same thread than the future to avoid context switchings.</li>
+<li>it does not overflow with recursive callbacks.</li>
+</ul>
+
+
+<p>To show the benefit of the trampoline execution context, let&rsquo;s call this function that does not make any sense, but simply calls <code>Future.map</code> n times:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">def</span> <span class="n">range</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">ec</span><span class="k">:</span> <span class="kt">ExecutionContext</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span>
+</span><span class='line'>  <span class="o">(</span><span class="mi">0</span> <span class="n">to</span> <span class="n">n</span><span class="o">).</span><span class="n">foldLeft</span><span class="o">[</span><span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]](</span><span class="nc">Future</span><span class="o">.</span><span class="n">successful</span><span class="o">(</span><span class="mi">0</span><span class="o">))</span> <span class="o">{</span> <span class="k">case</span> <span class="o">(</span><span class="n">f</span><span class="o">,</span> <span class="k">_</span><span class="o">)</span> <span class="k">⇒</span> <span class="n">f</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With n = 5 000 000:</p>
+
+<ul>
+<li>Scala Futures with standard EC: 0.037 ops/s</li>
+<li>Scala Futures with trampoline EC: 1.397 ops/s</li>
+</ul>
+
+
+<h3>Should we use the trampoline EC?</h3>
+
+<p>When we are confident with execution contexts, I thing we can use this trampoline EC if:</p>
+
+<ul>
+<li>the callback is running very fast. For example:</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">def</span> <span class="n">multiplyBy2</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Long</span><span class="o">]</span> <span class="k">=</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span> <span class="o">*</span> <span class="mi">2</span><span class="o">)(</span><span class="n">trampolineEC</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>we never call some blocking IO. This point can be tricky: some scala libs can use some java libs that use InputStream or OutputStream that can block.</li>
+</ul>
+
+
+<p>If you are unsure, use the standard EC.</p>
+
+<p>If you want to try this yourself, the <a href="https://github.com/yanns/trampoline-EC">code is on github</a>.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Review of Essential Slick (for Slick 3.0)]]></title>
@@ -114,7 +286,7 @@
 
 <h2>Thursday</h2>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Opening%20Keynote:%20Software%20Design%20in%20the%2021st%20Century">Opening Keynote: Software Design in the 21st Century</a> &ndash; <a href="https://twitter.com/martinfowler">Martin Fowler</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Opening%20Keynote:%20Software%20Design%20in%20the%2021st%20Century">Opening Keynote: Software Design in the 21st Century</a> - <a href="https://twitter.com/martinfowler">Martin Fowler</a></h5>
 
 <p>We, developers, take responsibility in the code we write.<br/>
 We cannot simply say: &ldquo;I implemented that because I was told so&rdquo;.<br/>
@@ -122,7 +294,7 @@ Avoid <a href="http://darkpatterns.org/">dark patterns</a>.</p>
 
 <p>We are not code monkeys.</p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Aeron:%20The%20Next%20Generation%20in%20Open-Source%20High-Performance%20Messaging">Aeron: The Next Generation in Open-Source High-Performance Messaging</a> &ndash; <a href="https://twitter.com/mjpt777">Martin Thompson</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Aeron:%20The%20Next%20Generation%20in%20Open-Source%20High-Performance%20Messaging">Aeron: The Next Generation in Open-Source High-Performance Messaging</a> - <a href="https://twitter.com/mjpt777">Martin Thompson</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/MartinThompson_AeronTheNextGenerationInOpenSourceHighPerformanceMessaging.pdf">slides</a>
 <a href="http://mechanical-sympathy.blogspot.com/">blog</a></p>
@@ -133,12 +305,12 @@ I&rsquo;d like to see an integration of Aeron in Akka cluster.</p>
 
 <p><a href="https://www.youtube.com/watch?v=tM4YskS94b0">similar talk</a></p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Writing%20highly%20Concurrent%20Polyglot%20Applications%20with%20Vert.x">Writing highly Concurrent Polyglot Applications with Vert.x</a> &ndash; <a href="https://twitter.com/timfox">Tim Fox</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Writing%20highly%20Concurrent%20Polyglot%20Applications%20with%20Vert.x">Writing highly Concurrent Polyglot Applications with Vert.x</a> - <a href="https://twitter.com/timfox">Tim Fox</a></h5>
 
 <p>It was a good introduction to Vert.x.<br/>
 But I was expecting more than an introduction.</p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Fast%20Analytics%20on%20Big%20Data">Fast Analytics on Big Data</a> &ndash; Petr Maj and Tomas Nykodym</h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Fast%20Analytics%20on%20Big%20Data">Fast Analytics on Big Data</a> - Petr Maj and Tomas Nykodym</h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/PetrMaj_and_TomasNykodym_FastAnalyticsOnBigData.pdf">slides</a></p>
 
@@ -148,47 +320,47 @@ But I was expecting more than an introduction.</p>
 
 <p>TODO: have a look at <a href="https://github.com/0xdata/h2o-training">https://github.com/0xdata/h2o-training</a></p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Security%20Architecture%20for%20the%20SmartHome">Security Architecture for the SmartHome</a> &ndash; <a href="https://twitter.com/jacobfahrenkrug">Jacob Fahrenkrug</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Security%20Architecture%20for%20the%20SmartHome">Security Architecture for the SmartHome</a> - <a href="https://twitter.com/jacobfahrenkrug">Jacob Fahrenkrug</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/JacobFahrenkrug_SecurityArchitectureForTheSmartHome.pdf">slides</a></p>
 
 <p>A good presentation about the future threats of connected objects and the solution <a href="http://www.yetu.com/">yetu</a> implements.</p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Graph%20All%20The%20Things!!%20Graph%20Database%20Use%20Cases%20That%20Aren't%20Social">Graph All The Things!! Graph Database Use Cases That Aren&rsquo;t Social</a> &ndash; <a href="https://twitter.com/emileifrem">Emil Eifrem</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Graph%20All%20The%20Things!!%20Graph%20Database%20Use%20Cases%20That%20Aren't%20Social">Graph All The Things!! Graph Database Use Cases That Aren&rsquo;t Social</a> - <a href="https://twitter.com/emileifrem">Emil Eifrem</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/EmilEifrem_GraphAllTheThingsGraphDatabaseUseCasesThatArentSocial.pdf">slides</a></p>
 
 <p>very good presentation of <a href="http://neo4j.com/">Neo4j</a>.<br/>
-We should use a graph database where it make sense &ndash; the search queries are much easier to write / read, and the performance very good.</p>
+We should use a graph database where it make sense - the search queries are much easier to write / read, and the performance very good.</p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Party%20Keynote:%20Staying%20Ahead%20of%20the%20Curve">Party Keynote: Staying Ahead of the Curve</a> &ndash; <a href="https://twitter.com/trisha_gee">Trisha Gee</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Party%20Keynote:%20Staying%20Ahead%20of%20the%20Curve">Party Keynote: Staying Ahead of the Curve</a> - <a href="https://twitter.com/trisha_gee">Trisha Gee</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/TrishaGee_PartyKeynoteStayingAheadOfTheCurve.pdf">slides</a></p>
 
 <h2>Friday</h2>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Morning%20Keynote:%20Excellence%20Culture%20&amp;%20Humane%20Keeping%20of%20Techies">Morning Keynote: Excellence Culture &amp; Humane Keeping of Techies</a> &ndash; <a href="https://twitter.com/wilddueck">Prof. Dr. Gunter Dueck</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Morning%20Keynote:%20Excellence%20Culture%20&amp;%20Humane%20Keeping%20of%20Techies">Morning Keynote: Excellence Culture &amp; Humane Keeping of Techies</a> - <a href="https://twitter.com/wilddueck">Prof. Dr. Gunter Dueck</a></h5>
 
 <p>a very good keynote, very funny and true at the same time.</p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Aerospike:%20Flash-optimized,%20High-Performance%20noSQL%20database%20for%20All">Aerospike: Flash-optimized, High-Performance noSQL database for All</a> &ndash; <a href="https://twitter.com/khaf">Khosrow Afroozeh</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Aerospike:%20Flash-optimized,%20High-Performance%20noSQL%20database%20for%20All">Aerospike: Flash-optimized, High-Performance noSQL database for All</a> - <a href="https://twitter.com/khaf">Khosrow Afroozeh</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/KhosrowAfroozeh_AerospikeFlashOptimizedHighPerformanceNoSQLDatabaseForAll.pdf">slides</a></p>
 
-<p>A new database on my radar &ndash; impressive.</p>
+<p>A new database on my radar - impressive.</p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Docker%20-%20A%20Lot%20Changed%20in%20a%20Year">Docker &ndash; A Lot Changed in a Year</a> &ndash; <a href="http://twitter.com/cpswan">Chris Swan</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Docker%20-%20A%20Lot%20Changed%20in%20a%20Year">Docker - A Lot Changed in a Year</a> - <a href="http://twitter.com/cpswan">Chris Swan</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/ChrisSwan_DockerALotChangedInAYear.pdf">slides</a></p>
 
 <p>Docker is maturating.<br/>
-Just do not forget that &ldquo;containers do not contain&rdquo; &ndash;> no complete security between container and host, and between containers.</p>
+Just do not forget that &ldquo;containers do not contain&rdquo; -> no complete security between container and host, and between containers.</p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/The%20Joys%20and%20Perils%20of%20Interactive%20Development">The Joys and Perils of Interactive Development</a> &ndash; <a href="https://twitter.com/stuartsierra">Stuart Sierra</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/The%20Joys%20and%20Perils%20of%20Interactive%20Development">The Joys and Perils of Interactive Development</a> - <a href="https://twitter.com/stuartsierra">Stuart Sierra</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/protected/StuartSierra_TheJoysAndPerilsOfInteractiveDevelopment.pdf">slides</a></p>
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/New%20Concurrency%20Utilities%20in%20Java%208">New Concurrency Utilities in Java 8</a> &ndash; <a href="https://twitter.com/AngelikaLanger">Angelika Langer</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/New%20Concurrency%20Utilities%20in%20Java%208">New Concurrency Utilities in Java 8</a> - <a href="https://twitter.com/AngelikaLanger">Angelika Langer</a></h5>
 
 <p><a href="http://gotocon.com/dl/goto-berlin-2014/slides/protected/AngelikaLanger_NewConcurrencyUtilitiesInJava8.pdf">slides</a></p>
 
@@ -198,7 +370,7 @@ Just do not forget that &ldquo;containers do not contain&rdquo; &ndash;> no comp
 </ul>
 
 
-<h5><a href="http://gotocon.com/berlin-2014/presentation/Adaptive%20Planning%20-%20Beyond%20User%20Stories">Adaptive Planning &ndash; Beyond User Stories</a> &ndash; <a href="https://twitter.com/gojkoadzic">Gojko Adzic</a></h5>
+<h5><a href="http://gotocon.com/berlin-2014/presentation/Adaptive%20Planning%20-%20Beyond%20User%20Stories">Adaptive Planning - Beyond User Stories</a> - <a href="https://twitter.com/gojkoadzic">Gojko Adzic</a></h5>
 
 <p><a href="http://gojko.net/">blog</a>
 <a href="http://gotocon.com/dl/goto-berlin-2014/slides/GojkoAdzic_AdaptivePlanningBeyondUserStories.pdf">slides</a></p>
@@ -352,7 +524,7 @@ To stay within the time slot, I have not developed so much my concerns about tha
 
 <p>Setting up the test environment with this approach is quite complex. For each external web service, a mock must be implemented as a real local http server. We must start all mock implementations, and then the new configured application. At the end of the tests, we must shutdown all services, even in case of exceptions.</p>
 
-<p>But the main drawback with this approach in my opinion is that running the tests take a lot of time, too much to be integrated in a normal development flow (write code &ndash;> compile &ndash;> test)</p>
+<p>But the main drawback with this approach in my opinion is that running the tests take a lot of time, too much to be integrated in a normal development flow (write code -> compile -> test)</p>
 
 <h3>An alternative approach between component and unit tests</h3>
 
@@ -366,7 +538,7 @@ The idea is still to use a request / response to test the application, but witho
 <p>Implementing that is actually quite easy: each layer declared as dependency an HTTP client (a <a href="http://www.playframework.com/documentation/2.3.x/api/scala/index.html#play.api.libs.ws.WSClient">WSClient</a> in play framework 2.3)</p>
 
 <ul>
-<li>The http client is a dependency at the top (controllers&#8217; layer):</li>
+<li>The http client is a dependency at the top (controllers' layer):</li>
 </ul>
 
 
@@ -1263,7 +1435,7 @@ In the <a href="http://play-react.herokuapp.com/serverSide">sample application</
 <p>We can optimize this version by sending the first bytes of the HTML page before having any data.
 When the data is there, we can send the rest of the page.</p>
 
-<p>With <a href="http://play-react.herokuapp.com/serverSideStream">that variant</a>, we can include the CSS and part of the JavaScript in the &lt;HEAD> section of the HTML page.
+<p>With <a href="http://play-react.herokuapp.com/serverSideStream">that variant</a>, we can include the CSS and part of the JavaScript in the \&lt;HEAD> section of the HTML page.
 The browser receives this information very quickly and can begin downloading these assets.
 The server lets the connection open and when the rest of the page is ready, it is send to the browser.</p>
 
@@ -1479,7 +1651,7 @@ It works very well. The app displays the duration of your talk, the current, pre
 <h2 id="day1"><a href="#day1">Day #1</a></h2>
 
 
-<p>From the <a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/DevOps3.0/">presentation from Immobilienscout</a> &ndash; <i>Marcel Wolf, <a target="_blank" href="https://twitter.com/felixsperling">Felix Sperling</a></i></p>
+<p>From the <a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/DevOps3.0/">presentation from Immobilienscout</a> - <i>Marcel Wolf, <a target="_blank" href="https://twitter.com/felixsperling">Felix Sperling</a></i></p>
 
 <ul>
     <li>Dev AM rotation: exchange between Dev and Ops</li>
@@ -1488,7 +1660,7 @@ It works very well. The app displays the duration of your talk, the current, pre
 </ul>
 
 
-<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/DevOps3.0/">DevTools team at Etsy</a> &ndash; <a target="_blank" href="https://twitter.com/mrtazz">Daniel Schauenberg</a></p>
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/DevOps3.0/">DevTools team at Etsy</a> - <a target="_blank" href="https://twitter.com/mrtazz">Daniel Schauenberg</a></p>
 
 <ul>
     <li><a target="_blank" href="http://fr.slideshare.net/mrtazz/devtools-at-etsy">Slides</a></li>
@@ -1506,26 +1678,26 @@ It works very well. The app displays the duration of your talk, the current, pre
 <h2 id="day2"><a href="#day2">Day #2</a></h2>
 
 
-<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/How%20the%20QA%20team%20got%20Prezi%20ready%20for%20DevOps/">How the QA team got Prezi ready for DevOps</a> &ndash; <a target="_blank" href="https://twitter.com/pneumark">Peter Neumark</a></p>
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/How%20the%20QA%20team%20got%20Prezi%20ready%20for%20DevOps/">How the QA team got Prezi ready for DevOps</a> - <a target="_blank" href="https://twitter.com/pneumark">Peter Neumark</a></p>
 
 <ul>
     <li><a target="_blank" href="http://prezi.com/qmrekeeqqvyf/how-the-qa-team-got-prezi-ready-for-devops/">presentation</a></li>
-    <li>Like the <a target="_blank" href="https://twitter.com/simon_yann/status/339462592315682816/photo/1">error handling</a>: &#8220;When blame inevitably arises, the most senior people in the room should repeat this mantra: if a mistake happens, shame on us for making it so easy to make that mistake&#8221;. Very similar to risk management culture.</li>
+    <li>Like the <a target="_blank" href="https://twitter.com/simon_yann/status/339462592315682816/photo/1">error handling</a>: "When blame inevitably arises, the most senior people in the room should repeat this mantra: if a mistake happens, shame on us for making it so easy to make that mistake". Very similar to risk management culture.</li>
 </ul>
 
 
-<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/Podularity%20FTW/">Podularity FTW!</a> &ndash; <a target="_blank" href="https://twitter.com/tlossen">Tim Lossen</a></p>
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/Podularity%20FTW/">Podularity FTW!</a> - <a target="_blank" href="https://twitter.com/tlossen">Tim Lossen</a></p>
 
 <ul>
     <li><a target="_blank" href="http://fr.slideshare.net/tim.lossen.de/podularity-ftw">slides</a></li>
-    <li>team = autonomous cell (even technological stack, product&#8230;)</li>
+    <li>team = autonomous cell (even technological stack, product...)</li>
     <li>The organization is a supercell, bindings autonomous cells together.</li>
     <li><a target="_blank" href="https://twitter.com/simon_yann/status/339461227552047104/photo/1">Lunch roulette</a></li>
     <li>Interesting question from the audience about the business continuity: if each team can choose its technological stack, is not it a problem then the team change, and when the new members do not know the new stack he is working with? Tim answered that it was indeed a problem the organization though of, but in practice, it never happened.<br/>I like this approach that I could try to summarize like this: do not spend your time trying to avoid problems, but solve real problem that exist.</li>
 </ul>
 
 
-<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/How%20we%20built%20and%20deployed%20the%20Honshu%20way/">Island Life: How we built and deployed the Honshū way</a> &ndash; Wes Mason</p>
+<p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/How%20we%20built%20and%20deployed%20the%20Honshu%20way/">Island Life: How we built and deployed the Honshū way</a> - Wes Mason</p>
 
 <ul>
     <li>from one monolith app to several islands like components</li>
@@ -1546,8 +1718,8 @@ It works very well. The app displays the duration of your talk, the current, pre
     <li>Discussion with <a target="_blank" href="http://www.gutefrage.net/">gutefrage.net</a> who use Scala / <a target="_blank" href="https://github.com/twitter/finagle">Finagle</a> with <a target="_blank" href="http://thrift.apache.org/">Thrift</a>.<br>Storage of statistics with <a target="_blank" href="http://opentsdb.net/">OpenTSDB</a></li>
     <li><a target="_blank" href="http://zeroturnaround.com/software/liverebel/">LiveRebel</a>: ZeroTurnaround made a presentation of LiveRebel<br/>
 LiveRebel contains some versions of the application.<br/>
-These versions can be uploaded, manually or automatically (maven plugin, command line tool&#8230;)<br/><br/>
-Then LiveRebel can deploy a specific version on production (or staging&#8230;)<br/>
+These versions can be uploaded, manually or automatically (maven plugin, command line tool...)<br/><br/>
+Then LiveRebel can deploy a specific version on production (or staging...)<br/>
 For this, an agent is running on each server.<br/><br/>
 LiveRebel can deploy to one server, check it with some configured smoke test.<br/>
 If the test is successful, the server is activated on the cluster, and the deployment process continues with the next server.<br/><br/>
@@ -1730,8 +1902,8 @@ The Enumerator is reading a file, but you can imagine it could read data from a 
 <p>I choose to use Server-Send Events instead of WebSockets because of the following reasons:</p>
 
 <ul>
-    <li>I&#8217;ve already played with WebSockets and wanted to try something new.</li>
-    <li>WebSockets are great and can communicate in both directions. But this technology is a new protocol, sometimes difficult to integrate in an existing infrastructure (Proxy, Load-Balancer, Firewall&#8230;) Server-Send Events, on the other hand, use the HTTP protocol. The PaaS <a target="_blank" href="https://www.heroku.com/">Heroku</a> does not support WebSockets yet, but support SSE. When pushing data from the server to clients is all what you need, SSE can be what is the most appropriate and is <a target="_blank" href="http://caniuse.com/#search=eventsource">well supported</a> (except in IE for the moment)</li>
+    <li>I've already played with WebSockets and wanted to try something new.</li>
+    <li>WebSockets are great and can communicate in both directions. But this technology is a new protocol, sometimes difficult to integrate in an existing infrastructure (Proxy, Load-Balancer, Firewall...) Server-Send Events, on the other hand, use the HTTP protocol. The PaaS <a target="_blank" href="https://www.heroku.com/">Heroku</a> does not support WebSockets yet, but support SSE. When pushing data from the server to clients is all what you need, SSE can be what is the most appropriate and is <a target="_blank" href="http://caniuse.com/#search=eventsource">well supported</a> (except in IE for the moment)</li>
 </ul>
 
 

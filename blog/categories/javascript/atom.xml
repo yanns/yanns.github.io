@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: JavaScript | yann's Blog]]></title>
+  <title><![CDATA[Category: javascript | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2015-12-14T09:46:41+01:00</updated>
+  <updated>2016-02-10T21:19:16+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -116,41 +116,59 @@ The result is send to the browser
 Ok(views.html.index(Html(new String(result.output.toArray, "UTF-8"))))
 </code>
 complete controller code:
-```scala
-  // with js-engine
-  def serverSideTrireme = serverSideWithJsEngine(Trireme.props())</p>
-
-<p>  // with node
-  def serverSideNode = serverSideWithJsEngine(Node.props())</p>
-
-<p>  private def serverSideWithJsEngine(jsEngine: Props) = Action.async { request =></p>
-
-<pre><code>import akka.pattern.ask
-import scala.concurrent.duration._
-
-val serverside = Play.getFile("public/javascripts/serverside.js")
-implicit val timeout = Timeout(5.seconds)
-val engine = Akka.system.actorOf(jsEngine, s"engine-${request.id}")
-
-for {
-  data &lt;- initialData
-  result &lt;- (engine ? Engine.ExecuteJs(new File(serverside.toURI), List(data))).mapTo[JsExecutionResult]
-} yield {
-  Ok(views.html.index(Html(new String(result.output.toArray, "UTF-8"))))
-}
-</code></pre>
-
-<p>  }
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'>  <span class="c1">// with js-engine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">serverSideTrireme</span> <span class="k">=</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="nc">Trireme</span><span class="o">.</span><span class="n">props</span><span class="o">())&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="c1">// with node</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">serverSideNode</span> <span class="k">=</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="nc">Node</span><span class="o">.</span><span class="n">props</span><span class="o">())&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">private</span> <span class="k">def</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="n">jsEngine</span><span class="k">:</span> <span class="kt">Props</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Action</span><span class="o">.</span><span class="n">async</span> <span class="o">{</span> <span class="n">request</span> <span class="k">=&gt;</span>
+</span><span class='line'>    <span class="k">import</span> <span class="nn">akka.pattern.ask</span>
+</span><span class='line'>    <span class="k">import</span> <span class="nn">scala.concurrent.duration._&lt;/p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">val</span> <span class="n">serverside</span> <span class="k">=</span> <span class="nc">Play</span><span class="o">.</span><span class="n">getFile</span><span class="o">(</span><span class="s">&quot;public/javascripts/serverside.js&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="k">implicit</span> <span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="nc">Timeout</span><span class="o">(</span><span class="mf">5.</span><span class="n">seconds</span><span class="o">)</span>
+</span><span class='line'><span class="k">val</span> <span class="n">engine</span> <span class="k">=</span> <span class="nc">Akka</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">actorOf</span><span class="o">(</span><span class="n">jsEngine</span><span class="o">,</span> <span class="n">s</span><span class="s">&quot;engine-${request.id}&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">data</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;-</span> <span class="n">initialData</span>
+</span><span class='line'>  <span class="n">result</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;-</span> <span class="o">(</span><span class="n">engine</span> <span class="o">?</span> <span class="nc">Engine</span><span class="o">.</span><span class="nc">ExecuteJs</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">serverside</span><span class="o">.</span><span class="n">toURI</span><span class="o">),</span> <span class="nc">List</span><span class="o">(</span><span class="n">data</span><span class="o">))).</span><span class="n">mapTo</span><span class="o">[</span><span class="kt">JsExecutionResult</span><span class="o">]</span>
+</span><span class='line'><span class="o">}</span> <span class="k">yield</span> <span class="o">{</span>
+</span><span class='line'>  <span class="nc">Ok</span><span class="o">(</span><span class="n">views</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">index</span><span class="o">(</span><span class="nc">Html</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">toArray</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">))))</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p>The code <code>serverside.js</code> uses the <a href="http://nodejs.org/api/modules.html#modules_module_require_id">node.js modules API</a> to render our main component (CommentBox).
-```javascript
-var React = require(&lsquo;./react&rsquo;),</p>
-
-<pre><code>CommentBox = require('./CommentBox');
-</code></pre>
-
-<p>```</p>
+<code>javascript
+var React = require('./react'),
+    CommentBox = require('./CommentBox');
+</code></p>
 
 <p>It then loads the data given as first parameter in the controller
 <code>javascript
@@ -160,32 +178,39 @@ var data = JSON.parse(process.argv[2]);
 
 <p>It renders the CommentBox component to a String and output it to console.log so that the Scala controller can receive the result with <code>result.output.toArray</code></p>
 
-<p><code>javascript
-console.log(React.renderComponentToString(CommentBox(backend)({data: data, onServerSide: true})));
-</code></p>
+<pre><code class="javascript">console.log(React.renderComponentToString(CommentBox(backend)({data: data, onServerSide: true})));
+</code></pre>
 
 <p>Complete code:
-```javascript
-var React = require(&lsquo;./react&rsquo;),</p>
-
-<pre><code>CommentBox = require('./CommentBox');
-</code></pre>
-
-<p>// take data from parameters
-var data = JSON.parse(process.argv[2]);</p>
-
-<p>var backend = {</p>
-
-<pre><code>loadCommentsFromServer: function(settings) {
-},
-handleCommentSubmit: function(settings) {
-}
-</code></pre>
-
-<p>};</p>
-
-<p>console.log(React.renderComponentToString(CommentBox(backend)({data: data, onServerSide: true})));
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;.</span><span class="o">/</span><span class="nx">react</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;),</span>
+</span><span class='line'>    <span class="nx">CommentBox</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;.</span><span class="o">/</span><span class="nx">CommentBox</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="c1">// take data from parameters</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">backend</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">loadCommentsFromServer</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nx">handleCommentSubmit</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">React</span><span class="p">.</span><span class="nx">renderComponentToString</span><span class="p">(</span><span class="nx">CommentBox</span><span class="p">(</span><span class="nx">backend</span><span class="p">)({</span><span class="nx">data</span><span class="o">:</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">onServerSide</span><span class="o">:</span> <span class="kc">true</span><span class="p">})));</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p><a href="http://play-react.herokuapp.com/serverSide">This page</a> does not flicker anymore compared to the <a href="http://play-react.herokuapp.com/clientSide">first version</a>.</p>
 
@@ -202,7 +227,7 @@ In the <a href="http://play-react.herokuapp.com/serverSide">sample application</
 <p>We can optimize this version by sending the first bytes of the HTML page before having any data.
 When the data is there, we can send the rest of the page.</p>
 
-<p>With <a href="http://play-react.herokuapp.com/serverSideStream">that variant</a>, we can include the CSS and part of the JavaScript in the &lt;HEAD> section of the HTML page.
+<p>With <a href="http://play-react.herokuapp.com/serverSideStream">that variant</a>, we can include the CSS and part of the JavaScript in the \&lt;HEAD> section of the HTML page.
 The browser receives this information very quickly and can begin downloading these assets.
 The server lets the connection open and when the rest of the page is ready, it is send to the browser.</p>
 
@@ -228,33 +253,51 @@ But Play Framework package all the public assets in the jar, making the JavaScri
 PublicOnFileSystem.settings
 </code></li>
 <li>project/PublicOnFileSystem.scala
-```scala
-import sbt.<em>
-import sbt.Keys.</em>
-import play.Keys.playAssetsDirectories
-import com.typesafe.sbt.SbtNativePackager._</li>
-</ul>
-
-
-<p>object PublicOnFileSystem {</p>
-
-<p>  val settings = Seq(</p>
-
-<pre><code>mappings in Universal &lt;++= playAssetsDirectories map { directories: Seq[File] =&gt;
-  directories.flatMap { dir: File =&gt;
-    val directoryLen = dir.getCanonicalPath.length
-    val pathFinder = dir ** "*"
-    pathFinder.get map {
-      publicFile: File =&gt;
-        publicFile -&gt; ("public/" + publicFile.getCanonicalPath.substring(directoryLen))
-    }
-  }
-}
-</code></pre>
-
-<p>  )
-}
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">sbt.</span><span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">sbt.Keys.</span><span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">play.Keys.playAssetsDirectories</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">com.typesafe.sbt.SbtNativePackager._&lt;/li</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">ul</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">object</span> <span class="nc">PublicOnFileSystem</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">val</span> <span class="n">settings</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span>
+</span><span class='line'>    <span class="n">mappings</span> <span class="n">in</span> <span class="nc">Universal</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;++=</span> <span class="n">playAssetsDirectories</span> <span class="n">map</span> <span class="o">{</span> <span class="n">directories</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">File</span><span class="o">]</span> <span class="k">=&gt;</span>
+</span><span class='line'>      <span class="n">directories</span><span class="o">.</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">dir</span><span class="k">:</span> <span class="kt">File</span> <span class="o">=&gt;</span>
+</span><span class='line'>        <span class="k">val</span> <span class="n">directoryLen</span> <span class="k">=</span> <span class="n">dir</span><span class="o">.</span><span class="n">getCanonicalPath</span><span class="o">.</span><span class="n">length</span>
+</span><span class='line'>        <span class="k">val</span> <span class="n">pathFinder</span> <span class="k">=</span> <span class="n">dir</span> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;*</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;&lt;/</span><span class="n">em</span><span class="o">&gt;&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">pathFinder</span><span class="o">.</span><span class="n">get</span> <span class="n">map</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">publicFile</span><span class="k">:</span> <span class="kt">File</span> <span class="o">=&gt;</span>
+</span><span class='line'>            <span class="n">publicFile</span> <span class="o">-&gt;</span> <span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">public</span><span class="o">/&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="o">+</span> <span class="n">publicFile</span><span class="o">.</span><span class="n">getCanonicalPath</span><span class="o">.</span><span class="n">substring</span><span class="o">(</span><span class="n">directoryLen</span><span class="o">))</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <h2>Conclusion</h2>
 

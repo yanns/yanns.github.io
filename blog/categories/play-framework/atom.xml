@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Play Framework | yann's Blog]]></title>
+  <title><![CDATA[Category: play framework | yann's Blog]]></title>
   <link href="http://yanns.github.io/blog/categories/play-framework/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2015-12-14T09:46:41+01:00</updated>
+  <updated>2016-02-10T21:19:16+01:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -157,7 +157,7 @@ To stay within the time slot, I have not developed so much my concerns about tha
 
 <p>Setting up the test environment with this approach is quite complex. For each external web service, a mock must be implemented as a real local http server. We must start all mock implementations, and then the new configured application. At the end of the tests, we must shutdown all services, even in case of exceptions.</p>
 
-<p>But the main drawback with this approach in my opinion is that running the tests take a lot of time, too much to be integrated in a normal development flow (write code &ndash;> compile &ndash;> test)</p>
+<p>But the main drawback with this approach in my opinion is that running the tests take a lot of time, too much to be integrated in a normal development flow (write code -> compile -> test)</p>
 
 <h3>An alternative approach between component and unit tests</h3>
 
@@ -172,18 +172,27 @@ The idea is still to use a request / response to test the application, but witho
 
 <ul>
 <li>The http client is a dependency at the top (controllers' layer):
-```scala
-package controllers</li>
-</ul>
-
-
-<p>class Application(ws: WSClient, app: play.api.Application) extends Controller {</p>
-
-<p>  val topVideoService = new TopVideoService(ws, app)
-//&hellip;</p>
-
-<p>}
-```
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">package</span> <span class="nn">controllers</span><span class="o">&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">ul</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">Application</span><span class="o">(</span><span class="n">ws</span><span class="k">:</span> <span class="kt">WSClient</span><span class="o">,</span> <span class="n">app</span><span class="k">:</span> <span class="kt">play.api.Application</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Controller</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">val</span> <span class="n">topVideoService</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">TopVideoService</span><span class="o">(</span><span class="n">ws</span><span class="o">,</span> <span class="n">app</span><span class="o">)</span>
+</span><span class='line'><span class="c1">//&amp;hellip;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure>
 (a second &ldquo;dependency&rdquo; is the current play application. This approach is very convenient to simulate different configurations)</p>
 
 <ul>
@@ -198,33 +207,47 @@ class ApplicationControllerFixture
 extends Application(MockWS(playerRoute), FakeApplication())
 </code></p></li>
 <li><p>The <code>playerRoute</code> simulate the external player web service:
-```scala
-val playerId = PlayerId(34)</p></li>
-</ul>
-
-
-<p>val playerRoute: MockWS.Routes = {
-  case (&ldquo;GET&rdquo;, u) if u == s"<a href="http://localhost:9001/players/$playerId">http://localhost:9001/players/$playerId</a>" =></p>
-
-<pre><code>Action { Ok(Json.parse(playerJson(playerId))) }
-</code></pre>
-
-<p>  case _ => Action { NotFound }
-}</p>
-
-<p>def playerJson(playerId: PlayerId) =
-  s"&ldquo;&rdquo;{</p>
-
-<pre><code>   |  "id": $playerId,
-   |  "name": "ze name",
-   |  "height": "ze height",
-   |  "weight": "ze weight",
-   |  "team": "ze team"
-   |}
- """.stripMargin
-</code></pre>
-
-<p>```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">val</span> <span class="n">playerId</span> <span class="k">=</span> <span class="nc">PlayerId</span><span class="o">(</span><span class="mi">34</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">ul</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">val</span> <span class="n">playerRoute</span><span class="k">:</span> <span class="kt">MockWS.Routes</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">case</span> <span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">GET</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="n">u</span><span class="o">)</span> <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="n">s</span><span class="s">&quot;&lt;a href=&quot;</span><span class="n">http</span><span class="o">://</span><span class="n">localhost</span><span class="k">:</span><span class="err">9001</span><span class="kt">/players/$playerId</span><span class="err">&quot;</span><span class="kt">&gt;http://localhost:</span><span class="err">9001</span><span class="kt">/players/$playerId&lt;/a&gt;</span><span class="err">&quot;</span> <span class="o">=&gt;</span>
+</span><span class='line'>    <span class="nc">Action</span> <span class="o">{</span> <span class="nc">Ok</span><span class="o">(</span><span class="nc">Json</span><span class="o">.</span><span class="n">parse</span><span class="o">(</span><span class="n">playerJson</span><span class="o">(</span><span class="n">playerId</span><span class="o">)))</span> <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">Action</span> <span class="o">{</span> <span class="nc">NotFound</span> <span class="o">}</span>
+</span><span class='line'><span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">def</span> <span class="n">playerJson</span><span class="o">(</span><span class="n">playerId</span><span class="k">:</span> <span class="kt">PlayerId</span><span class="o">)</span> <span class="k">=</span>
+</span><span class='line'>  <span class="n">s</span><span class="err">&quot;</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;&amp;</span><span class="n">rdquo</span><span class="o">;{</span>
+</span><span class='line'>       <span class="o">|</span>  <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">id</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span><span class="k">:</span> <span class="kt">$playerId</span><span class="o">,</span>
+</span><span class='line'>       <span class="o">|</span>  <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span><span class="k">:</span> <span class="kt">&amp;ldquo</span><span class="o">;</span><span class="n">ze</span> <span class="n">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span>
+</span><span class='line'>       <span class="o">|</span>  <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">height</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span><span class="k">:</span> <span class="kt">&amp;ldquo</span><span class="o">;</span><span class="n">ze</span> <span class="n">height</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span>
+</span><span class='line'>       <span class="o">|</span>  <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">weight</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span><span class="k">:</span> <span class="kt">&amp;ldquo</span><span class="o">;</span><span class="n">ze</span> <span class="n">weight</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span>
+</span><span class='line'>       <span class="o">|</span>  <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">team</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span><span class="k">:</span> <span class="kt">&amp;ldquo</span><span class="o">;</span><span class="n">ze</span> <span class="n">team</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span><span class='line'>       <span class="o">|}</span>
+</span><span class='line'>     <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;&amp;</span><span class="n">rdquo</span><span class="o">;&amp;</span><span class="n">ldquo</span><span class="o">;.</span><span class="n">stripMargin</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p>The <code>MockWS.Routes</code> type defines a partial function <code>PartialFunction[(String, String), EssentialAction]</code>, making really easy to combine different routes together with <code>orElse</code>:
 <code>scala
@@ -302,41 +325,69 @@ The application is not entirely treated as a black box. But most of the code is 
 This library provides a convenient feature: the <a href="http://logback.qos.ch/manual/mdc.html">Mapped Diagnostic Context (MDC)</a>.
 This context can be used to store values that can be displayed in every Logging statement.<br/>
 For example, if we want to display the current user ID:
-```scala</p>
-
-<pre><code>import org.slf4j.MDC
-
-val id = currentUser.id
-MDC.put("X-UserId", currentUser.id)
-
-try {
-  // the block of code that uses the Logger
-  // for example:
-  play.api.Logger.info("test")
-} finally {
-  // clean up the MDC
-  MDC.remove("X-UserId")
-}
-</code></pre>
-
-<p>```
-(This code could be in a <a href="https://www.playframework.com/documentation/latest/ScalaHttpFilters">filter</a>, run for each request)</p>
-
-<p>Logback must be configured to display the <code>X-UserId</code> value:
-```xml</p>
-
-<pre><code>&lt;appender name="stdout" class="ch.qos.logback.core.ConsoleAppender"&gt;
-    &lt;encoder&gt;
-        &lt;pattern&gt;%d{HH:mm:ss.SSS} %coloredLevel %logger{35} %mdc{X-UserId:--} - %msg%n%rootException&lt;/pattern&gt;
-    &lt;/encoder&gt;
-&lt;/appender&gt;
-</code></pre>
-
-<p><code>
-In the log file, the MDC value for `X-UserId` is now printed out.
-</code>
-10:50:54.773 [info] application jean.leloup &ndash; test
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">org.slf4j.MDC</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">val</span> <span class="n">id</span> <span class="k">=</span> <span class="n">currentUser</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'><span class="nc">MDC</span><span class="o">.</span><span class="n">put</span><span class="o">(</span><span class="s">&quot;X-UserId&quot;</span><span class="o">,</span> <span class="n">currentUser</span><span class="o">.</span><span class="n">id</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// the block of code that uses the Logger</span>
+</span><span class='line'>  <span class="c1">// for example:</span>
+</span><span class='line'>  <span class="n">play</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="nc">Logger</span><span class="o">.</span><span class="n">info</span><span class="o">(</span><span class="s">&quot;test&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// clean up the MDC</span>
+</span><span class='line'>  <span class="nc">MDC</span><span class="o">.</span><span class="n">remove</span><span class="o">(</span><span class="s">&quot;X-UserId&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;(</span><span class="nc">This</span> <span class="n">code</span> <span class="n">could</span> <span class="n">be</span> <span class="n">in</span> <span class="n">a</span> <span class="o">[</span><span class="kt">filter</span><span class="o">](</span><span class="n">https</span><span class="o">://</span><span class="n">www</span><span class="o">.</span><span class="n">playframework</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">documentation</span><span class="o">/</span><span class="n">latest</span><span class="o">/</span><span class="nc">ScalaHttpFilters</span><span class="o">),</span> <span class="n">run</span> <span class="k">for</span> <span class="n">each</span> <span class="n">request</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nc">Logback</span> <span class="n">must</span> <span class="n">be</span> <span class="n">configured</span> <span class="n">to</span> <span class="n">display</span> <span class="n">the</span> <span class="n">`X-UserId`</span> <span class="n">value</span><span class="k">:</span>
+</span><span class='line'><span class="kt">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">appender</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;stdout&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s">&quot;ch.qos.logback.core.ConsoleAppender&quot;</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">encoder</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">pattern</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;%</span><span class="n">d</span><span class="o">{</span><span class="nc">HH</span><span class="k">:</span><span class="kt">mm:ss.SSS</span><span class="o">}</span> <span class="o">%</span><span class="n">coloredLevel</span> <span class="o">%</span><span class="n">logger</span><span class="o">{</span><span class="mi">35</span><span class="o">}</span> <span class="o">%</span><span class="n">mdc</span><span class="o">{</span><span class="n">X</span><span class="o">-</span><span class="nc">UserId</span><span class="o">:--}</span> <span class="o">-</span> <span class="o">%</span><span class="n">msg</span><span class="o">%</span><span class="n">n</span><span class="o">%</span><span class="n">rootException</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;/</span><span class="n">pattern</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="o">;/</span><span class="n">encoder</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'><span class="o">&amp;</span><span class="n">lt</span><span class="o">;/</span><span class="n">appender</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="nc">In</span> <span class="n">the</span> <span class="n">log</span> <span class="n">file</span><span class="o">,</span> <span class="n">the</span> <span class="nc">MDC</span> <span class="n">value</span> <span class="k">for</span> <span class="n">`X-UserId`</span> <span class="n">is</span> <span class="n">now</span> <span class="n">printed</span> <span class="n">out</span><span class="o">.</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="mi">10</span><span class="k">:</span><span class="err">50</span><span class="kt">:</span><span class="err">54</span><span class="kt">.</span><span class="err">773</span> <span class="err">[</span><span class="kt">info</span><span class="err">]</span> <span class="kt">application</span> <span class="kt">jean.leloup</span> <span class="kt">-</span> <span class="kt">test</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <h2>Limitation of the default implementation of the MDC</h2>
 
@@ -355,127 +406,205 @@ This strategy works when one thread is used for one request, like in servlet con
 
 <p>To use the MDC, we provide a custom Akka <code>Dispatcher</code> that propagates the MDC from the caller&rsquo;s thread to the callee&rsquo;s one.
 
-```scala
-package monitoring</p>
-
-<p>import java.util.concurrent.TimeUnit</p>
-
-<p>import akka.dispatch._
-import com.typesafe.config.Config
-import org.slf4j.MDC</p>
-
-<p>import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.{Duration, FiniteDuration}</p>
-
-<p>/<em>*
- * Configurator for a MDC propagating dispatcher.
- *
- * To use it, configure play like this:
- * {{{
- * play {
- *   akka {
- *     actor {
- *       default-dispatcher = {
- *         type = &ldquo;monitoring.MDCPropagatingDispatcherConfigurator&rdquo;
- *       }
- *     }
- *   }
- * }
- * }}}
- *
- * Credits to James Roper for the [[<a href="https://github.com/jroper/thread-local-context-propagation/">https://github.com/jroper/thread-local-context-propagation/</a> initial implementation]]
- </em>/
-class MDCPropagatingDispatcherConfigurator(config: Config, prerequisites: DispatcherPrerequisites)
-  extends MessageDispatcherConfigurator(config, prerequisites) {</p>
-
-<p>  private val instance = new MDCPropagatingDispatcher(</p>
-
-<pre><code>this,
-config.getString("id"),
-config.getInt("throughput"),
-FiniteDuration(config.getDuration("throughput-deadline-time", TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS),
-configureExecutor(),
-FiniteDuration(config.getDuration("shutdown-timeout", TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS))
-</code></pre>
-
-<p>  override def dispatcher(): MessageDispatcher = instance
-}</p>
-
-<p>/<em>*
- * A MDC propagating dispatcher.
- *
- * This dispatcher propagates the MDC current request context if it&rsquo;s set when it&rsquo;s executed.
- </em>/
-class MDCPropagatingDispatcher(_configurator: MessageDispatcherConfigurator,</p>
-
-<pre><code>                           id: String,
-                           throughput: Int,
-                           throughputDeadlineTime: Duration,
-                           executorServiceFactoryProvider: ExecutorServiceFactoryProvider,
-                           shutdownTimeout: FiniteDuration)
-</code></pre>
-
-<p>  extends Dispatcher(_configurator, id, throughput, throughputDeadlineTime, executorServiceFactoryProvider, shutdownTimeout ) {</p>
-
-<p>  self =></p>
-
-<p>  override def prepare(): ExecutionContext = new ExecutionContext {</p>
-
-<pre><code>// capture the MDC
-val mdcContext = MDC.getCopyOfContextMap
-
-def execute(r: Runnable) = self.execute(new Runnable {
-  def run() = {
-    // backup the callee MDC context
-    val oldMDCContext = MDC.getCopyOfContextMap
-
-    // Run the runnable with the captured context
-    setContextMap(mdcContext)
-    try {
-      r.run()
-    } finally {
-      // restore the callee MDC context
-      setContextMap(oldMDCContext)
-    }
-  }
-})
-def reportFailure(t: Throwable) = self.reportFailure(t)
-</code></pre>
-
-<p>  }</p>
-
-<p>  private[this] def setContextMap(context: java.util.Map[String, String]) {</p>
-
-<pre><code>if (context == null) {
-  MDC.clear()
-} else {
-  MDC.setContextMap(context)
-}
-</code></pre>
-
-<p>  }</p>
-
-<p>}
-```
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">package</span> <span class="nn">monitoring</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">import</span> <span class="nn">java.util.concurrent.TimeUnit</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">import</span> <span class="nn">akka.dispatch._</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">com.typesafe.config.Config</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">org.slf4j.MDC</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">scala.concurrent.duration.</span><span class="o">{</span><span class="nc">Duration</span><span class="o">,</span> <span class="nc">FiniteDuration</span><span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">Configurator</span> <span class="k">for</span> <span class="n">a</span> <span class="nc">MDC</span> <span class="n">propagating</span> <span class="n">dispatcher</span><span class="o">.</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">To</span> <span class="n">use</span> <span class="n">it</span><span class="o">,</span> <span class="n">configure</span> <span class="n">play</span> <span class="n">like</span> <span class="k">this:</span>
+</span><span class='line'> <span class="kt">*</span> <span class="o">{{{</span>
+</span><span class='line'> <span class="kt">*</span> <span class="kt">play</span> <span class="o">{</span>
+</span><span class='line'> <span class="kt">*</span>   <span class="kt">akka</span> <span class="o">{</span>
+</span><span class='line'> <span class="kt">*</span>     <span class="kt">actor</span> <span class="o">{</span>
+</span><span class='line'> <span class="kt">*</span>       <span class="kt">default-dispatcher</span> <span class="o">=</span> <span class="o">{</span>
+</span><span class='line'> <span class="kt">*</span>         <span class="k">type</span> <span class="o">=</span> <span class="kt">&amp;ldquo</span><span class="o">;</span><span class="kt">monitoring.MDCPropagatingDispatcherConfigurator&amp;rdquo</span><span class="o">;</span>
+</span><span class='line'> <span class="kt">*</span>       <span class="o">}</span>
+</span><span class='line'> <span class="kt">*</span>     <span class="o">}</span>
+</span><span class='line'> <span class="kt">*</span>   <span class="o">}</span>
+</span><span class='line'> <span class="kt">*</span> <span class="o">}</span>
+</span><span class='line'> <span class="o">*</span> <span class="o">}}}</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">Credits</span> <span class="n">to</span> <span class="nc">James</span> <span class="nc">Roper</span> <span class="k">for</span> <span class="n">the</span> <span class="o">[[</span><span class="kt">&lt;a</span> <span class="kt">href=</span><span class="err">&quot;</span><span class="kt">https://github.com/jroper/thread-local-context-propagation/</span><span class="err">&quot;</span><span class="kt">&gt;https://github.com/jroper/thread-local-context-propagation/&lt;/a&gt;</span> <span class="kt">initial</span> <span class="kt">implementation</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">MDCPropagatingDispatcherConfigurator</span><span class="o">(</span><span class="n">config</span><span class="k">:</span> <span class="kt">Config</span><span class="o">,</span> <span class="n">prerequisites</span><span class="k">:</span> <span class="kt">DispatcherPrerequisites</span><span class="o">)</span>
+</span><span class='line'>  <span class="k">extends</span> <span class="nc">MessageDispatcherConfigurator</span><span class="o">(</span><span class="n">config</span><span class="o">,</span> <span class="n">prerequisites</span><span class="o">)</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">private</span> <span class="k">val</span> <span class="n">instance</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MDCPropagatingDispatcher</span><span class="o">(</span>
+</span><span class='line'>    <span class="k">this</span><span class="o">,</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">getString</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">id</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;),</span>
+</span><span class='line'>    <span class="n">config</span><span class="o">.</span><span class="n">getInt</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">throughput</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;),</span>
+</span><span class='line'>    <span class="nc">FiniteDuration</span><span class="o">(</span><span class="n">config</span><span class="o">.</span><span class="n">getDuration</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">throughput</span><span class="o">-</span><span class="n">deadline</span><span class="o">-</span><span class="n">time</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="nc">NANOSECONDS</span><span class="o">),</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="nc">NANOSECONDS</span><span class="o">),</span>
+</span><span class='line'>    <span class="n">configureExecutor</span><span class="o">(),</span>
+</span><span class='line'>    <span class="nc">FiniteDuration</span><span class="o">(</span><span class="n">config</span><span class="o">.</span><span class="n">getDuration</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">shutdown</span><span class="o">-</span><span class="n">timeout</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="nc">MILLISECONDS</span><span class="o">),</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="nc">MILLISECONDS</span><span class="o">))&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">override</span> <span class="k">def</span> <span class="n">dispatcher</span><span class="o">()</span><span class="k">:</span> <span class="kt">MessageDispatcher</span> <span class="o">=</span> <span class="n">instance</span>
+</span><span class='line'><span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">A</span> <span class="nc">MDC</span> <span class="n">propagating</span> <span class="n">dispatcher</span><span class="o">.</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">This</span> <span class="n">dispatcher</span> <span class="n">propagates</span> <span class="n">the</span> <span class="nc">MDC</span> <span class="n">current</span> <span class="n">request</span> <span class="n">context</span> <span class="k">if</span> <span class="n">it</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="o">;</span><span class="n">s</span> <span class="n">set</span> <span class="n">when</span> <span class="n">it</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="o">;</span><span class="n">s</span> <span class="n">executed</span><span class="o">.</span>
+</span><span class='line'> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">MDCPropagatingDispatcher</span><span class="o">(&lt;</span><span class="n">em</span><span class="o">&gt;</span><span class="n">configurator</span><span class="k">:</span> <span class="kt">MessageDispatcherConfigurator</span><span class="o">,</span>
+</span><span class='line'>                               <span class="n">id</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span>
+</span><span class='line'>                               <span class="n">throughput</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span>
+</span><span class='line'>                               <span class="n">throughputDeadlineTime</span><span class="k">:</span> <span class="kt">Duration</span><span class="o">,</span>
+</span><span class='line'>                               <span class="n">executorServiceFactoryProvider</span><span class="k">:</span> <span class="kt">ExecutorServiceFactoryProvider</span><span class="o">,</span>
+</span><span class='line'>                               <span class="n">shutdownTimeout</span><span class="k">:</span> <span class="kt">FiniteDuration</span><span class="o">)</span>
+</span><span class='line'>  <span class="k">extends</span> <span class="nc">Dispatcher</span><span class="o">(&lt;/</span><span class="n">em</span><span class="o">&gt;</span><span class="n">configurator</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">throughput</span><span class="o">,</span> <span class="n">throughputDeadlineTime</span><span class="o">,</span> <span class="n">executorServiceFactoryProvider</span><span class="o">,</span> <span class="n">shutdownTimeout</span> <span class="o">)</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="n">self</span> <span class="o">=&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">override</span> <span class="k">def</span> <span class="n">prepare</span><span class="o">()</span><span class="k">:</span> <span class="kt">ExecutionContext</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ExecutionContext</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// capture the MDC</span>
+</span><span class='line'>    <span class="k">val</span> <span class="n">mdcContext</span> <span class="k">=</span> <span class="nc">MDC</span><span class="o">.</span><span class="n">getCopyOfContextMap</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">def</span> <span class="n">execute</span><span class="o">(</span><span class="n">r</span><span class="k">:</span> <span class="kt">Runnable</span><span class="o">)</span> <span class="k">=</span> <span class="n">self</span><span class="o">.</span><span class="n">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">run</span><span class="o">()</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="c1">// backup the callee MDC context</span>
+</span><span class='line'>    <span class="k">val</span> <span class="n">oldMDCContext</span> <span class="k">=</span> <span class="nc">MDC</span><span class="o">.</span><span class="n">getCopyOfContextMap</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Run the runnable with the captured context</span>
+</span><span class='line'>    <span class="n">setContextMap</span><span class="o">(</span><span class="n">mdcContext</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>      <span class="n">r</span><span class="o">.</span><span class="n">run</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>      <span class="c1">// restore the callee MDC context</span>
+</span><span class='line'>      <span class="n">setContextMap</span><span class="o">(</span><span class="n">oldMDCContext</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}</span>
+</span><span class='line'><span class="o">})</span>
+</span><span class='line'><span class="k">def</span> <span class="n">reportFailure</span><span class="o">(</span><span class="n">t</span><span class="k">:</span> <span class="kt">Throwable</span><span class="o">)</span> <span class="k">=</span> <span class="n">self</span><span class="o">.</span><span class="n">reportFailure</span><span class="o">(</span><span class="n">t</span><span class="o">)</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">def</span> <span class="n">setContextMap</span><span class="o">(</span><span class="n">context</span><span class="k">:</span> <span class="kt">java.util.Map</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">context</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">MDC</span><span class="o">.</span><span class="n">clear</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">MDC</span><span class="o">.</span><span class="n">setContextMap</span><span class="o">(</span><span class="n">context</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure>
 </p>
 
 <h4>Using a custom Akka dispatcher everywhere:</h4>
 
 <p>To use this custom Akka dispatcher everywhere, we just have to configure it:
-```bash application.conf
+<code>bash application.conf
 play {
-  akka {</p>
-
-<pre><code>actor {
-  default-dispatcher = {
-    type = "monitoring.MDCPropagatingDispatcherConfigurator"
+  akka {
+    actor {
+      default-dispatcher = {
+        type = "monitoring.MDCPropagatingDispatcherConfigurator"
+      }
+    }
   }
 }
-</code></pre>
-
-<p>  }
-}
-```
+</code>
 and that&rsquo;s all! ;)</p>
 
 <p>The MDC context is propagated when we use the play default <a href="https://www.playframework.com/documentation/2.3.x/api/scala/index.html#play.api.libs.concurrent.Execution$"><code>ExecutionContext</code></a>.</p>
@@ -491,90 +620,144 @@ and that&rsquo;s all! ;)</p>
 <p>The dispatching of the jobs on different threads in done with an <code>ExecutionContext</code>. Each <code>ExecutionContext</code> manages a <a href="https://www.playframework.com/documentation/latest/ThreadPools">thread pool</a>.</p>
 
 <p>To use the MDC, we just have to use a custom <code>ExecutionContext</code> that propagates the MDC from the caller&rsquo;s thread to the callee&rsquo;s one.
-```scala
-import org.slf4j.MDC
-import scala.concurrent.{ExecutionContextExecutor, ExecutionContext}</p>
-
-<p>/<em>*
- * slf4j provides a MDC [[<a href="http://logback.qos.ch/manual/mdc.html">http://logback.qos.ch/manual/mdc.html</a> Mapped Diagnostic Context]]
- * based on a [[ThreadLocal]]. In an asynchronous environment, the callbacks can be called
- * in another thread, where the local thread variable does not exist anymore.
- *
- * This execution context fixes this problem:
- * it propagates the MDC from the caller&rsquo;s thread to the callee&rsquo;s one.
- </em>/
-object MDCHttpExecutionContext {</p>
-
-<p>  /<em>*
-   * Create an MDCHttpExecutionContext with values from the current thread.
-   </em>/
-  def fromThread(delegate: ExecutionContext): ExecutionContextExecutor =</p>
-
-<pre><code>new MDCHttpExecutionContext(MDC.getCopyOfContextMap, delegate)
-</code></pre>
-
-<p>}</p>
-
-<p>/<em>*
- * Manages execution to ensure that the given MDC context are set correctly
- * in the current thread. Actual execution is performed by a delegate ExecutionContext.
- </em>/
-class MDCHttpExecutionContext(mdcContext: java.util.Map[<em>, </em>], delegate: ExecutionContext) extends ExecutionContextExecutor {
-  def execute(runnable: Runnable) = delegate.execute(new Runnable {</p>
-
-<pre><code>def run() {
-  val oldMDCContext = MDC.getCopyOfContextMap
-  setContextMap(mdcContext)
-  try {
-    runnable.run()
-  } finally {
-    setContextMap(oldMDCContext)
-  }
-}
-</code></pre>
-
-<p>  })</p>
-
-<p>  private[this] def setContextMap(context: java.util.Map[<em>, </em>]) {</p>
-
-<pre><code>if (context == null) {
-  MDC.clear()
-} else {
-  MDC.setContextMap(context)
-}
-</code></pre>
-
-<p>  }</p>
-
-<p>  def reportFailure(t: Throwable) = delegate.reportFailure(t)
-}
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">org.slf4j.MDC</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">scala.concurrent.</span><span class="o">{</span><span class="nc">ExecutionContextExecutor</span><span class="o">,</span> <span class="nc">ExecutionContext</span><span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">slf4j</span> <span class="n">provides</span> <span class="n">a</span> <span class="nc">MDC</span> <span class="o">[[</span><span class="kt">&lt;a</span> <span class="kt">href=</span><span class="err">&quot;</span><span class="kt">http://logback.qos.ch/manual/mdc.html</span><span class="err">&quot;</span><span class="kt">&gt;http://logback.qos.ch/manual/mdc.html&lt;/a&gt;</span> <span class="kt">Mapped</span> <span class="kt">Diagnostic</span> <span class="kt">Context</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">based</span> <span class="n">on</span> <span class="n">a</span> <span class="o">[[</span><span class="kt">ThreadLocal</span><span class="o">]].</span> <span class="nc">In</span> <span class="n">an</span> <span class="n">asynchronous</span> <span class="n">environment</span><span class="o">,</span> <span class="n">the</span> <span class="n">callbacks</span> <span class="n">can</span> <span class="n">be</span> <span class="n">called</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">in</span> <span class="n">another</span> <span class="n">thread</span><span class="o">,</span> <span class="n">where</span> <span class="n">the</span> <span class="n">local</span> <span class="n">thread</span> <span class="n">variable</span> <span class="n">does</span> <span class="n">not</span> <span class="n">exist</span> <span class="n">anymore</span><span class="o">.</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">This</span> <span class="n">execution</span> <span class="n">context</span> <span class="n">fixes</span> <span class="k">this</span> <span class="n">problem</span><span class="k">:</span>
+</span><span class='line'> <span class="kt">*</span> <span class="kt">it</span> <span class="kt">propagates</span> <span class="kt">the</span> <span class="kt">MDC</span> <span class="kt">from</span> <span class="kt">the</span> <span class="kt">caller&amp;rsquo</span><span class="o">;</span><span class="n">s</span> <span class="n">thread</span> <span class="n">to</span> <span class="n">the</span> <span class="n">callee</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="o">;</span><span class="n">s</span> <span class="n">one</span><span class="o">.</span>
+</span><span class='line'> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'><span class="k">object</span> <span class="nc">MDCHttpExecutionContext</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'>   <span class="o">*</span> <span class="nc">Create</span> <span class="n">an</span> <span class="nc">MDCHttpExecutionContext</span> <span class="k">with</span> <span class="n">values</span> <span class="n">from</span> <span class="n">the</span> <span class="n">current</span> <span class="n">thread</span><span class="o">.</span>
+</span><span class='line'>   <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">fromThread</span><span class="o">(</span><span class="n">delegate</span><span class="k">:</span> <span class="kt">ExecutionContext</span><span class="o">)</span><span class="k">:</span> <span class="kt">ExecutionContextExecutor</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">new</span> <span class="nc">MDCHttpExecutionContext</span><span class="o">(</span><span class="nc">MDC</span><span class="o">.</span><span class="n">getCopyOfContextMap</span><span class="o">,</span> <span class="n">delegate</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">Manages</span> <span class="n">execution</span> <span class="n">to</span> <span class="n">ensure</span> <span class="n">that</span> <span class="n">the</span> <span class="n">given</span> <span class="nc">MDC</span> <span class="n">context</span> <span class="n">are</span> <span class="n">set</span> <span class="n">correctly</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">in</span> <span class="n">the</span> <span class="n">current</span> <span class="n">thread</span><span class="o">.</span> <span class="nc">Actual</span> <span class="n">execution</span> <span class="n">is</span> <span class="n">performed</span> <span class="n">by</span> <span class="n">a</span> <span class="n">delegate</span> <span class="nc">ExecutionContext</span><span class="o">.</span>
+</span><span class='line'> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">MDCHttpExecutionContext</span><span class="o">(</span><span class="n">mdcContext</span><span class="k">:</span> <span class="kt">java.util.Map</span><span class="o">[</span><span class="kt">&lt;em&gt;</span>, <span class="kt">&lt;/em&gt;</span><span class="o">],</span> <span class="n">delegate</span><span class="k">:</span> <span class="kt">ExecutionContext</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">ExecutionContextExecutor</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">execute</span><span class="o">(</span><span class="n">runnable</span><span class="k">:</span> <span class="kt">Runnable</span><span class="o">)</span> <span class="k">=</span> <span class="n">delegate</span><span class="o">.</span><span class="n">execute</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">def</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      <span class="k">val</span> <span class="n">oldMDCContext</span> <span class="k">=</span> <span class="nc">MDC</span><span class="o">.</span><span class="n">getCopyOfContextMap</span>
+</span><span class='line'>      <span class="n">setContextMap</span><span class="o">(</span><span class="n">mdcContext</span><span class="o">)</span>
+</span><span class='line'>      <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">runnable</span><span class="o">.</span><span class="n">run</span><span class="o">()</span>
+</span><span class='line'>      <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">setContextMap</span><span class="o">(</span><span class="n">oldMDCContext</span><span class="o">)</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">})&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">def</span> <span class="n">setContextMap</span><span class="o">(</span><span class="n">context</span><span class="k">:</span> <span class="kt">java.util.Map</span><span class="o">[</span><span class="kt">&lt;em&gt;</span>, <span class="kt">&lt;/em&gt;</span><span class="o">])</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="o">(</span><span class="n">context</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">MDC</span><span class="o">.</span><span class="n">clear</span><span class="o">()</span>
+</span><span class='line'>    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>      <span class="nc">MDC</span><span class="o">.</span><span class="n">setContextMap</span><span class="o">(</span><span class="n">context</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="n">reportFailure</span><span class="o">(</span><span class="n">t</span><span class="k">:</span> <span class="kt">Throwable</span><span class="o">)</span> <span class="k">=</span> <span class="n">delegate</span><span class="o">.</span><span class="n">reportFailure</span><span class="o">(</span><span class="n">t</span><span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p>Then we can define the default ExecutionContext in our application:
-```scala
-package concurrent</p>
-
-<p>import scala.concurrent.ExecutionContext</p>
-
-<p>/<em>*
- * The standard [[play.api.libs.concurrent.Execution.defaultContext]] loses the MDC context.
- *
- * This custom [[ExecutionContext]] propagates the MDC context, so that the request
- * and the correlation IDs can be logged.
- </em>/
-object Execution {</p>
-
-<p>  object Implicits {</p>
-
-<pre><code>implicit def defaultContext: ExecutionContext = Execution.defaultContext
-</code></pre>
-
-<p>  }</p>
-
-<p>  def defaultContext: ExecutionContext = MDCHttpExecutionContext.fromThread(play.api.libs.concurrent.Execution.defaultContext)</p>
-
-<p>}
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">package</span> <span class="nn">concurrent</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">The</span> <span class="n">standard</span> <span class="o">[[</span><span class="kt">play.api.libs.concurrent.Execution.defaultContext</span><span class="o">]]</span> <span class="n">loses</span> <span class="n">the</span> <span class="nc">MDC</span> <span class="n">context</span><span class="o">.</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nc">This</span> <span class="n">custom</span> <span class="o">[[</span><span class="kt">ExecutionContext</span><span class="o">]]</span> <span class="n">propagates</span> <span class="n">the</span> <span class="nc">MDC</span> <span class="n">context</span><span class="o">,</span> <span class="n">so</span> <span class="n">that</span> <span class="n">the</span> <span class="n">request</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">and</span> <span class="n">the</span> <span class="n">correlation</span> <span class="nc">IDs</span> <span class="n">can</span> <span class="n">be</span> <span class="n">logged</span><span class="o">.</span>
+</span><span class='line'> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'><span class="k">object</span> <span class="nc">Execution</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">object</span> <span class="nc">Implicits</span> <span class="o">{</span>
+</span><span class='line'>    <span class="k">implicit</span> <span class="k">def</span> <span class="n">defaultContext</span><span class="k">:</span> <span class="kt">ExecutionContext</span> <span class="o">=</span> <span class="nc">Execution</span><span class="o">.</span><span class="n">defaultContext</span>
+</span><span class='line'>  <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">def</span> <span class="n">defaultContext</span><span class="k">:</span> <span class="kt">ExecutionContext</span> <span class="o">=</span> <span class="nc">MDCHttpExecutionContext</span><span class="o">.</span><span class="n">fromThread</span><span class="o">(</span><span class="n">play</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">libs</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Execution</span><span class="o">.</span><span class="n">defaultContext</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p>Now we will use the <code>concurrent.Execution.defaultContext</code> instead of the one from play (<code>play.api.libs.concurrent.Execution.defaultContext</code>)</p>
 
@@ -585,28 +768,41 @@ object Execution {</p>
 
 <p>The default <a href="https://www.playframework.com/documentation/latest/ScalaActions"><code>Action</code></a> uses the default <code>play.api.libs.concurrent.Execution.defaultContext</code>.
 We must define a custom <code>ActionBuilder</code> that uses our new <code>ExecutionContext</code>:
-```scala
-package controllers</p>
-
-<p>object Action extends ActionBuilder[Request] {
-  def invokeBlock<a href="request:%20Request[A],%20block:%20(Request[A]">A</a> => Future[SimpleResult]) = {</p>
-
-<pre><code>block(request)
-</code></pre>
-
-<p>  }</p>
-
-<p>  /<em>*
-   * The standard [[play.api.mvc.Action]] loses the MDC context.
-   *
-   * This action builder sets the [[ExecutionContext]] so that the
-   * MDC context is propagated.
-   * With this custom [[ExecutionContext]], the request and the correlation IDs
-   * can be logged.
-   </em>/
-  override def executionContext: ExecutionContext = Execution.defaultContext
-}
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">package</span> <span class="nn">controllers</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">object</span> <span class="nc">Action</span> <span class="k">extends</span> <span class="nc">ActionBuilder</span><span class="o">[</span><span class="kt">Request</span><span class="o">]</span> <span class="o">{</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">invokeBlock</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s">&quot;request:%20Request[A],%20block:%20(Request[A]&quot;</span><span class="o">&gt;</span><span class="n">A</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="nc">Future</span><span class="o">[</span><span class="kt">SimpleResult</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">block</span><span class="o">(</span><span class="n">request</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">}&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="o">/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'>   <span class="o">*</span> <span class="nc">The</span> <span class="n">standard</span> <span class="o">[[</span><span class="kt">play.api.mvc.Action</span><span class="o">]]</span> <span class="n">loses</span> <span class="n">the</span> <span class="nc">MDC</span> <span class="n">context</span><span class="o">.</span>
+</span><span class='line'>   <span class="o">*</span>
+</span><span class='line'>   <span class="o">*</span> <span class="nc">This</span> <span class="n">action</span> <span class="n">builder</span> <span class="n">sets</span> <span class="n">the</span> <span class="o">[[</span><span class="kt">ExecutionContext</span><span class="o">]]</span> <span class="n">so</span> <span class="n">that</span> <span class="n">the</span>
+</span><span class='line'>   <span class="o">*</span> <span class="nc">MDC</span> <span class="n">context</span> <span class="n">is</span> <span class="n">propagated</span><span class="o">.</span>
+</span><span class='line'>   <span class="o">*</span> <span class="nc">With</span> <span class="k">this</span> <span class="n">custom</span> <span class="o">[[</span><span class="kt">ExecutionContext</span><span class="o">]],</span> <span class="n">the</span> <span class="n">request</span> <span class="n">and</span> <span class="n">the</span> <span class="n">correlation</span> <span class="nc">IDs</span>
+</span><span class='line'>   <span class="o">*</span> <span class="n">can</span> <span class="n">be</span> <span class="n">logged</span><span class="o">.</span>
+</span><span class='line'>   <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'>  <span class="k">override</span> <span class="k">def</span> <span class="n">executionContext</span><span class="k">:</span> <span class="kt">ExecutionContext</span> <span class="o">=</span> <span class="nc">Execution</span><span class="o">.</span><span class="n">defaultContext</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p>Instead of using of <code>play.api.mvc.Action</code>, we just have to use the newly defined <code>controllers.Action</code>.</p>
 
@@ -717,41 +913,59 @@ The result is send to the browser
 Ok(views.html.index(Html(new String(result.output.toArray, "UTF-8"))))
 </code>
 complete controller code:
-```scala
-  // with js-engine
-  def serverSideTrireme = serverSideWithJsEngine(Trireme.props())</p>
-
-<p>  // with node
-  def serverSideNode = serverSideWithJsEngine(Node.props())</p>
-
-<p>  private def serverSideWithJsEngine(jsEngine: Props) = Action.async { request =></p>
-
-<pre><code>import akka.pattern.ask
-import scala.concurrent.duration._
-
-val serverside = Play.getFile("public/javascripts/serverside.js")
-implicit val timeout = Timeout(5.seconds)
-val engine = Akka.system.actorOf(jsEngine, s"engine-${request.id}")
-
-for {
-  data &lt;- initialData
-  result &lt;- (engine ? Engine.ExecuteJs(new File(serverside.toURI), List(data))).mapTo[JsExecutionResult]
-} yield {
-  Ok(views.html.index(Html(new String(result.output.toArray, "UTF-8"))))
-}
-</code></pre>
-
-<p>  }
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'>  <span class="c1">// with js-engine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">serverSideTrireme</span> <span class="k">=</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="nc">Trireme</span><span class="o">.</span><span class="n">props</span><span class="o">())&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="c1">// with node</span>
+</span><span class='line'>  <span class="k">def</span> <span class="n">serverSideNode</span> <span class="k">=</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="nc">Node</span><span class="o">.</span><span class="n">props</span><span class="o">())&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">private</span> <span class="k">def</span> <span class="n">serverSideWithJsEngine</span><span class="o">(</span><span class="n">jsEngine</span><span class="k">:</span> <span class="kt">Props</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Action</span><span class="o">.</span><span class="n">async</span> <span class="o">{</span> <span class="n">request</span> <span class="k">=&gt;</span>
+</span><span class='line'>    <span class="k">import</span> <span class="nn">akka.pattern.ask</span>
+</span><span class='line'>    <span class="k">import</span> <span class="nn">scala.concurrent.duration._&lt;/p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">val</span> <span class="n">serverside</span> <span class="k">=</span> <span class="nc">Play</span><span class="o">.</span><span class="n">getFile</span><span class="o">(</span><span class="s">&quot;public/javascripts/serverside.js&quot;</span><span class="o">)</span>
+</span><span class='line'><span class="k">implicit</span> <span class="k">val</span> <span class="n">timeout</span> <span class="k">=</span> <span class="nc">Timeout</span><span class="o">(</span><span class="mf">5.</span><span class="n">seconds</span><span class="o">)</span>
+</span><span class='line'><span class="k">val</span> <span class="n">engine</span> <span class="k">=</span> <span class="nc">Akka</span><span class="o">.</span><span class="n">system</span><span class="o">.</span><span class="n">actorOf</span><span class="o">(</span><span class="n">jsEngine</span><span class="o">,</span> <span class="n">s</span><span class="s">&quot;engine-${request.id}&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="o">{</span>
+</span><span class='line'>  <span class="n">data</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;-</span> <span class="n">initialData</span>
+</span><span class='line'>  <span class="n">result</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;-</span> <span class="o">(</span><span class="n">engine</span> <span class="o">?</span> <span class="nc">Engine</span><span class="o">.</span><span class="nc">ExecuteJs</span><span class="o">(</span><span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">serverside</span><span class="o">.</span><span class="n">toURI</span><span class="o">),</span> <span class="nc">List</span><span class="o">(</span><span class="n">data</span><span class="o">))).</span><span class="n">mapTo</span><span class="o">[</span><span class="kt">JsExecutionResult</span><span class="o">]</span>
+</span><span class='line'><span class="o">}</span> <span class="k">yield</span> <span class="o">{</span>
+</span><span class='line'>  <span class="nc">Ok</span><span class="o">(</span><span class="n">views</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">index</span><span class="o">(</span><span class="nc">Html</span><span class="o">(</span><span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">toArray</span><span class="o">,</span> <span class="s">&quot;UTF-8&quot;</span><span class="o">))))</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p>The code <code>serverside.js</code> uses the <a href="http://nodejs.org/api/modules.html#modules_module_require_id">node.js modules API</a> to render our main component (CommentBox).
-```javascript
-var React = require(&lsquo;./react&rsquo;),</p>
-
-<pre><code>CommentBox = require('./CommentBox');
-</code></pre>
-
-<p>```</p>
+<code>javascript
+var React = require('./react'),
+    CommentBox = require('./CommentBox');
+</code></p>
 
 <p>It then loads the data given as first parameter in the controller
 <code>javascript
@@ -761,32 +975,39 @@ var data = JSON.parse(process.argv[2]);
 
 <p>It renders the CommentBox component to a String and output it to console.log so that the Scala controller can receive the result with <code>result.output.toArray</code></p>
 
-<p><code>javascript
-console.log(React.renderComponentToString(CommentBox(backend)({data: data, onServerSide: true})));
-</code></p>
+<pre><code class="javascript">console.log(React.renderComponentToString(CommentBox(backend)({data: data, onServerSide: true})));
+</code></pre>
 
 <p>Complete code:
-```javascript
-var React = require(&lsquo;./react&rsquo;),</p>
-
-<pre><code>CommentBox = require('./CommentBox');
-</code></pre>
-
-<p>// take data from parameters
-var data = JSON.parse(process.argv[2]);</p>
-
-<p>var backend = {</p>
-
-<pre><code>loadCommentsFromServer: function(settings) {
-},
-handleCommentSubmit: function(settings) {
-}
-</code></pre>
-
-<p>};</p>
-
-<p>console.log(React.renderComponentToString(CommentBox(backend)({data: data, onServerSide: true})));
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;.</span><span class="o">/</span><span class="nx">react</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;),</span>
+</span><span class='line'>    <span class="nx">CommentBox</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">lsquo</span><span class="p">;.</span><span class="o">/</span><span class="nx">CommentBox</span><span class="o">&amp;</span><span class="nx">rsquo</span><span class="p">;);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="c1">// take data from parameters</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="kd">var</span> <span class="nx">backend</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">loadCommentsFromServer</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nx">handleCommentSubmit</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">settings</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">React</span><span class="p">.</span><span class="nx">renderComponentToString</span><span class="p">(</span><span class="nx">CommentBox</span><span class="p">(</span><span class="nx">backend</span><span class="p">)({</span><span class="nx">data</span><span class="o">:</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">onServerSide</span><span class="o">:</span> <span class="kc">true</span><span class="p">})));</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <p><a href="http://play-react.herokuapp.com/serverSide">This page</a> does not flicker anymore compared to the <a href="http://play-react.herokuapp.com/clientSide">first version</a>.</p>
 
@@ -803,7 +1024,7 @@ In the <a href="http://play-react.herokuapp.com/serverSide">sample application</
 <p>We can optimize this version by sending the first bytes of the HTML page before having any data.
 When the data is there, we can send the rest of the page.</p>
 
-<p>With <a href="http://play-react.herokuapp.com/serverSideStream">that variant</a>, we can include the CSS and part of the JavaScript in the &lt;HEAD> section of the HTML page.
+<p>With <a href="http://play-react.herokuapp.com/serverSideStream">that variant</a>, we can include the CSS and part of the JavaScript in the \&lt;HEAD> section of the HTML page.
 The browser receives this information very quickly and can begin downloading these assets.
 The server lets the connection open and when the rest of the page is ready, it is send to the browser.</p>
 
@@ -829,33 +1050,51 @@ But Play Framework package all the public assets in the jar, making the JavaScri
 PublicOnFileSystem.settings
 </code></li>
 <li>project/PublicOnFileSystem.scala
-```scala
-import sbt.<em>
-import sbt.Keys.</em>
-import play.Keys.playAssetsDirectories
-import com.typesafe.sbt.SbtNativePackager._</li>
-</ul>
-
-
-<p>object PublicOnFileSystem {</p>
-
-<p>  val settings = Seq(</p>
-
-<pre><code>mappings in Universal &lt;++= playAssetsDirectories map { directories: Seq[File] =&gt;
-  directories.flatMap { dir: File =&gt;
-    val directoryLen = dir.getCanonicalPath.length
-    val pathFinder = dir ** "*"
-    pathFinder.get map {
-      publicFile: File =&gt;
-        publicFile -&gt; ("public/" + publicFile.getCanonicalPath.substring(directoryLen))
-    }
-  }
-}
-</code></pre>
-
-<p>  )
-}
-```</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='scala'><span class='line'><span class="k">import</span> <span class="nn">sbt.</span><span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">sbt.Keys.</span><span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">play.Keys.playAssetsDirectories</span>
+</span><span class='line'><span class="k">import</span> <span class="nn">com.typesafe.sbt.SbtNativePackager._&lt;/li</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">ul</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">object</span> <span class="nc">PublicOnFileSystem</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>  <span class="k">val</span> <span class="n">settings</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span>
+</span><span class='line'>    <span class="n">mappings</span> <span class="n">in</span> <span class="nc">Universal</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;++=</span> <span class="n">playAssetsDirectories</span> <span class="n">map</span> <span class="o">{</span> <span class="n">directories</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">File</span><span class="o">]</span> <span class="k">=&gt;</span>
+</span><span class='line'>      <span class="n">directories</span><span class="o">.</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">dir</span><span class="k">:</span> <span class="kt">File</span> <span class="o">=&gt;</span>
+</span><span class='line'>        <span class="k">val</span> <span class="n">directoryLen</span> <span class="k">=</span> <span class="n">dir</span><span class="o">.</span><span class="n">getCanonicalPath</span><span class="o">.</span><span class="n">length</span>
+</span><span class='line'>        <span class="k">val</span> <span class="n">pathFinder</span> <span class="k">=</span> <span class="n">dir</span> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;*</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;&lt;/</span><span class="n">em</span><span class="o">&gt;&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">pathFinder</span><span class="o">.</span><span class="n">get</span> <span class="n">map</span> <span class="o">{</span>
+</span><span class='line'>          <span class="n">publicFile</span><span class="k">:</span> <span class="kt">File</span> <span class="o">=&gt;</span>
+</span><span class='line'>            <span class="n">publicFile</span> <span class="o">-&gt;</span> <span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">public</span><span class="o">/&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="o">+</span> <span class="n">publicFile</span><span class="o">.</span><span class="n">getCanonicalPath</span><span class="o">.</span><span class="n">substring</span><span class="o">(</span><span class="n">directoryLen</span><span class="o">))</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>      <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>  <span class="o">)</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></p>
 
 <h2>Conclusion</h2>
 
@@ -952,7 +1191,7 @@ A particularity of this &ldquo;dependency injection&rdquo; mechanism is that it 
 <p>I had great feedbacks, like these ones:<br/>
 <blockquote><p>Leanovate Software Engineer Yann Simon gives the best presentation on the cake pattern I’ve ever seen.</p><footer><strong>Gilt</strong> <cite><a href="http://tech.gilt.com/post/74733533436/a-few-things-about-ping-a-play-framework-conference">http://tech.gilt.com/post/74733533436/a-few-things-about-ping-a-play-framework-conference</a></cite></footer></blockquote>
 <blockquote><p>it was great that Yann pointed out the disadvantages as well every step along the way and made it clear how far it’s worth going in various cases.</p><footer><strong>Csaba Palfi</strong> <cite><a href="http://csaba.palfi.me/ping-conf-day-1/">http://csaba.palfi.me/ping-conf-day-1/</a></cite></footer></blockquote>
-<blockquote><p>Currently talking, is astounding the audience with live baking an application, slam dunk videos feat. Sulley &ndash; of Monsters fame &ndash; and hand drawn presentation slides!</p><footer><strong>kinja</strong> <cite><a href="http://pingconference.kinja.com/yann-simon-1502530900">http://pingconference.kinja.com/yann-simon-1502530900</a></cite></footer></blockquote>
+<blockquote><p>Currently talking, is astounding the audience with live baking an application, slam dunk videos feat. Sulley - of Monsters fame - and hand drawn presentation slides!</p><footer><strong>kinja</strong> <cite><a href="http://pingconference.kinja.com/yann-simon-1502530900">http://pingconference.kinja.com/yann-simon-1502530900</a></cite></footer></blockquote>
 <blockquote><p>All this was presented using funny monster videos and a French-German accent.</p><footer><strong>Marius Soutier</strong> <cite><a href="http://www.mariussoutier.com/blog/2014/01/20/ping-conference-play-edition-day-1/">http://www.mariussoutier.com/blog/2014/01/20/ping-conference-play-edition-day-1/</a></cite></footer></blockquote></p>
 
 <blockquote class="twitter-tweet" lang="en"><p>the infamous Totoro-defense! <a href="https://twitter.com/search?q=%23pingconf&amp;src=hash">#pingconf</a> <a href="http://t.co/EnJhauj8tw">pic.twitter.com/EnJhauj8tw</a></p>&mdash; serif (@_serif) <a href="https://twitter.com/_serif/statuses/423793818857930752">January 16, 2014</a></blockquote>

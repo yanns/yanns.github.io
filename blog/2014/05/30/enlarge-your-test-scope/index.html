@@ -85,7 +85,7 @@ I showed how this &hellip;">
   
 
 
-<time datetime="2014-05-30T22:00:22+02:00" pubdate data-updated="true">May 30<span>th</span>, 2014</time>
+<time datetime="2014-05-30T22:00:22+02:00" pubdate data-updated="true"></time>
         
       </p>
     
@@ -147,7 +147,7 @@ To stay within the time slot, I have not developed so much my concerns about tha
 
 <p>Setting up the test environment with this approach is quite complex. For each external web service, a mock must be implemented as a real local http server. We must start all mock implementations, and then the new configured application. At the end of the tests, we must shutdown all services, even in case of exceptions.</p>
 
-<p>But the main drawback with this approach in my opinion is that running the tests take a lot of time, too much to be integrated in a normal development flow (write code &ndash;> compile &ndash;> test)</p>
+<p>But the main drawback with this approach in my opinion is that running the tests take a lot of time, too much to be integrated in a normal development flow (write code -> compile -> test)</p>
 
 <h3>An alternative approach between component and unit tests</h3>
 
@@ -161,7 +161,7 @@ The idea is still to use a request / response to test the application, but witho
 <p>Implementing that is actually quite easy: each layer declared as dependency an HTTP client (a <a href="http://www.playframework.com/documentation/2.3.x/api/scala/index.html#play.api.libs.ws.WSClient">WSClient</a> in play framework 2.3)</p>
 
 <ul>
-<li>The http client is a dependency at the top (controllers&#8217; layer):</li>
+<li>The http client is a dependency at the top (controllers' layer):</li>
 </ul>
 
 
@@ -327,12 +327,12 @@ The application is not entirely treated as a black box. But most of the code is 
   
 
 
-<time datetime="2014-05-30T22:00:22+02:00" pubdate data-updated="true">May 30<span>th</span>, 2014</time>
+<time datetime="2014-05-30T22:00:22+02:00" pubdate data-updated="true"></time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/play-framework/'>Play Framework</a>
+    <a class='category' href='/blog/categories/play-framework/'>play framework</a>
   
 </span>
 
@@ -368,6 +368,10 @@ The application is not entirely treated as a black box. But most of the code is 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/02/10/trampoline-execution-context-with-scala-futures/">Trampoline Execution Context With Scala Futures</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/07/review-of-essential-slick/">Review of Essential Slick (for Slick 3.0)</a>
       </li>
     
@@ -381,10 +385,6 @@ The application is not entirely treated as a black box. But most of the code is 
     
       <li class="post">
         <a href="/blog/2014/11/10/goto-conference-2014/">Goto Conference 2014</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/08/10/complete-asynchronous-io-for-play-applications-in-servlet-3-dot-1-containers-with-the-play2-war-plugin/">Asynchronous IO for Play! Applications in Servlet 3.1 Containers With the Play2-war Plugin</a>
       </li>
     
   </ul>
@@ -443,7 +443,7 @@ The application is not entirely treated as a black box. But most of the code is 
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Yann Simon -
+  Copyright &copy; 2016 - Yann Simon -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
