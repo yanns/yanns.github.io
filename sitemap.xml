@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://yanns.github.io/blog/2016/04/26/migrate-a-playframework-app-from-2-dot-3-to-2-dot-5/</loc>
+    <lastmod>2016-04-26T09:31:45+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://yanns.github.io/blog/2016/02/10/trampoline-execution-context-with-scala-futures/</loc>
     <lastmod>2016-02-10T21:19:33+01:00</lastmod>
   </url>

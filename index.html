@@ -9,7 +9,7 @@
   <meta name="author" content="Yann Simon">
 
   
-  <meta name="description" content="Disclaimer: I am continually learning, and this post reflects my current understanding of the topic. I may be wrong. Do not believe directly what I &hellip;">
+  <meta name="description" content="Recently I migrated several play applications from the version 2.3 to the version 2.5. As this experience may interest other people, I decided to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,190 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/26/migrate-a-playframework-app-from-2-dot-3-to-2-dot-5/">Migrate a Playframework App From 2.3 to 2.5</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-26T09:31:45+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Recently I migrated several <a href="https://www.playframework.com/">play</a> applications from the version 2.3 to the version 2.5.</p>
+
+<p>As this experience may interest other people, I decided to write about it.</p>
+
+<p>So let&rsquo;s start!</p>
+
+<h1><a href="#migrate-from-2.3-to-2.4">§</a> <a name="migrate-from-2.3-to-2.4"></a> Migration from 2.3 to 2.4</h1>
+
+<p>First, we will migrate the application from the version 2.3 to the version 2.4.</p>
+
+<p>For that, the <a href="https://www.playframework.com/documentation/latest/Migration24">migration guide</a> will be our reference.</p>
+
+<p>How do I proceed?</p>
+
+<h3><a href="#update-sbt-config">1.</a> <a name="update-sbt-config"></a> Update the sbt config to play 2.4</h3>
+
+<p>First, I update the SBT configuration:</p>
+
+<ul>
+<li>update the play version in <code>project/plugins.sbt</code>:</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.10")
+</span><span class='line'>+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.6")</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>if needed, update the sbt version in <code>project/build.properties</code>:</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sbt.version=0.13.11</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>update the <code>build.sbt</code>:</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-import PlayKeys._
+</span><span class='line'>+import play.sbt.PlayImport._</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I also add to replace <code>playVersion.value</code> with <code>play.core.PlayVersion.current</code></p>
+
+<p>The goal of this first step is to be able to load the application with <code>sbt</code>, even if the application itself does not compile. At this point, Intellij can load the application with a play 2.4 version, and can provide auto-completion.</p>
+
+<h3><a href="#fix-compilation">2.</a> <a name="fix-compilation"></a> Fix compilation errors</h3>
+
+<p>Then, I fix the compilation</p>
+
+<p>Inside sbt, I just trigger the compilation:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~compile</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and fix all compilation errors. The play team has made a very good job at documenting all steps in the <a href="https://www.playframework.com/documentation/latest/Migration24">migration guide</a>.</p>
+
+<p>At this point, I just want the application to compile with the minimal number of changes. I do not care if I use deprecated APIs.</p>
+
+<h3><a href="#run-application">3.</a> <a name="run-application"></a> Run the application</h3>
+
+<p>When all compilation errors are fixed, I just make sure that the application can run:</p>
+
+<p>In sbt:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~run</span></code></pre></td></tr></table></div></figure>
+
+
+<p>At this point, I sometimes discovered version conflicts between libs (ex: Netty versions) and I know if I can complete the migration or if I have to update a dependency before.</p>
+
+<p>Analysing all dependencies can be difficult.
+I use the <a href="https://github.com/jrudolph/sbt-dependency-graph">sbt-dependency-graph</a> to find overriding versions.</p>
+
+<h3><a href="#fix-tests">4.</a> <a name="fix-tests"></a> Fix the tests</h3>
+
+<p>Then I fix all compilation errors in the tests, and then check that the tests are successful.</p>
+
+<p>In sbt:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~testQuick</span></code></pre></td></tr></table></div></figure>
+
+
+<p>When all the tests are green, the application is migrated.</p>
+
+<h3><a href="#remove-deprecated-usages">5.</a> <a name="remove-deprecated-usages"></a> Remove all usages of deprecated API</h3>
+
+<p>Now it is time to clean our application and to fix all code using a deprecated API.</p>
+
+<p>I use the Scala API, and I prefer not to use any runtime dependency injection framework.</p>
+
+<p>I introduced the so-called <a href="https://www.playframework.com/documentation/2.5.x/ScalaCompileTimeDependencyInjection"><em>compile time dependency injection</em></a> to simply instantiate my controllers in one application loader.</p>
+
+<p>For more info about this topic, please refer to:</p>
+
+<ul>
+<li><a href="http://de.slideshare.net/yann_s/play-24dimacwire">my talk about it</a> at the <a href="/blog/2015/05/20/di-with-play-2-dot-4/">play meetup</a></li>
+<li><a href="http://loicdescotte.github.io/posts/play24-compile-time-di/">this great post from Loïc Descotte</a></li>
+</ul>
+
+
+<h1><a href="#migrate-from-2.4-to-2.5">§</a> <a name="migrate-from-2.4-to-2.5"></a> Migration from 2.4 to 2.5</h1>
+
+<p>For that, the <a href="https://www.playframework.com/documentation/latest/Migration25">migration guide</a> will be our reference.</p>
+
+<p>same steps as before:</p>
+
+<ul>
+<li><a href="#update-sbt-config">update the sbt config</a>, but to play 2.5:</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.6")
+</span><span class='line'>+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.2")</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="#fix-compilation">fix the compilation errors</a>, like in application loader:</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-    Logger.configure(context.environment)
+</span><span class='line'>+    LoggerConfigurator(context.environment.classLoader).foreach { _.configure(context.environment) }</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="#run-application">run the application</a></li>
+<li><a href="#fix-tests">fix the tests</a></li>
+<li><a href="#remove-deprecated-usages">clean up the application</a><br>
+For example, I can remove the <code>InjectedRoutesGenerator</code> as it is now the default.</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-routesGenerator := InjectedRoutesGenerator</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -428,7 +612,7 @@ This trampoline execution context is a great piece of software:</p>
 <ul>
 <li><p>from Micheal: runtime DI in Java with <a href="https://github.com/google/guice">Guice</a>, the default framework introduced in play 2.4: <a href="https://github.com/schleichardt/play-2-4-di-talk">https://github.com/schleichardt/play-2-4-di-talk</a></p></li>
 <li><p>from <a href="https://twitter.com/easyangel">Oleg</a>: runtime DI in Scala with <a href="http://scaldi.org/">Scaldi</a>: <a href="http://scaldi.github.io/scaldi-play-2.4.0-presentation/">http://scaldi.github.io/scaldi-play-2.4.0-presentation/</a></p></li>
-<li><p>compile-time DI in Scala with constructor arguments or <a href="https://github.com/adamw/macwire">MacWire</a>: <a href="http://de.slideshare.net/yann_s/play-24dimacwire.">http://de.slideshare.net/yann_s/play-24dimacwire.</a> For that talk, I re-used the TBA application I used at the <a href="http://localhost:4000/blog/2014/02/17/ping-conf-2014/">Ping Conf</a> last year and added a version using MacWire: <a href="https://github.com/yanns/TPA/tree/master/frontend/TBA_macwire">https://github.com/yanns/TPA/tree/master/frontend/TBA_macwire</a></p></li>
+<li><p>compile-time DI in Scala with constructor arguments or <a href="https://github.com/adamw/macwire">MacWire</a>: <a href="http://de.slideshare.net/yann_s/play-24dimacwire">http://de.slideshare.net/yann_s/play-24dimacwire</a>. For that talk, I re-used the TBA application I used at the <a href="/blog/2014/02/17/ping-conf-2014/">Ping Conf</a> last year and added a version using MacWire: <a href="https://github.com/yanns/TPA/tree/master/frontend/TBA_macwire">https://github.com/yanns/TPA/tree/master/frontend/TBA_macwire</a></p></li>
 </ul>
 
 </div>
@@ -1822,145 +2006,6 @@ And I guess it will be even easier in the future.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/02/17/ping-conf-2014/">Ping Conf 2014</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-02-17T16:49:00+01:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In January, I had the pleasure to participate and give a talk at the <a href="http://www.ping-conf.com/">ping conf</a>.</p>
-
-<p>Ping conf was the first world wide community conference about the <a href="http://www.playframework.com/">Play Framework!</a>.</p>
-
-<p>This conference was very well organized. I&rsquo;d like to thank all the organizers one more time for this.
-It was a good opportunity to meet people I only knew online from the mailing list or on twitter.</p>
-
-<p>The talks were very interesting. Some notices:</p>
-
-<h4>&ldquo;Javascript functionality coming to Play 2.3&rdquo; from <a href="https://twitter.com/huntchr">Christopher Hunt</a></h4>
-
-<p>Typesafe take the JavaScript build chain very seriously and the new <a href="https://github.com/sbt/sbt-web">sbt-web</a> offers a lot of new functionalities.
-IMO, one of the most important is the possibility to use NodeJS as JavaScript engine. The performance of the JavaScript build pipeline in Play is similar or even better than the ones based on NodeJS (like Grunt or Gulp)<br/>
-<a href="http://huntc.github.io/sbt-web-presentation/#/step-1">slides</a></p>
-
-<h4>&ldquo;Typesafing your blobs with Scala&rdquo; from <a href="https://twitter.com/skaalf">Julien Tournay</a> and <a href="https://twitter.com/mandubian/">Pascal Voitot</a></h4>
-
-<p>Julien and Pascal show us the new <a href="https://github.com/jto/Play20/tree/new_validation_api/documentation/manual/scalaGuide/main/validation">validation API</a>, unifying the Form and JSON validation.
-This new API should appear in Play 2.3.<br/>
-<a href="http://jto.github.io/articles/play_new_validation_api/">More info</a><br/>
-<a href="https://docs.google.com/presentation/d/1bc4437zIO3dUD0cYoSFDbNjrSErY3soURfE5QUErbgw/pub?start=false&amp;loop=false&amp;delayms=3000#slide=id.g11c889a6e_23">slides</a></p>
-
-<h4>&ldquo;Writing a reactive web app with Scala.js and ReactJS&rdquo; from <a href="https://twitter.com/matthiasnehlsen">Matthias Nehlsen</a></h4>
-
-<p>Matthias, famous for his <a href="http://matthiasnehlsen.com/">blog</a> and his <a href="http://birdwatch.matthiasnehlsen.com/">realtime reactive tweet analysing application</a> talked about the <a href="http://facebook.github.io/react/">ReactJS UI library</a> combined with <a href="http://www.scala-js.org/">ScalaJS</a>.
-These two tools can be well combined. ReactJS like immutable data structure, that ScalaJS can provide.</p>
-
-<h4>&ldquo;Play2 and Redis : when simplicity meets productivity&rdquo; from <a href="https://twitter.com/nmartignole">Nicolas Martignole</a></h4>
-
-<p>Nicolas talked about his experience with Redis and Play. This combination is looking very simple and performant.</p>
-
-<h4>&ldquo;Building composable, streaming, testable Play apps&rdquo; from <a href="https://twitter.com/brikis98">Yevgeniy Brikman</a></h4>
-
-<p>The &ldquo;Jim&rdquo; from LinkedIn talked about how to compose web pages together, using the <a href="https://www.facebook.com/note.php?note_id=389414033919">Facebook&rsquo;s BigPipe concept</a>.
-Very interesting way to decompose a web site into small web components.<br/>
-<a href="http://de.slideshare.net/brikis98/composable-and-streamable-play-apps">slides</a></p>
-
-<h4>&ldquo;Play is for Performance&rdquo; from <a href="https://twitter.com/jroper">James Roper</a>, tech lead for Play! framework</h4>
-
-<p>Very interesting talk about how to optimize (or not) an asynchronous Play! application.<br/>
-<a href="https://github.com/jroper/play-is-for-performance">slides as Play! application</a> (simply check it out and start the Play! application, it is very impressive)</p>
-
-<h4>&ldquo;Making the case for Play&rdquo; from <a href="https://twitter.com/ajevans85">Adam Evans</a> and <a href="https://twitter.com/asherglynn">Asher Glynn</a>, BBC</h4>
-
-<p>Adam and Asher talked about pushing change within an organization like the BBC, how they introduced the Play Framework!<br/>
-<a href="http://pt.slideshare.net/ajevans/making-the-30191542">slides</a></p>
-
-<h4><a href="https://twitter.com/grantklopper">Grant Klopper</a>, Software engineer at The Guardian.</h4>
-
-<p>Grant made a change during the talk and push it into production, very impressive.</p>
-
-<h4><a href="https://twitter.com/tobnee">Tobias Neef</a></h4>
-
-<p>Tobias talk about action composition and filter in Play, when to use the first ones and when to use the others.</p>
-
-<h4>&ldquo;Async: Reacting instead of waiting for better times&rdquo; from <a href="https://twitter.com/apnylle">Johan Andrén</a></h4>
-
-<p>Johan talk about asynchronous programming and how it works with Play. A very good introduction!<br/>
-<a href="http://de.slideshare.net/johanandren/async-react-dont-wait-ping-conf">slides</a></p>
-
-<hr/>
-
-
-<p>My talk was about &ldquo;Structure your Play application with the cake pattern (and test it)&rdquo;</p>
-
-<p>I talked about how to organize a Play! application written in Scala into components with the cake pattern.
-The main goal of these components is to encaspulate and expose services only to others components, and to declare dependencies if needed.</p>
-
-<p>As a side effect, the cake pattern allows to inject dependencies at compile time.
-A particularity of this &ldquo;dependency injection&rdquo; mechanism is that it does not need any container like Spring or Guice at runtime.</p>
-
-<p><a href="http://www.ustream.tv/recorded/42775808">Video of my talk &ldquo;Structure your Play application with the cake pattern (and test it)&rdquo;</a><br/>
-<a href="http://de.slideshare.net/yann_s/play-withcake-export2">slides</a></p>
-
-<p>I had great feedbacks, like these ones:<br/></p>
-
-<blockquote><p>Leanovate Software Engineer Yann Simon gives the best presentation on the cake pattern I’ve ever seen.</p><footer><strong>Gilt,</strong> <cite><a href='http://tech.gilt.com/post/74733533436/a-few-things-about-ping-a-play-framework-conference'>tech.gilt.com/post/74733533436/&hellip;</a></cite></footer></blockquote>
-
-
-<blockquote><p>it was great that Yann pointed out the disadvantages as well every step along the way and made it clear how far it’s worth going in various cases.</p><footer><strong>Csaba Palfi,</strong> <cite><a href='http://csaba.palfi.me/ping-conf-day-1/'>csaba.palfi.me/ping-conf-day-1/&hellip;</a></cite></footer></blockquote>
-
-
-<blockquote><p>Currently talking, is astounding the audience with live baking an application, slam dunk videos feat. Sulley - of Monsters fame - and hand drawn presentation slides!</p><footer><strong>kinja,</strong> <cite><a href='http://pingconference.kinja.com/yann-simon-1502530900'>pingconference.kinja.com/&hellip;</a></cite></footer></blockquote>
-
-
-<blockquote><p>All this was presented using funny monster videos and a French-German accent.</p><footer><strong>Marius Soutier,</strong> <cite><a href='http://www.mariussoutier.com/blog/2014/01/20/ping-conference-play-edition-day-1/'>www.mariussoutier.com/blog/2014/&hellip;</a></cite></footer></blockquote>
-
-
-
-
-<blockquote class="twitter-tweet" lang="en"><p>the infamous Totoro-defense! <a href="https://twitter.com/search?q=%23pingconf&amp;src=hash">#pingconf</a> <a href="http://t.co/EnJhauj8tw">pic.twitter.com/EnJhauj8tw</a></p>&mdash; serif (@_serif) <a href="https://twitter.com/_serif/statuses/423793818857930752">January 16, 2014</a></blockquote>
-
-
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-
-<p>Thanks everybody!</p>
-
-<hr/>
-
-
-<p>Some people saw that I was using my phone to controll the slideshow during the talk and asked me how I did that.
-I was simply using <a href="https://www.libreoffice.org/">LibreOffice Impress</a> for my slides. I controlled the slideshow with <a href="https://play.google.com/store/apps/details?id=org.libreoffice.impressremote&amp;hl=en">Impress Remote app</a> installed on my phone.
-It works very well. The app displays the duration of your talk, the current, previous and next slide.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="2">&larr; Older</a>
@@ -1976,6 +2021,10 @@ It works very well. The app displays the duration of your talk, the current, pre
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/26/migrate-a-playframework-app-from-2-dot-3-to-2-dot-5/">Migrate a Playframework App From 2.3 to 2.5</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/02/10/trampoline-execution-context-with-scala-futures/">Trampoline Execution Context With Scala Futures</a>
       </li>
     
@@ -1989,10 +2038,6 @@ It works very well. The app displays the duration of your talk, the current, pre
     
       <li class="post">
         <a href="/blog/2015/05/20/di-with-play-2-dot-4/">DI With Play 2.4</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/11/10/goto-conference-2014/">Goto Conference 2014</a>
       </li>
     
   </ul>
