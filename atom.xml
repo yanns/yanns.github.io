@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2016-04-26T17:07:55+02:00</updated>
+  <updated>2016-04-27T08:41:30+02:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -67,7 +67,7 @@
 </span><span class='line'>+import play.sbt.PlayImport._</span></code></pre></td></tr></table></div></figure>
 
 
-<p>I also add to replace <code>playVersion.value</code> with <code>play.core.PlayVersion.current</code></p>
+<p>I also had to replace <code>playVersion.value</code> with <code>play.core.PlayVersion.current</code>.</p>
 
 <p>The goal of this first step is to be able to load the application with <code>sbt</code>, even if the application itself does not compile. At this point, Intellij can load the application with a play 2.4 version, and can provide auto-completion.</p>
 
@@ -95,10 +95,10 @@
 </pre></td><td class='code'><pre><code class=''><span class='line'>~run</span></code></pre></td></tr></table></div></figure>
 
 
-<p>At this point, I sometimes discovered version conflicts between libs (ex: Netty versions) and I know if I can complete the migration or if I have to update a dependency before.</p>
+<p>When running the application, I sometimes discovered version conflicts between libs (ex: Netty versions) and I know if I can complete the migration or if I have to update a dependency before.</p>
 
 <p>Analysing all dependencies can be difficult.
-I use the <a href="https://github.com/jrudolph/sbt-dependency-graph">sbt-dependency-graph</a> to find overriding versions.</p>
+I use the <a href="https://github.com/jrudolph/sbt-dependency-graph">sbt-dependency-graph</a> to have an overview of all dependencies and find overriding versions.</p>
 
 <h3><a href="#fix-tests">4.</a> <a name="fix-tests"></a> Fix the tests</h3>
 
@@ -110,11 +110,14 @@ I use the <a href="https://github.com/jrudolph/sbt-dependency-graph">sbt-depende
 </pre></td><td class='code'><pre><code class=''><span class='line'>~testQuick</span></code></pre></td></tr></table></div></figure>
 
 
-<p>When all the tests are green, the application is migrated.</p>
+<p>When all the tests are green, the application is migrated.
+The migration to play 2.4 is now completed, profit from the new version! ;)</p>
 
 <h3><a href="#remove-deprecated-usages">5.</a> <a name="remove-deprecated-usages"></a> Remove all usages of deprecated API</h3>
 
 <p>Now it is time to clean our application and to fix all code using a deprecated API.</p>
+
+<p>This clean up can be done step by step.</p>
 
 <p>I use the Scala API, and I prefer not to use any runtime dependency injection framework.</p>
 
@@ -128,11 +131,13 @@ I use the <a href="https://github.com/jrudolph/sbt-dependency-graph">sbt-depende
 </ul>
 
 
+<p>This cleanup is necessary before updating to play 2.5, as deprecated API are likely to be removed in the next version.</p>
+
 <h1><a href="#migrate-from-2.4-to-2.5">§</a> <a name="migrate-from-2.4-to-2.5"></a> Migration from 2.4 to 2.5</h1>
 
 <p>For that, the <a href="https://www.playframework.com/documentation/latest/Migration25">migration guide</a> will be our reference.</p>
 
-<p>same steps as before:</p>
+<p>The migrate follow the same steps as <a href="http://yanns.github.io/#migrate-from-2.3-to-2.4">the previous migration</a>:</p>
 
 <ul>
 <li><a href="#update-sbt-config">update the sbt config</a>, but to play 2.5:</li>
