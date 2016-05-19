@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2016-04-27T08:41:30+02:00</updated>
+  <updated>2016-05-19T20:44:12+02:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -14,10 +14,13 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Migrate a Playframework App From 2.3 to 2.5]]></title>
+    
+    <title type="html"><![CDATA[migrate a playframework app from 2.3 to 2.5]]></title>
     <link href="http://yanns.github.io/blog/2016/04/26/migrate-a-playframework-app-from-2-dot-3-to-2-dot-5/"/>
+    
     <updated>2016-04-26T09:31:45+02:00</updated>
     <id>http://yanns.github.io/blog/2016/04/26/migrate-a-playframework-app-from-2-dot-3-to-2-dot-5</id>
+    
     <content type="html"><![CDATA[<p>Recently I migrated several <a href="https://www.playframework.com/">play</a> applications from the version 2.3 to the version 2.5.</p>
 
 <p>As this experience may interest other people, I decided to write about it.</p>
@@ -173,13 +176,17 @@ For example, I can remove the <code>InjectedRoutesGenerator</code> as it is now 
 </pre></td><td class='code'><pre><code class=''><span class='line'>-routesGenerator := InjectedRoutesGenerator</span></code></pre></td></tr></table></div></figure>
 
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Trampoline Execution Context With Scala Futures]]></title>
+    
+    <title type="html"><![CDATA[trampoline execution context with scala Futures]]></title>
     <link href="http://yanns.github.io/blog/2016/02/10/trampoline-execution-context-with-scala-futures/"/>
+    
     <updated>2016-02-10T21:19:33+01:00</updated>
     <id>http://yanns.github.io/blog/2016/02/10/trampoline-execution-context-with-scala-futures</id>
+    
     <content type="html"><![CDATA[<p>Disclaimer: I am continually learning, and this post reflects my current understanding of the topic. I may be wrong. Do not believe directly what I write. Test what you need. If you want to provide some precisions or corrections, please contact me on <a href="https://twitter.com/simon_yann">twitter</a>, and I&rsquo;ll fix this post.</p>
 
 <p><a href="https://twitter.com/runarorama">Rúnar</a> showed in a <a href="http://blog.higher-order.com/blog/2015/06/18/easy-performance-wins-with-scalaz/">blog post how Scalaz Tasks can perform better than the Scala Futures</a>.</p>
@@ -345,13 +352,17 @@ This trampoline execution context is a great piece of software:</p>
 
 <p>If you want to try this yourself, the <a href="https://github.com/yanns/trampoline-EC">code is on github</a>.</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Review of Essential Slick (for Slick 3.0)]]></title>
+    
+    <title type="html"><![CDATA[review of Essential Slick (for Slick 3.0)]]></title>
     <link href="http://yanns.github.io/blog/2015/12/07/review-of-essential-slick/"/>
+    
     <updated>2015-12-07T18:00:36+01:00</updated>
     <id>http://yanns.github.io/blog/2015/12/07/review-of-essential-slick</id>
+    
     <content type="html"><![CDATA[<p>I had the pleasure to review the book &ldquo;<a href="http://underscore.io/books/essential-slick/">Essential Slick</a>&rdquo; about <a href="http://slick.typesafe.com/">Slick 3</a>.</p>
 
 <p>I really enjoyed reading it. For anyone starting a project with Slick, I highly recommend this book, in particular to learn about:</p>
@@ -390,13 +401,17 @@ This trampoline execution context is a great piece of software:</p>
 
 <p>All in all, a very good book!</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Play Framework Meetup in Berlin in November 2015]]></title>
+    
+    <title type="html"><![CDATA[play framework meetup in Berlin in November 2015]]></title>
     <link href="http://yanns.github.io/blog/2015/11/17/introduction-to-type-classes-in-scala/"/>
+    
     <updated>2015-11-17T21:43:55+01:00</updated>
     <id>http://yanns.github.io/blog/2015/11/17/introduction-to-type-classes-in-scala</id>
+    
     <content type="html"><![CDATA[<p>During the <a href="http://www.meetup.com/Play-Berlin-Brandenburg/events/226561633/">play framework meetup in Berlin in November 2015</a>:</p>
 
 <h2>for a better workflow between designers and developers</h2>
@@ -421,13 +436,17 @@ This trampoline execution context is a great piece of software:</p>
 
 <p>Step by step, I explained how the Json Reads/Writes/Formats work in the <a href="https://www.playframework.com/documentation/2.4.x/ScalaJson">scala API of the play framework</a>.</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[DI With Play 2.4]]></title>
+    
+    <title type="html"><![CDATA[DI with play 2.4]]></title>
     <link href="http://yanns.github.io/blog/2015/05/20/di-with-play-2-dot-4/"/>
+    
     <updated>2015-05-20T23:01:57+02:00</updated>
     <id>http://yanns.github.io/blog/2015/05/20/di-with-play-2-dot-4</id>
+    
     <content type="html"><![CDATA[<p>During the <a href="http://www.meetup.com/Play-Berlin-Brandenburg/events/222130013/">play framework meetup in Mai 2015</a>, there were 3 talks about Dependency Injection (DI) in Play 2.4:</p>
 
 <ul>
@@ -437,13 +456,17 @@ This trampoline execution context is a great piece of software:</p>
 </ul>
 
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Goto Conference 2014]]></title>
+    
+    <title type="html"><![CDATA[goto conference 2014]]></title>
     <link href="http://yanns.github.io/blog/2014/11/10/goto-conference-2014/"/>
+    
     <updated>2014-11-10T10:33:59+01:00</updated>
     <id>http://yanns.github.io/blog/2014/11/10/goto-conference-2014</id>
+    
     <content type="html"><![CDATA[<p>My notes from the <a href="http://gotocon.com/berlin-2014">goto conference Berlin 2014</a>:</p>
 
 <h2>Thursday</h2>
@@ -540,13 +563,17 @@ Just do not forget that &ldquo;containers do not contain&rdquo; -> no complete s
 <p>Gojko Adzic really thinks agile. Good presentation of how to make better user stories.<br/>
 Do not describe a desired behavior but a behavior change.</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Asynchronous IO for Play! Applications in Servlet 3.1 Containers With the Play2-war Plugin]]></title>
+    
+    <title type="html"><![CDATA[asynchronous IO for Play! applications in servlet 3.1 containers with the play2-war plugin]]></title>
     <link href="http://yanns.github.io/blog/2014/08/10/complete-asynchronous-io-for-play-applications-in-servlet-3-dot-1-containers-with-the-play2-war-plugin/"/>
+    
     <updated>2014-08-10T18:55:36+02:00</updated>
     <id>http://yanns.github.io/blog/2014/08/10/complete-asynchronous-io-for-play-applications-in-servlet-3-dot-1-containers-with-the-play2-war-plugin</id>
+    
     <content type="html"><![CDATA[<p>A <a href="http://playframework.com/">Play application</a> does not need any container and <a href="http://playframework.com/documentation/2.3.x/Production">runs directly in production</a>.</p>
 
 <p>However some organizations prefer to run play applications within a servlet container and can use for this the <a href="https://github.com/play2war/play2-war-plugin">WAR Plugin</a>.</p>
@@ -624,13 +651,17 @@ I&rsquo;d like to thank <a href="https://twitter.com/jroper">James Roper</a> and
 
 <p>All in all it was a great experience to contribute to the WAR Plugin, and I hope my work will be useful for others.</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Enlarge Your Test Scope]]></title>
+    
+    <title type="html"><![CDATA[enlarge your test scope]]></title>
     <link href="http://yanns.github.io/blog/2014/05/30/enlarge-your-test-scope/"/>
+    
     <updated>2014-05-30T22:00:22+02:00</updated>
     <id>http://yanns.github.io/blog/2014/05/30/enlarge-your-test-scope</id>
+    
     <content type="html"><![CDATA[<p>At the beginning at the year, I had the chance to present <a href="blog/2014/02/17/ping-conf-2014/">how to organize a play application with the Cake pattern</a> at <a href="http://www.ping-conf.com/">Ping Conf</a>.
 I showed how this pattern enable designing the application as components, how to reduce visibility of specific gateway&rsquo;s model only to components that need it. One side-effect of the cake pattern is that it allows a dependency injection resolved at compilation time.</p>
 
@@ -845,13 +876,17 @@ The application is not entirely treated as a black box. But most of the code is 
 
 <p>And I could deeply change the code with almost no impact on the tests. ;)</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[SLF4J Mapped Diagnostic Context (MDC) With Play Framework]]></title>
+    
+    <title type="html"><![CDATA[SLF4J Mapped Diagnostic Context (MDC) with play framework]]></title>
     <link href="http://yanns.github.io/blog/2014/05/04/slf4j-mapped-diagnostic-context-mdc-with-play-framework/"/>
+    
     <updated>2014-05-04T11:45:52+02:00</updated>
     <id>http://yanns.github.io/blog/2014/05/04/slf4j-mapped-diagnostic-context-mdc-with-play-framework</id>
+    
     <content type="html"><![CDATA[<p>I&rsquo;d like the share with this post one solution I found to use a Mapped Diagnostic Context (MDC) in an asynchronous environment like the play framework.</p>
 
 <h2>Edit (September 2014)</h2>
@@ -1360,13 +1395,17 @@ We must define a custom <code>ActionBuilder</code> that uses our new <code>Execu
 
 <p>With each of these customizations, we are now able to use the Mapped Diagnostic Context (MDC) with asynchronous actions written in Scala.</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Server Side Rendering for JavaScript ReactJS Framework]]></title>
+    
+    <title type="html"><![CDATA[Server side rendering for JavaScript ReactJS framework]]></title>
     <link href="http://yanns.github.io/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework/"/>
+    
     <updated>2014-03-15T09:44:00+01:00</updated>
     <id>http://yanns.github.io/blog/2014/03/15/server-side-rendering-for-javascript-reactjs-framework</id>
+    
     <content type="html"><![CDATA[<h2>Flicker effect with JavaScript applications</h2>
 
 <p>A lot of web applications are nowadays build with a JavaScript framework, rendering the HTML in the browser (client side).
@@ -1686,13 +1725,17 @@ And I guess it will be even easier in the future.</p>
 
 <p>If you need more information, the <a href="https://github.com/yanns/play-react">code is available on github</a>.</p>
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Ping Conf 2014]]></title>
+    
+    <title type="html"><![CDATA[ping conf 2014]]></title>
     <link href="http://yanns.github.io/blog/2014/02/17/ping-conf-2014/"/>
+    
     <updated>2014-02-17T16:49:00+01:00</updated>
     <id>http://yanns.github.io/blog/2014/02/17/ping-conf-2014</id>
+    
     <content type="html"><![CDATA[<p>In January, I had the pleasure to participate and give a talk at the <a href="http://www.ping-conf.com/">ping conf</a>.</p>
 
 <p>Ping conf was the first world wide community conference about the <a href="http://www.playframework.com/">Play Framework!</a>.</p>
@@ -1798,13 +1841,17 @@ A particularity of this &ldquo;dependency injection&rdquo; mechanism is that it 
 I was simply using <a href="https://www.libreoffice.org/">LibreOffice Impress</a> for my slides. I controlled the slideshow with <a href="https://play.google.com/store/apps/details?id=org.libreoffice.impressremote&amp;hl=en">Impress Remote app</a> installed on my phone.
 It works very well. The app displays the duration of your talk, the current, previous and next slide.</p>
 ]]></content>
+    
   </entry>
   
   <entry>
+    
     <title type="html"><![CDATA[DevOpsDays Berlin 2013]]></title>
     <link href="http://yanns.github.io/blog/2013/05/08/devopsdays-berlin-2013/"/>
+    
     <updated>2013-05-08T12:47:00+02:00</updated>
     <id>http://yanns.github.io/blog/2013/05/08/devopsdays-berlin-2013</id>
+    
     <content type="html"><![CDATA[<p>direct from DevOpsDay Berlin 2013, my notices:</p>
 
 <p><a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/program/">Program</a>
@@ -1889,13 +1936,17 @@ Liquibase is used to deploy a version to a database.</li>
 </ul>
 
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[G+ or Blog?]]></title>
+    
+    <title type="html"><![CDATA[G+ or blog?]]></title>
     <link href="http://yanns.github.io/blog/2012/08/20/g-plus-or-blog/"/>
+    
     <updated>2012-08-20T06:17:00+02:00</updated>
     <id>http://yanns.github.io/blog/2012/08/20/g-plus-or-blog</id>
+    
     <content type="html"><![CDATA[<p>Why having opened a blog, while I regularly post on G+?</p>
 
 <p>I like posting on G+, it fells spontaneous.</p>
@@ -1918,13 +1969,17 @@ It is possible that I move this blog to another platform if I am not happy with 
 
 
 ]]></content>
+    
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Handling Data Streams With Play2 and Server-Send Events]]></title>
+    
+    <title type="html"><![CDATA[Handling data streams with Play2 and Server-Send Events]]></title>
     <link href="http://yanns.github.io/blog/2012/08/12/handling-data-streams-with-play2-and-server-send-events/"/>
+    
     <updated>2012-08-12T09:42:00+02:00</updated>
     <id>http://yanns.github.io/blog/2012/08/12/handling-data-streams-with-play2-and-server-send-events</id>
+    
     <content type="html"><![CDATA[<h2 id="Handling-data-streams"><a href="#Handling-data-streams">Handling data streams</a></h2>
 
 
@@ -2104,6 +2159,7 @@ You can see the result on Heroku: <a href="http://wiki-growth.herokuapp.com/">ht
 The code source is available on github: <a href="https://github.com/yanns/play2-wiki-growth-sse">https://github.com/yanns/play2-wiki-growth-sse</a><br/>
 You can run it by yourself with Play and let heroku sleeping.</p>
 ]]></content>
+    
   </entry>
   
 </feed>
