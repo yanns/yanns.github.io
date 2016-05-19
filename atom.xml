@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2016-05-19T20:44:12+02:00</updated>
+  <updated>2016-05-19T21:00:03+02:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -12,6 +12,27 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    
+    <title type="html"><![CDATA[graphql meetup in Berlin]]></title>
+    <link href="http://yanns.github.io/blog/2016/05/19/graphql-meetup-in-berlin/"/>
+    
+    <updated>2016-05-19T20:49:15+02:00</updated>
+    <id>http://yanns.github.io/blog/2016/05/19/graphql-meetup-in-berlin</id>
+    
+    <content type="html"><![CDATA[<p>Honeypot organized the first meetup about <a href="http://graphql.org/">GraphQL</a> in Berlin and I had the pleasure to be invited to talk about my experience.</p>
+
+<p>My topic was <a href="http://www.slideshare.net/yann_s/performance-optimisation-with-graphql">Performance optimisation with GraphQL</a>.</p>
+
+<p>You can find the <a href="http://blog.honeypot.io/honeypot-tech-meetup-graphql/">slides for the other talks here</a>.</p>
+
+<p><img src="http://yanns.github.io/images/graphql-meetup-1.jpg"></p>
+
+<p><img src="http://yanns.github.io/images/graphql-meetup-2.jpg"></p>
+]]></content>
+    
+  </entry>
   
   <entry>
     

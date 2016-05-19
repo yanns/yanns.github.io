@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://yanns.github.io/blog/2016/05/19/graphql-meetup-in-berlin/</loc>
+    <lastmod>2016-05-19T20:49:15+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://yanns.github.io/blog/2016/04/26/migrate-a-playframework-app-from-2-dot-3-to-2-dot-5/</loc>
     <lastmod>2016-04-26T09:31:45+02:00</lastmod>
   </url>
@@ -85,8 +89,5 @@
   </url>
   <url>
     <loc>http://yanns.github.io/blog/categories/play2-war-plugin/</loc>
-  </url>
-  <url>
-    <loc>http://yanns.github.io/posts/2/</loc>
   </url>
 </urlset>
