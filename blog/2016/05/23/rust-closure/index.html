@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rust Closure - yann's Blog</title>
+  <meta name="author" content="Yann Simon">
+
+  
+  <meta name="description" content="I am learning Rust and, as a beginner, I have sometimes problems achieving some little tasks that would be so easy in other programming languages I &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://yanns.github.io/blog/2016/05/23/rust-closure">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="yann's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+  
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner">
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:yanns.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+  
+    
+      <h1 class="entry-title">Rust Closure</h1>
+    
+  
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-05-23T21:47:00+02:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I am learning <a href="https://www.rust-lang.org/">Rust</a> and, as a beginner, I have sometimes problems achieving some little tasks that would be so easy in other programming languages I know better.</p>
+
+<p>But when I met some Rust developers and they ask me about my difficulties, I often forget about them.</p>
+
+<p>I therefore decided to write about my difficulties in Rust to keep track of them.</p>
+
+<p>So today about closures.</p>
+
+<p>When reading a <a href="http://fredrik.anderzon.se/2016/05/10/rust-for-node-developers-part-1-introduction/">blog post introducing Rust for Node.js Developers</a> I made the same Todo application.</p>
+
+<p>At the end, the program contains such piece of code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">fn</span> <span class="n">remove_todo</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="kd">let</span> <span class="nb">Some</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span> <span class="o">=</span> <span class="n">todos</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">().</span><span class="n">find</span><span class="p">(</span><span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">todo</span><span class="p">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">mark_done</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="kd">let</span> <span class="nb">Some</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span> <span class="o">=</span> <span class="n">todos</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">().</span><span class="n">find</span><span class="p">(</span><span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">todo</span><span class="p">.</span><span class="n">completed</span> <span class="o">=</span> <span class="k">true</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The first function marks a Todo as deleted if it can be found by its ID in the vector.
+The second function marks a Todo as completed, also if it can be found in the vector of Todos.</p>
+
+<p>Some code is duplicated and I decided to refactor the common code in a third function, that would do <em>something</em> on a Todo if found in a vector.</p>
+
+<p>This third function would take a closure as input parameter, like in pseudo-code:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">fn</span> <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">,</span> <span class="n">f</span><span class="o">:</span> <span class="o">&lt;</span><span class="n">closure</span> <span class="o">-</span> <span class="k">do</span> <span class="n">something</span> <span class="n">on</span> <span class="n">a</span> <span class="n">Todo</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="kd">let</span> <span class="nb">Some</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span> <span class="o">=</span> <span class="n">todos</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">().</span><span class="n">find</span><span class="p">(</span><span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">f</span><span class="p">(</span><span class="n">todo</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>so that the 2 initial functions are simplified like that:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">fn</span> <span class="n">remove_todo</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">mark_done</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">completed</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This closure is a side-effect on a Todo. It should accept a mutable Todo as parameter and return nothing.</p>
+
+<p>One <a href="http://rustbyexample.com/fn/closures/input_parameters.html">source of documentation for closures as input parameters</a> mentions that there exist 3 kinds of closures:</p>
+
+<ul>
+<li>Fn: takes captures by reference (<code>&amp;T</code>)</li>
+<li>FnMut: takes captures by mutable reference (<code>&amp;mut T</code>)</li>
+<li>FnOnce: takes captures by value (<code>T</code>)</li>
+</ul>
+
+
+<p>This is a lot of information for a new developer.</p>
+
+<p>I tried different possibilities, like:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">fn</span> <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">,</span> <span class="n">f</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">Todo</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="kd">let</span> <span class="nb">Some</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span> <span class="o">=</span> <span class="n">todos</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">().</span><span class="n">find</span><span class="p">(</span><span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">f</span><span class="p">(</span><span class="n">todo</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">remove_todo</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">mark_done</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">completed</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Without any success:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>cargo run
+</span><span class='line'>   Compiling todo-list v0.1.0 <span class="o">(</span>file:///Users/yannsimon/projects/rust/rust-playground/todo-list<span class="o">)</span>
+</span><span class='line'>src/main.rs:27:38: 27:50 error: the <span class="nb">type </span>of this value must be known in this context
+</span><span class='line'>src/main.rs:27    with_todo_id<span class="o">(</span>todos, todo_id, <span class="p">|</span>todo<span class="p">|</span> todo.deleted <span class="o">=</span> <span class="nb">true</span><span class="o">)</span><span class="p">;</span>
+</span><span class='line'>                                                      ^~~~~~~~~~~~
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <a href="https://doc.rust-lang.org/book/closures.html#taking-closures-as-arguments">official documentation</a> was not so much help neither.</p>
+
+<p>I asked for help on <a href="https://client00.chat.mibbit.com/?server=irc.mozilla.org&amp;channel=%23rust-beginners">#rust-beginners</a>.
+People on this channel are <strong>very</strong> helpful and kind. The community of Rust is awesome!</p>
+
+<p>I was proposed 2 solutions. Both work, and I choose that one:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">fn</span> <span class="n">with_todo_id</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">,</span> <span class="n">f</span><span class="o">:</span> <span class="n">P</span><span class="p">)</span> <span class="n">where</span> <span class="n">P</span><span class="o">:</span> <span class="n">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">Todo</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="kd">let</span> <span class="nb">Some</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span> <span class="o">=</span> <span class="n">todos</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">().</span><span class="n">find</span><span class="p">(</span><span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">f</span><span class="p">(</span><span class="n">todo</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">remove_todo</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">mark_done</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">completed</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Compared to my previous attempt, the <code>f: &amp;Fn(&amp;mut Todo)</code> is replaced by <code>f: P where P: Fn(&amp;mut Todo)</code>.</p>
+
+<p>I still do not completely understand why this works and not the previous version. I was explained Rust can use the reference to the closure&hellip; I will continue reading documentation about it&hellip;. ;)</p>
+
+<p>If you have any good source for this, please <a href="https://twitter.com/simon_yann">tell me</a>.</p>
+
+<p>In conclusion I still find closure as input parameters quite complex in Rust. I surely need to more understand the theory behind the language to fully understand them.</p>
+
+<p>The Rust community is very helpful, but it may not scale if there are more and more beginners like me.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Yann Simon</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-05-23T21:47:00+02:00" pubdate data-updated="true"></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/05/19/graphql-meetup-in-berlin/" title="Previous Post: graphql meetup in Berlin">&laquo; graphql meetup in Berlin</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo">
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
