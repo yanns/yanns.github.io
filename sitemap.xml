@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://yanns.github.io/blog/2016/05/23/rust-closure/</loc>
+    <loc>http://yanns.github.io/blog/2016/05/23/rust-closures-as-input-parameters/</loc>
     <lastmod>2016-05-23T21:47:00+02:00</lastmod>
   </url>
   <url>
@@ -93,5 +93,8 @@
   </url>
   <url>
     <loc>http://yanns.github.io/blog/categories/play2-war-plugin/</loc>
+  </url>
+  <url>
+    <loc>http://yanns.github.io/posts/2/</loc>
   </url>
 </urlset>

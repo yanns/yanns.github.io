@@ -4,7 +4,7 @@
   <title><![CDATA[yann's Blog]]></title>
   <link href="http://yanns.github.io/atom.xml" rel="self"/>
   <link href="http://yanns.github.io/"/>
-  <updated>2016-05-23T22:33:57+02:00</updated>
+  <updated>2016-05-23T22:39:57+02:00</updated>
   <id>http://yanns.github.io/</id>
   <author>
     <name><![CDATA[Yann Simon]]></name>
@@ -15,11 +15,11 @@
   
   <entry>
     
-    <title type="html"><![CDATA[Rust closure]]></title>
-    <link href="http://yanns.github.io/blog/2016/05/23/rust-closure/"/>
+    <title type="html"><![CDATA[Rust closures as input parameters]]></title>
+    <link href="http://yanns.github.io/blog/2016/05/23/rust-closures-as-input-parameters/"/>
     
     <updated>2016-05-23T21:47:00+02:00</updated>
-    <id>http://yanns.github.io/blog/2016/05/23/rust-closure</id>
+    <id>http://yanns.github.io/blog/2016/05/23/rust-closures-as-input-parameters</id>
     
     <content type="html"><![CDATA[<p>I am learning <a href="https://www.rust-lang.org/">Rust</a> and, as a beginner, I have sometimes problems achieving some little tasks that would be so easy in other programming languages I know better.</p>
 
