@@ -269,6 +269,85 @@ People on this channel are <strong>very</strong> helpful and kind. The community
 <p>In conclusion I still find closure as input parameters quite complex in Rust. I surely need to more understand the theory behind the language to fully understand them.</p>
 
 <p>The Rust community is very helpful, but it may not scale if there are more and more beginners like me.</p>
+
+<h4><a name="update-2016-05-25"></a> <a href="#update-2016-05-25"><em>Update (May 25)</em></a></h4>
+
+<p>The following <a href="https://twitter.com/rustlang/status/734946700536774656">tweet</a> from <a href="https://twitter.com/rustlang">@rustlang</a> provided me the good keywords to search for:</p>
+
+<blockquote><p>it's about trait objects vs type parameters, which can be tough when you're learning</p><footer><strong>@rustlang,</strong> <cite><a href='https://twitter.com/rustlang/status/734946700536774656'>twitter.com/rustlang/status/&hellip;</a></cite></footer></blockquote>
+
+
+<p><a href="https://doc.rust-lang.org/book/trait-objects.html">Trait objects</a> are used for <a href="https://en.wikipedia.org/wiki/Dynamic_dispatch">dynamic dispatch</a>, feature found in most OO languages.</p>
+
+<p>With that in mind, I could understand the <a href="https://doc.rust-lang.org/book/closures.html#taking-closures-as-arguments">Rust book about closures</a>.</p>
+
+<p>If I use trait objects, this version works:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">fn</span> <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">,</span> <span class="n">f</span><span class="o">:</span> <span class="o">&amp;</span><span class="n">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">Todo</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="kd">let</span> <span class="nb">Some</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span> <span class="o">=</span> <span class="n">todos</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">().</span><span class="n">find</span><span class="p">(</span><span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">f</span><span class="p">(</span><span class="n">todo</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">remove_todo</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">&amp;|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">mark_done</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">&amp;|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">completed</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Trait objects force Rust to use dynamic dispatch. For that, Rust must allocate the closure in the heap.</p>
+
+<p>If I use type parameter instead of a trait object:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='rust'><span class='line'><span class="k">fn</span> <span class="n">with_todo_id</span><span class="o">&lt;</span><span class="n">P</span><span class="o">&gt;</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">,</span> <span class="n">f</span><span class="o">:</span> <span class="n">P</span><span class="p">)</span> <span class="n">where</span> <span class="n">P</span><span class="o">:</span> <span class="n">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">Todo</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="kd">let</span> <span class="nb">Some</span><span class="p">(</span><span class="n">todo</span><span class="p">)</span> <span class="o">=</span> <span class="n">todos</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">().</span><span class="n">find</span><span class="p">(</span><span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">todo_id</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">f</span><span class="p">(</span><span class="n">todo</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">remove_todo</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">fn</span> <span class="n">mark_done</span><span class="p">(</span><span class="n">todos</span><span class="o">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">Vec</span><span class="o">&lt;</span><span class="n">Todo</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">todo_id</span><span class="o">:</span> <span class="kt">i16</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">with_todo_id</span><span class="p">(</span><span class="n">todos</span><span class="p">,</span> <span class="n">todo_id</span><span class="p">,</span> <span class="o">|</span><span class="n">todo</span><span class="o">|</span> <span class="n">todo</span><span class="p">.</span><span class="n">completed</span> <span class="o">=</span> <span class="k">true</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then Rust is able to monomorphize the closure and use static dispatch, without any heap allocation.</p>
+
+<p>Another great example of the <a href="http://blog.rust-lang.org/2015/05/11/traits.html">zero-cost abstraction</a> possible with Rust!</p>
 </div>
 
 
