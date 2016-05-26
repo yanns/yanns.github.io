@@ -317,7 +317,7 @@ People on this channel are <strong>very</strong> helpful and kind. The community
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Trait objects force Rust to use dynamic dispatch. For that, Rust must allocate the closure in the heap.</p>
+<p>Trait objects force Rust to use dynamic dispatch.</p>
 
 <p>If I use type parameter instead of a trait object:</p>
 
@@ -350,7 +350,7 @@ People on this channel are <strong>very</strong> helpful and kind. The community
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>then Rust is able to monomorphize the closure and use static dispatch, without any heap allocation.</p>
+<p>then Rust is able to monomorphize the closure and use static dispatch, and does not need any object for the dyamic dispatch.</p>
 
 <p>Another great example of the <a href="http://blog.rust-lang.org/2015/05/11/traits.html">zero-cost abstraction</a> possible with Rust!</p>
 </div>
