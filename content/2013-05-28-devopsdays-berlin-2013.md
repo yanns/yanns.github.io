@@ -9,7 +9,7 @@ direct from DevOpsDay Berlin 2013, my notices:
 <a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/program/">Program</a>
 <a target="_blank" href="http://new.livestream.com/accounts/4051563">Videos</a>
 
-<h2 id="day1"><a href="#day1">Day #1</a></h2>
+## [Day #1](#day1) {#day1}
 
 From the <a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/DevOps3.0/">presentation from Immobilienscout</a> - <i>Marcel Wolf, <a target="_blank" href="https://twitter.com/felixsperling">Felix Sperling</a></i>
 <ul>
@@ -31,7 +31,7 @@ From the <a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/p
 </ul>
 
 
-<h2 id="day2"><a href="#day2">Day #2</a></h2>
+## [Day #2](#day2) {#day2}
 
 <a target="_blank" href="http://www.devopsdays.org/events/2013-berlin/proposals/How%20the%20QA%20team%20got%20Prezi%20ready%20for%20DevOps/">How the QA team got Prezi ready for DevOps</a> - <a target="_blank" href="https://twitter.com/pneumark">Peter Neumark</a>
 <ul>

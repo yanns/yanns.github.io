@@ -69,7 +69,7 @@ The implementation of the MDC with a `ThreadLocal` cannot work with this non-blo
 Play dispatchs the jobs on different threads with a [thread pool](https://www.playframework.com/documentation/latest/ThreadPools). The Play default thread pool is an [Akka dispatcher](http://doc.akka.io/docs/akka/current/scala/dispatchers.html).
 
 To use the MDC, we provide a custom Akka `Dispatcher` that propagates the MDC from the caller's thread to the callee's one.
-{% raw %}
+
 ```scala
 package monitoring
 
@@ -161,7 +161,6 @@ class MDCPropagatingDispatcher(_configurator: MessageDispatcherConfigurator,
 
 }
 ```
-{% endraw %}
 
 #### Using a custom Akka dispatcher everywhere:
 
