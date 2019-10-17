@@ -130,7 +130,7 @@ The Rust community is very helpful, but it may not scale if there are more and m
 
 
 
-#### <a name="update-2016-05-25"></a> [_Update (May 25)_](#update-2016-05-25)
+#### [_Update (May 25)_](#update-2016-05-25) {#update-2016-05-25}
 
 The following [tweet](https://twitter.com/rustlang/status/734946700536774656) from [@rustlang](https://twitter.com/rustlang) provided me the good keywords to search for:
 
