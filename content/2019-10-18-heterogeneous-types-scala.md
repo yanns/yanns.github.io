@@ -1,9 +1,8 @@
 +++
-title = "Replacing type parameters with path dependent types to support heterogeneous types in Scala"
+title = "Supporting heterogeneous types in Scala"
 date = 2019-10-18
 path = "blog/2019/10/18/heterogeneous-types-scala/"
 +++
-
 
 # The objective
 
@@ -46,7 +45,9 @@ Then the scala compiler tries to find an instance of `Encoder[Any]` and fails to
 <iframe height="280px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=lmeb8C8/1&theme=dark&layout=h74"></iframe>
 
 
-# One solution
+# First solution: replacing type parameters with path dependent types
+
+## Introducing `ToEncode` with a path dependent type to capture the type of each element
 
 One solution is to force the scala compiler to capture the `Encoder` instance for each element, instead of using one generic `Encoder` for the whole list.
 
@@ -108,7 +109,7 @@ encode(List(1, "hello", 3))
 ```
 <iframe height="625px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=jfGglKO/1&theme=dark&layout=h74"></iframe>
 
-# Generic solution
+## Generic solution
 
 Instead of defining helper functions like `stringToEncode` or `intToEncode` for each type we need, we can also have a generic solution by building a `ToEncode` whenever we find an `Encoder` instance:
 
@@ -146,10 +147,57 @@ encode(List(1, "hello", 3))
 
 <iframe height="550px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=IMTlBrw/2&theme=dark&layout=h74"></iframe>
 
-# Disadvantage
+## Disadvantage
 
 To use this approach, we need one instance of `ToEncode` for each element in the list.
 
 Calling `encode` with a list of 500 strings will create 500 instances of `ToEncode`!
 
-If you know a better solution, please do not hesitate to tell [me](https://twitter.com/simon_yann).
+# Second solution: using value classes to encode each element
+
+After great feedback from [Travis](https://twitter.com/travisbrown/status/1186062469850112002), I could get rid of the `ToEncode` instances.
+
+Let's introduce a value class that will contain the `Json` instance for each element:
+
+```scala
+class AsJson(val json: Json) extends AnyVal
+```
+
+We use a value class to (hopefully) avoid runtime instances. A version with Dotty could use phantom type.
+
+Instead of encoding each value in the `encode` function, we encode directly when converting each element to a `AsJson`:
+
+```scala
+object AsJson {
+  implicit def toAsJson[A: Encoder](a: A): AsJson = new AsJson(Encoder[A].apply(a))
+}
+```
+
+The `encode` function has almost nothing to do except forcing the compiler to encode each element:
+
+```scala
+def encode(l: List[AsJson]): List[Json] =
+  l.map(_.json)
+```
+
+By making `AsJson.toAsJson` visible in the scope, we can now use our `encode` function with heterogeneous types:
+
+```scala
+import AsJson._
+
+encode(List("hello", "world"))
+// List[io.circe.Json] = List("hello", "world")
+
+encode(List(1, 2))
+// List[io.circe.Json] = List(1, 2)
+
+encode(List(1, "hello", 3))
+// List[io.circe.Json] = List(1, "hello", 3)
+```
+
+<iframe height="400px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=XcTtE5u/1&theme=dark&layout=h74"></iframe>
+
+
+# Feedback welcome
+
+If you know a better solution, please do not hesitate to tell [me](https://twitter.com/simon_yann/status/1185276156561506304).
