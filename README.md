@@ -10,6 +10,11 @@ Created with zola
 zola serve
 ```
 
+## publishing
+
+- push the changes in the `blog_source` branch.
+- the changes are [automatically deployed to the `master` branch](https://github.com/yanns/yanns.github.io/actions).
+
 # How this blog was setup
 
 ## install zola:
