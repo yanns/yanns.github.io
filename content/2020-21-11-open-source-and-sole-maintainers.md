@@ -52,7 +52,7 @@ Having said all that, [I looked for another maintainer for a modest library of m
 
 Additionally, we also made sure that he can publish artifacts. As a result he took care of [publishing the last release](https://github.com/leanovate/play-mockws/releases/tag/v2.8.0).
 
-I would like to thank him for jumping in. I am now feeling relieved by not being alone on this project anymore.
+@Claudio: thank you for jumping in. I am now feeling relieved by not being alone on this project anymore.
 
 # Avoid being a single point of failure
 
