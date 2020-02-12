@@ -63,3 +63,6 @@ Admittedly administrative work is needed to grant access to a new maintainer and
 Still, please go through it and do it.
 
 It will make everyone’s life much easier.
+
+---
+_Many thanks to [Tobi](https://twitter.com/tdeekens) for the review_
