@@ -1,7 +1,7 @@
 +++
 title = "Open source and sole maintainers"
 date = 2020-02-11
-path = "blog/2020/02/11/open-source-and-single-maintainers/"
+path = "blog/2020/02/11/open-source-and-sole-maintainers/"
 +++
 
 # Open source and sole maintainers
