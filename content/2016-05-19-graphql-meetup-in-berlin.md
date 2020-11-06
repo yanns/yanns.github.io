@@ -1,5 +1,5 @@
 +++
-title = "graphql meetup in Berlin"
+title = "GraphQL Meetup in Berlin"
 date = 2016-05-19
 path = "blog/2016/05/19/graphql-meetup-in-berlin/"
 +++
