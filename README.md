@@ -4,6 +4,11 @@ Source for http://yanns.github.io/
 
 Created with [zola](https://www.getzola.org/)
 
+## checkout theme
+```
+git submodule update --init
+```
+
 ## preview
 
 ```
