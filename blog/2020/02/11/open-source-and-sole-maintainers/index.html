@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Open source and sole maintainers</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>Open source and sole maintainers</h2>
+    	<div class="info">
+    		<span>4 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>11 February 2020</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<h1 id="open-source-and-sole-maintainers">Open source and sole maintainers</h1>
+<p>Last year I was in the very sad situation of <a href="https://github.com/sangria-graphql/sangria/issues/445">losing one colleague and friend, Oleg</a>.</p>
+<p>He was the creator and the maintainer of some open source libraries.</p>
+<p>Among them the famous <a href="https://sangria-graphql.org/">Sangria</a>, a scala implementation of GraphQL. This library is used by major companies, such as Twitter or the New York Times.</p>
+<p>Over the years Oleg has put a lot of time and energy into building and maintaining Sangria. He also gave many talks about it at <a href="https://www.youtube.com/watch?v=ymILgZAdfnA">different conferences</a>.</p>
+<p>After his disparition, we, his colleagues, started investigating <a href="https://github.com/sangria-graphql/sangria/issues/446">how to proceed with Sangria in the future</a>.</p>
+<p>It become apparent early that the bureaucracy involved will be very painful process. Partly due to the fact that Oleg was the only one who granted himself access to almost all his repositories hosted on Github.</p>
+<h2 id="dealing-with-github">Dealing with Github</h2>
+<p>The general procedure of dealing with GitHub during this process of transitioning the ownership is very fuzzy. It involves a lot of paperwork. At each subsequent step, we were asked for more documents than during the previous one.</p>
+<p>I will spare us all the details as I would like to focus on the current status. By now the process has been ongoing for several months. Sadly, we still do not have transitioned ownership rights of Sangria.</p>
+<h2 id="the-temporary-solution">The temporary solution</h2>
+<p>As a temporary solution, we <a href="https://github.com/sangria-graphql/sangria/issues/446#issuecomment-546281588">set up another Github organization</a>, and we had to fork all repositories.</p>
+<p>For this I would like to thank <a href="https://twitter.com/travisbrown">Travis Brown</a> who jumped in and set up the initial infrastructure.</p>
+<h2 id="dealing-with-sonatype">Dealing with Sonatype</h2>
+<p>Also Sonatype was very supportive. They were responsive and helped by granting us the <a href="https://issues.sonatype.org/browse/OSSRH-48782">rights to publish the artifacts of Sangria</a>. With these permissions, we were able to <a href="https://github.com/sangria-graphql-org/sangria/releases">release new versions</a>.</p>
+<p>Thanks again Sonatype for the support!</p>
+<h1 id="why-am-i-telling-you-that">Why am I telling you that</h1>
+<p>The point of my writings is not to blame Github! Any company follows processes in place and struggles with cases like this. If it was not Github today, it would have been another company we would be involved with.</p>
+<p>What I would however like to emphasize is how complex and time consuming it is to work with open source library when the maintainer has disappeared.</p>
+<p>Oleg’s tragic destiny is not the only cause why one cannot or do not want to maintain an open source library anymore. Many other valid reasons exist.</p>
+<p>However, if we would have prepared ourselves by setting up a few things while Oleg was still alive, the remaining steps needed would have caused far less problems and friction for all of us.</p>
+<h1 id="about-me-being-a-single-point-of-failure">About me being a single point of failure</h1>
+<p>Having said all that, <a href="https://github.com/leanovate/play-mockws/issues/66">I looked for another maintainer for a modest library of mine</a> and found <a href="https://github.com/avdv">someone</a> who stepped up for the library by reviewing and merging pull requests.</p>
+<p>Additionally, we also made sure that he can publish artifacts. As a result he took care of <a href="https://github.com/leanovate/play-mockws/releases/tag/v2.8.0">publishing the last release</a>.</p>
+<p>@Claudio: thank you for jumping in. I am now feeling relieved by not being alone on this project anymore.</p>
+<h1 id="avoid-being-a-single-point-of-failure">Avoid being a single point of failure</h1>
+<p>My main message here is: try to make sure you are not a single point of failure for your projects. Think of others using your libraries and their expectations and dependencies towards it. Onboard other maintainers early if you can and delegate some of your reponsibilities.</p>
+<p>Admittedly administrative work is needed to grant access to a new maintainer and align on the resulting expectations. Frankly, it is not a very motivating task.</p>
+<p>Still, please go through it and do it.</p>
+<p>It will make everyone’s life much easier.</p>
+<hr />
+<p><em>Many thanks to <a href="https://twitter.com/tdeekens">Tobi</a> for the review</em></p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

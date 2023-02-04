@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Talk about mongo, FS2 and reactive streams</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>Talk about mongo, FS2 and reactive streams</h2>
+    	<div class="info">
+    		<span>1 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>21 December 2021</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<p>At the <a href="https://www.meetup.com/de-DE/Scala-Berlin-Brandenburg/">scala meetup in Berlin</a>, I presented my investigation on how the <a href="https://mongodb.github.io/mongo-java-driver/">mongo java driver</a>, <a href="https://www.reactive-streams.org/">reactive streams</a> and <a href="https://fs2.io/">FS2</a> are working together.</p>
+<p>By comparing akka-stream and fs2, I could find out a difference in how many elements are asked to the reactive publisher.
+That resulted in much more mongo queries when using FS2.</p>
+<ul>
+<li><a href="https://www.slideshare.net/yann_s/fs2-mongo-reactivestreams">Slides</a></li>
+<li><a href="https://github.com/yanns/mongo-fs2">Source code</a></li>
+</ul>
+<p>This whole investigation resulted in a <a href="https://github.com/typelevel/fs2/pull/2666">new API in FS2</a>.
+With this change, FS2 is now capable of consuming a reactive stream publisher by asking more than one element at a time. When used with the mongo java driver, it results in less queries fetching each more documents.</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

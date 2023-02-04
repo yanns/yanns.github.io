@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>migrate a playframework app from 2.3 to 2.5</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>migrate a playframework app from 2.3 to 2.5</h2>
+    	<div class="info">
+    		<span>3 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>26 April 2016</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<p>Recently I migrated several <a href="https://www.playframework.com/">play</a> applications from the version 2.3 to the version 2.5.</p>
+<p>As this experience may interest other people, I decided to write about it.</p>
+<p>So let's start!</p>
+<h1 id="migration-from-2-3-to-2-4">Migration from 2.3 to 2.4</h1>
+<p>First, we will migrate the application from the version 2.3 to the version 2.4.</p>
+<p>For that, the <a href="https://www.playframework.com/documentation/latest/Migration24">migration guide</a> will be our reference.</p>
+<p>How do I proceed?</p>
+<h3 id="1-update-the-sbt-config-to-play-2-4">1. Update the sbt config to play 2.4</h3>
+<p>First, I update the SBT configuration:</p>
+<ul>
+<li>update the play version in <code>project/plugins.sbt</code>:</li>
+</ul>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>-addSbtPlugin(&quot;com.typesafe.play&quot; % &quot;sbt-plugin&quot; % &quot;2.3.10&quot;)
+</span><span>+addSbtPlugin(&quot;com.typesafe.play&quot; % &quot;sbt-plugin&quot; % &quot;2.4.6&quot;)
+</span></code></pre>
+<ul>
+<li>if needed, update the sbt version in <code>project/build.properties</code>:</li>
+</ul>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>sbt.version=0.13.11
+</span></code></pre>
+<ul>
+<li>update the <code>build.sbt</code>:</li>
+</ul>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>-import PlayKeys._
+</span><span>+import play.sbt.PlayImport._
+</span></code></pre>
+<p>I also had to replace <code>playVersion.value</code> with <code>play.core.PlayVersion.current</code>.</p>
+<p>The goal of this first step is to be able to load the application with <code>sbt</code>, even if the application itself does not compile. At this point, Intellij can load the application with a play 2.4 version, and can provide auto-completion.</p>
+<h3 id="2-fix-compilation-errors">2. Fix compilation errors</h3>
+<p>Then, I fix the compilation</p>
+<p>Inside sbt, I just trigger the compilation:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>~compile
+</span></code></pre>
+<p>and fix all compilation errors. The play team has made a very good job at documenting all steps in the <a href="https://www.playframework.com/documentation/latest/Migration24">migration guide</a>.</p>
+<p>At this point, I just want the application to compile with the minimal number of changes. I do not care if I use deprecated APIs.</p>
+<h3 id="3-run-the-application">3. Run the application</h3>
+<p>When all compilation errors are fixed, I just make sure that the application can run:</p>
+<p>In sbt:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>~run
+</span></code></pre>
+<p>When running the application, I sometimes discovered version conflicts between libs (ex: Netty versions) and I know if I can complete the migration or if I have to update a dependency before.</p>
+<p>Analysing all dependencies can be difficult.
+I use the <a href="https://github.com/jrudolph/sbt-dependency-graph">sbt-dependency-graph</a> to have an overview of all dependencies and find overriding versions.</p>
+<h3 id="4-fix-the-tests">4. Fix the tests</h3>
+<p>Then I fix all compilation errors in the tests, and then check that the tests are successful.</p>
+<p>In sbt:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>~testQuick
+</span></code></pre>
+<p>When all the tests are green, the application is migrated.
+The migration to play 2.4 is now completed, profit from the new version! ;)</p>
+<h3 id="5-remove-all-usages-of-deprecated-api">5. Remove all usages of deprecated API</h3>
+<p>Now it is time to clean our application and to fix all code using a deprecated API.</p>
+<p>This clean up can be done step by step.</p>
+<p>I use the Scala API, and I prefer not to use any runtime dependency injection framework.</p>
+<p>I introduced the so-called <a href="https://www.playframework.com/documentation/2.5.x/ScalaCompileTimeDependencyInjection"><em>compile time dependency injection</em></a> to simply instantiate my controllers in one application loader.</p>
+<p>For more info about this topic, please refer to:</p>
+<ul>
+<li><a href="http://de.slideshare.net/yann_s/play-24dimacwire">my talk about it</a> at the <a href="/blog/2015/05/20/di-with-play-2-dot-4/">play meetup</a></li>
+<li><a href="http://loicdescotte.github.io/posts/play24-compile-time-di/">this great post from Loïc Descotte</a></li>
+</ul>
+<p>This cleanup is necessary before updating to play 2.5, as deprecated API are likely to be removed in the next version.</p>
+<h1 id="migration-from-2-4-to-2-5">Migration from 2.4 to 2.5</h1>
+<p>For that, the <a href="https://www.playframework.com/documentation/latest/Migration25">migration guide</a> will be our reference.</p>
+<p>The migrate follow the same steps as <a href="/#migrate-from-2.3-to-2.4">the previous migration</a>:</p>
+<ul>
+<li>update the sbt config, but to play 2.5:</li>
+</ul>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>-addSbtPlugin(&quot;com.typesafe.play&quot; % &quot;sbt-plugin&quot; % &quot;2.4.6&quot;)
+</span><span>+addSbtPlugin(&quot;com.typesafe.play&quot; % &quot;sbt-plugin&quot; % &quot;2.5.2&quot;)
+</span></code></pre>
+<ul>
+<li>fix the compilation errors, like in application loader:</li>
+</ul>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>-    Logger.configure(context.environment)
+</span><span>+    LoggerConfigurator(context.environment.classLoader).foreach { _.configure(context.environment) }
+</span></code></pre>
+<ul>
+<li>run the application</li>
+<li>fix the tests</li>
+<li>clean up the application<br>
+For example, I can remove the <code>InjectedRoutesGenerator</code> as it is now the default.</li>
+</ul>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>-routesGenerator := InjectedRoutesGenerator
+</span></code></pre>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

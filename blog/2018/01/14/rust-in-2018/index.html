@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Rust in 2018</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>Rust in 2018</h2>
+    	<div class="info">
+    		<span>2 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>14 January 2018</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<p>This is my contribution to the <a href="https://blog.rust-lang.org/2018/01/03/new-years-rust-a-call-for-community-blogposts.html">#Rust2018 blog posts</a>.</p>
+<h1 id="why-i-started-with-rust">Why I started with Rust</h1>
+<p>My daily job is to implement scalable backends in Scala.</p>
+<p>I very like Functional Programming and async IO.</p>
+<p>But I have some pain point in Scala/JVM and I was very interested to see how Rust could fit here:</p>
+<h2 id="fp-in-scala-is-not-gc-friendly">FP in Scala is not GC-friendly</h2>
+<p>FP in Scala tends to create a lot of small living objects, putting pressure on the Garbage Collector.</p>
+<p>For very hot code, I have to re-implement some FP scala code into imperative style for better performances, and I very dislike that.</p>
+<p>Rust on the other hand provide abstractions without overhead (or very little).</p>
+<h2 id="java-programs-tend-to-be-very-fat">Java programs tend to be very &quot;fat&quot;</h2>
+<p>A Rust program can be statically compiled and directly packaged as a <a href="https://github.com/yanns/zeugnis/blob/master/Dockerfile">from scratch docker container</a>, very lightweight compared to java applications that needs a distribution and a JVM.</p>
+<h1 id="rust-in-2017">Rust in 2017</h1>
+<p>In 2017, I tried different programs in Rust, from a <a href="https://github.com/sphereio/sphere-hello-api/tree/master/rust">minimal SDK</a> that I tried to move to <a href="https://github.com/sphereio/sphere-hello-api/tree/async_hyper/rust">async IO</a>, to a GUI program. I tried a lot of different HTTP servers.</p>
+<p>And I contributed to an <a href="https://github.com/hjr3/weldr">HTTP proxy</a> based on Tokio and Futures.</p>
+<h1 id="rust-in-2018">Rust in 2018</h1>
+<p>My wishes for Rust in 2018 are mostly based on the pain I had with Rust in 2017:</p>
+<h2 id="easier-futures">Easier Futures</h2>
+<p>My experience with Futures was... very painful.</p>
+<p>I had a lot of strange compiler errors, especially with lifetimes.</p>
+<p>Sometimes, to fix then, I just had to move one variable from one closure to the upper one, something that makes no sense from the implement logic point of view.</p>
+<p>I have a lot of difficulties with the static lifetime of Futures.</p>
+<p>I hope that this will improve. Maybe non lexical lifetimes will help here.</p>
+<ul>
+<li><code>impl Trait</code> feature</li>
+</ul>
+<p>And I'll also follow the <a href="https://github.com/alexcrichton/futures-await">async/await coroutines</a>.</p>
+<h2 id="a-standard-http-server-for-backends">a &quot;standard&quot; HTTP server for backends</h2>
+<p>I'd need a good asynchronous http server ready for production usage, with  a good community.
+There should exist good libraries that can integrate easily with this &quot;standard&quot; HTTP server, like for logs and metrics.</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Sangria &amp; Scala Futures, round 1</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>Sangria &amp; Scala Futures, round 1</h2>
+    	<div class="info">
+    		<span>6 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>24 December 2020</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<h1 id="sangria-and-future">Sangria and <code>Future</code></h1>
+<p><a href="https://sangria-graphql.github.io/">Sangria</a> is a Scala library implementing GraphQL on the server side.</p>
+<p>To use it, one defines the GraphQL schema by defining types, fields, and, for each field, how to solve it.</p>
+<p>When Oleg started this library, he used the Scala <code>Future</code> as main representation for asynchronous computation.</p>
+<p>The main entry point is the <code>sangria.execution.Executor</code>. Here is a simplified version:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">case class</span><span style="color:#ebcb8b;"> Executor</span><span>[</span><span style="color:#ebcb8b;">Ctx</span><span>, </span><span style="color:#ebcb8b;">Root</span><span>](</span><span style="color:#bf616a;">schema</span><span>: </span><span style="color:#ebcb8b;">Schema</span><span>[</span><span style="color:#ebcb8b;">Ctx</span><span>, </span><span style="color:#ebcb8b;">Root</span><span>])(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">executionContext</span><span>: </span><span style="color:#ebcb8b;">ExecutionContext</span><span>) </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">execute</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">queryAst</span><span style="color:#eff1f5;">: ast.</span><span style="color:#ebcb8b;">Document</span><span style="color:#eff1f5;">)(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">scheme</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">ExecutionScheme</span><span style="color:#eff1f5;">): scheme.</span><span style="color:#ebcb8b;">Result</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Ctx</span><span style="color:#eff1f5;">, marshaller.</span><span style="color:#ebcb8b;">Node</span><span style="color:#eff1f5;">] </span><span>= </span><span style="color:#eff1f5;">{...}
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>where <code>scheme.Result</code> is by default implemented as a <code>Future</code>.</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>  </span><span style="color:#b48ead;">implicit object</span><span style="color:#ebcb8b;"> Default </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">ExecutionScheme </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">type </span><span style="color:#eff1f5;">Result[</span><span style="color:#ebcb8b;">Ctx</span><span style="color:#eff1f5;">, </span><span style="color:#ebcb8b;">Res</span><span style="color:#eff1f5;">] </span><span>= </span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Res</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">  }
+</span></code></pre>
+<p>The resolution of the GraphQL query is delegated to <code>sangria.execution.Resolver</code>, which is using <code>Future</code> internally:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">class</span><span style="color:#ebcb8b;"> Resolver</span><span>[</span><span style="color:#ebcb8b;">Ctx</span><span>](</span><span style="color:#bf616a;">queryAst</span><span>: ast.</span><span style="color:#ebcb8b;">Document</span><span>)(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">executionContext</span><span>: </span><span style="color:#ebcb8b;">ExecutionContext</span><span>) </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">processFinalResolve</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">resolve</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Resolve</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">[(</span><span style="color:#ebcb8b;">Vector</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">RegisteredError</span><span style="color:#eff1f5;">], marshaller.</span><span style="color:#ebcb8b;">Node</span><span style="color:#eff1f5;">)] </span><span>= </span><span style="color:#eff1f5;">{...}
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<h1 id="future-is-not-the-only-option"><code>Future</code> is not the only option</h1>
+<p>In the <code>Scala</code> world, <code>Future</code> is not the only option to work with asynchronous computations.</p>
+<p>And at the time I'm writing this post, <a href="https://typelevel.org/cats-effect/">cats-effect</a> 3.x is being developed, providing a set of very interesting features and performance improvements.</p>
+<p>I've also used Sangria in application using the <a href="https://monix.io/">Monix</a> <code>Task</code> instead of <code>Future</code>. The code integrating Sangria is converting back and forth between <code>Task</code> and <code>Future</code>. It's not a major issue, but still does not feel optimal.</p>
+<p>I think that there is value for a library like Sangria to better support alternatives to <code>Future</code>.</p>
+<h1 id="supporting-alternatives-to-future">Supporting alternatives to <code>Future</code></h1>
+<p>So I'm trying to enhance Sangria to be able to support any alternatives to <code>Future</code>.</p>
+<p>By looking at the code, I see some usages of <code>future.map</code>, <code>future.sequence</code>, etc.</p>
+<h2 id="abstracting-with-a-functional-library">Abstracting with a functional library</h2>
+<p>My first reflex is to use a functional library like <code>cats</code> and to make the code abstract by using type classes like <a href="https://typelevel.org/cats/typeclasses/monad.html"><code>Monad</code></a>, <a href="https://typelevel.org/cats/typeclasses/applicative.html"><code>Applicative</code></a> and so on.</p>
+<p>But Oleg wanted the Sangria library to have minimal dependencies. He has not used any functional library.</p>
+<p>So I'll respect this decision and try another approach.</p>
+<h2 id="abstracting-over-future">Abstracting over <code>Future</code>.</h2>
+<p>To make the Sangria code not depending on <code>Future</code> directly, I'm introducing a trait that should abstract <code>Future</code> away:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">trait</span><span style="color:#ebcb8b;"> Effect</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#bf616a;">_</span><span>]] </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">pure</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">a</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">map</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">, </span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">fa</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">])(</span><span style="color:#bf616a;">f</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A </span><span>=&gt; </span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>To stay compatible with <code>Future</code>, I also provide a default implicit implementation for it.
+If my experiment goes well, at the end, this should be the only place where Sangria is using <code>Future</code>.</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">object</span><span style="color:#ebcb8b;"> Effect </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">implicit def </span><span style="color:#8fa1b3;">FutureEffect</span><span style="color:#eff1f5;">(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">ec</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">ExecutionContext</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">Effect</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">] </span><span>=
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">Effect</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">] {
+</span><span style="color:#eff1f5;">      </span><span style="color:#b48ead;">override def </span><span style="color:#8fa1b3;">pure</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">a</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">] </span><span>= </span><span style="color:#eff1f5;">Future.successful(a)
+</span><span style="color:#eff1f5;">      </span><span style="color:#b48ead;">override def </span><span style="color:#8fa1b3;">map</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">, </span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">fa</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">])(</span><span style="color:#bf616a;">f</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A </span><span>=&gt; </span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">] </span><span>=</span><span style="color:#eff1f5;"> fa.map(f)
+</span><span style="color:#eff1f5;">    }
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>I know it would be better to first have <code>flatMap</code> and <code>unit</code> as <code>map</code> could be expressed in <code>flatMap</code> of <code>unit</code> but I don't care for now. The name is also not optimal.</p>
+<p>My goal is first to check if I can quickly make Sangria using <code>Effect</code> instead of <code>Future</code>.
+Once Sangria can compile with it, and if the current tests relying on <code>Future</code> pass, I can refine <code>Effect</code>.</p>
+<p>So I'm starting using <code>Effect</code>. The compiler is calling me names.</p>
+<p>But I am changing code step by step, and this is feeling good. I can remove <code>Future</code> completely from some classes:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>-</span><span style="color:#b48ead;">import</span><span> scala.concurrent.{ExecutionContext, Future}
+</span><span>
+</span><span>-  </span><span style="color:#b48ead;">case class</span><span style="color:#ebcb8b;"> DeferredResult</span><span>(</span><span style="color:#bf616a;">deferred</span><span>: </span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">Defer</span><span>]]], </span><span style="color:#bf616a;">futureValue</span><span>: </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#ebcb8b;">Result</span><span>])
+</span><span>+  </span><span style="color:#b48ead;">case class</span><span style="color:#ebcb8b;"> DeferredResult</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#bf616a;">_</span><span>]: </span><span style="color:#ebcb8b;">Effect</span><span>](
+</span><span>+      </span><span style="color:#bf616a;">deferred</span><span>: </span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">Defer</span><span>]]],
+</span><span>+      </span><span style="color:#bf616a;">futureValue</span><span>: </span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#ebcb8b;">Result</span><span>])
+</span><span>       </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">Resolve </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">     </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">appendErrors</span><span style="color:#eff1f5;">(
+</span><span style="color:#eff1f5;">         </span><span style="color:#bf616a;">path</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">ExecutionPath</span><span style="color:#eff1f5;">,
+</span><span style="color:#eff1f5;">         </span><span style="color:#bf616a;">errors</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Vector</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Throwable</span><span style="color:#eff1f5;">],
+</span><span style="color:#eff1f5;">-        </span><span style="color:#bf616a;">position</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Option</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">AstLocation</span><span style="color:#eff1f5;">]) </span><span>=
+</span><span style="color:#eff1f5;">+        position: </span><span style="color:#ebcb8b;">Option</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">AstLocation</span><span style="color:#eff1f5;">]): </span><span style="color:#ebcb8b;">DeferredResult</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">] </span><span>=
+</span><span style="color:#eff1f5;">       </span><span style="color:#b48ead;">if </span><span style="color:#eff1f5;">(errors.nonEmpty)
+</span><span style="color:#eff1f5;">-        copy(futureValue </span><span>=</span><span style="color:#eff1f5;"> futureValue.map(</span><span style="color:#bf616a;">_</span><span style="color:#eff1f5;">.appendErrors(path, errors, position)))
+</span><span style="color:#eff1f5;">+        copy(futureValue </span><span>= </span><span style="color:#eff1f5;">Effect[</span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">]().map(futureValue)(</span><span style="color:#bf616a;">_</span><span style="color:#eff1f5;">.appendErrors(path, errors, position)))
+</span><span style="color:#eff1f5;">       </span><span style="color:#b48ead;">else </span><span style="color:#bf616a;">this
+</span><span style="color:#eff1f5;">   }
+</span></code></pre>
+<p>The code is a bit more complex but still manageable:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>-  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">resolveValue</span><span>(
+</span><span>+  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">resolveValue</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#bf616a;">_</span><span>]: </span><span style="color:#ebcb8b;">Effect</span><span>](
+</span><span>       </span><span style="color:#bf616a;">path</span><span>: </span><span style="color:#ebcb8b;">ExecutionPath</span><span>,
+</span><span>       </span><span style="color:#bf616a;">astFields</span><span>: </span><span style="color:#ebcb8b;">Vector</span><span>[ast.</span><span style="color:#ebcb8b;">Field</span><span>],
+</span><span>       </span><span style="color:#bf616a;">tpe</span><span>: </span><span style="color:#ebcb8b;">OutputType</span><span>[</span><span style="color:#bf616a;">_</span><span>],
+</span><span>@@ -</span><span style="color:#d08770;">1231</span><span>,</span><span style="color:#d08770;">23</span><span> +</span><span style="color:#d08770;">1239</span><span>,</span><span style="color:#d08770;">23</span><span> @@ </span><span style="color:#b48ead;">class</span><span style="color:#ebcb8b;"> Resolver</span><span>[</span><span style="color:#ebcb8b;">Ctx</span><span>](
+</span><span>             resolveSimpleListValue(simpleRes, path, optional, astFields.head.location)
+</span><span>           </span><span style="color:#b48ead;">else </span><span>{
+</span><span>             </span><span style="color:#65737e;">// this is very hot place, so resorting to mutability to minimize the footprint
+</span><span>-            </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">deferredBuilder </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">VectorBuilder</span><span>[</span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">Defer</span><span>]]]
+</span><span>-            </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">resultFutures </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">VectorBuilder</span><span>[</span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#ebcb8b;">Result</span><span>]]
+</span><span>+            </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">deferredBuilder </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">VectorBuilder</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">Defer</span><span>]]]
+</span><span>+            </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">resultFutures </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">VectorBuilder</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#ebcb8b;">Result</span><span>]]
+</span><span>
+</span><span>             </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">resIt </span><span>= res.iterator
+</span><span>
+</span><span>             </span><span style="color:#b48ead;">while </span><span>(resIt.hasNext)
+</span><span>               resIt.next() </span><span style="color:#b48ead;">match </span><span>{
+</span><span>                 </span><span style="color:#b48ead;">case </span><span style="color:#bf616a;">r</span><span>: </span><span style="color:#ebcb8b;">Result </span><span style="color:#b48ead;">=&gt;
+</span><span>-                  resultFutures += Future.successful(r)
+</span><span>-                </span><span style="color:#b48ead;">case </span><span style="color:#bf616a;">dr</span><span>: </span><span style="color:#ebcb8b;">DeferredResult </span><span style="color:#b48ead;">=&gt;
+</span><span>+                  resultFutures += Effect[</span><span style="color:#ebcb8b;">F</span><span>]().pure(r)
+</span><span>+                </span><span style="color:#b48ead;">case </span><span style="color:#bf616a;">dr</span><span>: </span><span style="color:#ebcb8b;">DeferredResult</span><span>[</span><span style="color:#ebcb8b;">F</span><span>] </span><span style="color:#b48ead;">=&gt;
+</span><span>                   resultFutures += dr.futureValue
+</span><span>                   deferredBuilder ++= dr.deferred
+</span><span>               }
+</span><span>
+</span><span>             DeferredResult(
+</span><span>               deferred = deferredBuilder.result(),
+</span><span>-              futureValue = Future
+</span><span>+              futureValue = Effect[</span><span style="color:#ebcb8b;">F</span><span>]()
+</span><span>                 .sequence(resultFutures.result())
+</span><span>                 .map(resolveSimpleListValue(</span><span style="color:#bf616a;">_</span><span>, path, optional, astFields.head.location))
+</span><span>             )
+</span></code></pre>
+<p>As I abstract more and more functions on <code>Future</code>, the <code>Effect</code> abstraction is growing:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">trait</span><span style="color:#ebcb8b;"> Effect</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#bf616a;">_</span><span>]] </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">pure</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">a</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">failed</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">T</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">exception</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Throwable</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">T</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">map</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">, </span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">fa</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">])(</span><span style="color:#bf616a;">f</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A </span><span>=&gt; </span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">B</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">sequence</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">vector</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Vector</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">]]): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Vector</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">]]
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">recover</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">, </span><span style="color:#ebcb8b;">U </span><span>&gt;: </span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">fa</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">])(</span><span style="color:#bf616a;">pf</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">PartialFunction</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Throwable</span><span style="color:#eff1f5;">, </span><span style="color:#ebcb8b;">U</span><span style="color:#eff1f5;">]): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">U</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>It's not beautiful but I don't consider this as an issue for now. Once everything compiles, I will take time to refine it and to reduce the surface of this abstraction.</p>
+<h2 id="promise-on-the-way"><code>Promise</code> on the way</h2>
+<p>But then I encounter some code using <code>Promise</code>, like:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>  </span><span style="color:#b48ead;">case class</span><span style="color:#ebcb8b;"> ChildDeferredContext</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#bf616a;">_</span><span>]: </span><span style="color:#ebcb8b;">Effect</span><span>](</span><span style="color:#bf616a;">promise</span><span>: </span><span style="color:#ebcb8b;">Promise</span><span>[</span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">F</span><span>[</span><span style="color:#ebcb8b;">Vector</span><span>[</span><span style="color:#ebcb8b;">Defer</span><span>]]]]) </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">resolveDeferredResult</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">uc</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Ctx</span><span style="color:#eff1f5;">, </span><span style="color:#bf616a;">res</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">DeferredResult</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">]): </span><span style="color:#ebcb8b;">F</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Result</span><span style="color:#eff1f5;">] </span><span>= </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">      promise.success(res.deferred)
+</span><span style="color:#eff1f5;">      res.futureValue
+</span><span style="color:#eff1f5;">    }
+</span></code></pre>
+<p><code>Promise</code> is a <a href="https://www.scala-lang.org/api/current/scala/concurrent/Promise.html">standard Scala class</a> that allows to build a <code>Future</code> based on side effects.
+It's low level, and easy to make mistakes when using it.</p>
+<p>I don't know why Oleg has decided to use it. I guess it was for performance optimizations to avoid mapping over <code>Future</code> everywhere. Something to check later.</p>
+<p>But it's quite a shock. I was not expecting that.</p>
+<p>This makes an abstraction over <code>Future</code> much more complicated now.</p>
+<h2 id="what-to-do-now">What to do now</h2>
+<p>Encountering <code>Promise</code> is a new challenge.</p>
+<p>I see two options from here:</p>
+<h3 id="option-1-abstracting-over-promise">option 1 - abstracting over <code>Promise</code></h3>
+<p>The first option is to extend the abstraction to also abstract over <code>Promise</code>.</p>
+<p>Frankly I doubt this will lead to somewhere. The resulting code might be quite complex. And it might be much more difficult to provide alternative implementations for those abstractions.</p>
+<h3 id="option-2-removing-promise">option 2 - removing <code>Promise</code></h3>
+<p>The second option is to remove the usage of <code>Promise</code>. For that I first need to understand why it was used.</p>
+<p>Removing <code>Promise</code> could lead to more functional code at the end. But I'm afraid it is a big change.</p>
+<h1 id="sangria-1-0-yann">Sangria 1 - 0 Yann</h1>
+<p>So I've tried to abstract over <code>Future</code> for sangria, but it was more complex than expected.</p>
+<p>Time to stop this first round.</p>
+<p>If you have some suggestions how to deal with <code>Promise</code>, I'm all hear on <a href="https://twitter.com/simon_yann">Twitter</a> or <a href="https://mastodon.partipirate.org/@yanns">Mastodon</a>.</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

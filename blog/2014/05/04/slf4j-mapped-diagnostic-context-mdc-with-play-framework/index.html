@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>SLF4J Mapped Diagnostic Context (MDC) with play framework</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>SLF4J Mapped Diagnostic Context (MDC) with play framework</h2>
+    	<div class="info">
+    		<span>6 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>04 May 2014</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<p>I'd like the share with this post one solution I found to use a Mapped Diagnostic Context (MDC) in an asynchronous environment like the play framework.</p>
+<h2 id="edit-september-2014">Edit (September 2014)</h2>
+<p>Based on <a href="https://github.com/jroper/thread-local-context-propagation/">one implementation from James Roper</a>, I added one solution based on <a href="http://doc.akka.io/docs/akka/current/scala/dispatchers.html">Akka Dispatcher</a>.</p>
+<h2 id="tl-dr">tl;dr</h2>
+<p>This post provides two solution to propagate the MDC context in an asynchronous Play application:</p>
+<ul>
+<li>using a custom Akka <code>Dispatcher</code>. This solution needs minimal change to a current application.</li>
+<li>using a custom <code>ExecutionContext</code> that propagates the MDC from the caller's thread to the callee's one. A custom <code>ActionBuilder</code> is necessary as well to completely use this custom <code>ExectionContext</code>.</li>
+</ul>
+<h2 id="the-mapped-diagnostic-context-mdc">The Mapped Diagnostic Context (MDC)</h2>
+<p>The play framework uses for logging <a href="http://logback.qos.ch/">Logback</a> behind <a href="http://www.slf4j.org/">SLF4J (&quot;Simple Logging Facade for Java&quot;)</a>.<br/>
+This library provides a convenient feature: the <a href="http://logback.qos.ch/manual/mdc.html">Mapped Diagnostic Context (MDC)</a>.
+This context can be used to store values that can be displayed in every Logging statement.<br/>
+For example, if we want to display the current user ID:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">import</span><span> org.slf4j.MDC
+</span><span>
+</span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">id </span><span>= currentUser.id
+</span><span>MDC.put(&quot;</span><span style="color:#a3be8c;">X-UserId</span><span>&quot;, currentUser.id)
+</span><span>
+</span><span style="color:#b48ead;">try </span><span>{
+</span><span>    </span><span style="color:#65737e;">// the block of code that uses the Logger
+</span><span>    </span><span style="color:#65737e;">// for example:
+</span><span>    play.api.Logger.info(&quot;</span><span style="color:#a3be8c;">test</span><span>&quot;)
+</span><span>} </span><span style="color:#b48ead;">finally </span><span>{
+</span><span>    </span><span style="color:#65737e;">// clean up the MDC
+</span><span>    MDC.remove(&quot;</span><span style="color:#a3be8c;">X-UserId</span><span>&quot;)
+</span><span>}
+</span></code></pre>
+<p>(This code could be in a <a href="https://www.playframework.com/documentation/latest/ScalaHttpFilters">filter</a>, run for each request)</p>
+<p>Logback must be configured to display the <code>X-UserId</code> value:</p>
+<pre data-lang="xml" style="background-color:#2b303b;color:#c0c5ce;" class="language-xml "><code class="language-xml" data-lang="xml"><span>&lt;</span><span style="color:#bf616a;">appender </span><span style="color:#d08770;">name</span><span>=&quot;</span><span style="color:#a3be8c;">stdout</span><span>&quot; </span><span style="color:#d08770;">class</span><span>=&quot;</span><span style="color:#a3be8c;">ch.qos.logback.core.ConsoleAppender</span><span>&quot;&gt;
+</span><span>    &lt;</span><span style="color:#bf616a;">encoder</span><span>&gt;
+</span><span>        &lt;</span><span style="color:#bf616a;">pattern</span><span>&gt;%d{HH:mm:ss.SSS} %coloredLevel %logger{35} %mdc{X-UserId:--} - %msg%n%rootException&lt;/</span><span style="color:#bf616a;">pattern</span><span>&gt;
+</span><span>    &lt;/</span><span style="color:#bf616a;">encoder</span><span>&gt;
+</span><span>&lt;/</span><span style="color:#bf616a;">appender</span><span>&gt;
+</span></code></pre>
+<p>In the log file, the MDC value for <code>X-UserId</code> is now printed out.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>10:50:54.773 [info] application jean.leloup - test
+</span></code></pre>
+<h2 id="limitation-of-the-default-implementation-of-the-mdc">Limitation of the default implementation of the MDC</h2>
+<p>To record the values in the MDC, Logback uses a <code>ThreadLocal</code> variable.
+This strategy works when one thread is used for one request, like in servlet container before the 3.1 specification.</p>
+<p>Play framework, on the other hand, is <a href="http://www.playframework.com/documentation/2.2.x/ScalaAsync">asynchronous</a>. The processing of a request is composed of several function calls, and each call can be run on a different thread. (&quot;Don't call me, I'll call you&quot;)</p>
+<p>The implementation of the MDC with a <code>ThreadLocal</code> cannot work with this non-blocking asynchronous threading model.</p>
+<h2 id="first-solution-with-akka-dispatcher">First solution with Akka Dispatcher</h2>
+<h4 id="defining-a-custom-akka-dispatcher">Defining a custom Akka dispatcher</h4>
+<p>Play dispatchs the jobs on different threads with a <a href="https://www.playframework.com/documentation/latest/ThreadPools">thread pool</a>. The Play default thread pool is an <a href="http://doc.akka.io/docs/akka/current/scala/dispatchers.html">Akka dispatcher</a>.</p>
+<p>To use the MDC, we provide a custom Akka <code>Dispatcher</code> that propagates the MDC from the caller's thread to the callee's one.</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">package </span><span>monitoring
+</span><span>
+</span><span style="color:#b48ead;">import</span><span> java.util.concurrent.TimeUnit
+</span><span>
+</span><span style="color:#b48ead;">import</span><span> akka.dispatch.</span><span style="color:#bf616a;">_
+</span><span style="color:#b48ead;">import</span><span> com.typesafe.config.Config
+</span><span style="color:#b48ead;">import</span><span> org.slf4j.MDC
+</span><span>
+</span><span style="color:#b48ead;">import</span><span> scala.concurrent.ExecutionContext
+</span><span style="color:#b48ead;">import</span><span> scala.concurrent.duration.{Duration, FiniteDuration}
+</span><span>
+</span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;"> * Configurator for a MDC propagating dispatcher.
+</span><span style="color:#65737e;"> *
+</span><span style="color:#65737e;"> * To use it, configure play like this:
+</span><span style="color:#65737e;"> * {{{
+</span><span style="color:#65737e;"> * play {
+</span><span style="color:#65737e;"> *   akka {
+</span><span style="color:#65737e;"> *     actor {
+</span><span style="color:#65737e;"> *       default-dispatcher = {
+</span><span style="color:#65737e;"> *         type = &quot;monitoring.MDCPropagatingDispatcherConfigurator&quot;
+</span><span style="color:#65737e;"> *       }
+</span><span style="color:#65737e;"> *     }
+</span><span style="color:#65737e;"> *   }
+</span><span style="color:#65737e;"> * }
+</span><span style="color:#65737e;"> * }}}
+</span><span style="color:#65737e;"> *
+</span><span style="color:#65737e;"> * Credits to James Roper for the [[https://github.com/jroper/thread-local-context-propagation/ initial implementation]]
+</span><span style="color:#65737e;"> */
+</span><span style="color:#b48ead;">class</span><span style="color:#ebcb8b;"> MDCPropagatingDispatcherConfigurator</span><span>(</span><span style="color:#bf616a;">config</span><span>: </span><span style="color:#ebcb8b;">Config</span><span>, </span><span style="color:#bf616a;">prerequisites</span><span>: </span><span style="color:#ebcb8b;">DispatcherPrerequisites</span><span>)
+</span><span>  </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">MessageDispatcherConfigurator</span><span>(config, prerequisites) </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">private val </span><span style="color:#bf616a;">instance </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">MDCPropagatingDispatcher</span><span style="color:#eff1f5;">(
+</span><span style="color:#eff1f5;">    </span><span style="color:#bf616a;">this</span><span style="color:#eff1f5;">,
+</span><span style="color:#eff1f5;">    config.getString(</span><span>&quot;</span><span style="color:#a3be8c;">id</span><span>&quot;</span><span style="color:#eff1f5;">),
+</span><span style="color:#eff1f5;">    config.getInt(</span><span>&quot;</span><span style="color:#a3be8c;">throughput</span><span>&quot;</span><span style="color:#eff1f5;">),
+</span><span style="color:#eff1f5;">    FiniteDuration(config.getDuration(</span><span>&quot;</span><span style="color:#a3be8c;">throughput-deadline-time</span><span>&quot;</span><span style="color:#eff1f5;">, TimeUnit.NANOSECONDS), TimeUnit.NANOSECONDS),
+</span><span style="color:#eff1f5;">    configureExecutor(),
+</span><span style="color:#eff1f5;">    FiniteDuration(config.getDuration(</span><span>&quot;</span><span style="color:#a3be8c;">shutdown-timeout</span><span>&quot;</span><span style="color:#eff1f5;">, TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS))
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">override def </span><span style="color:#8fa1b3;">dispatcher</span><span style="color:#eff1f5;">(): </span><span style="color:#ebcb8b;">MessageDispatcher </span><span>=</span><span style="color:#eff1f5;"> instance
+</span><span style="color:#eff1f5;">}
+</span><span>
+</span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;"> * A MDC propagating dispatcher.
+</span><span style="color:#65737e;"> *
+</span><span style="color:#65737e;"> * This dispatcher propagates the MDC current request context if it&#39;s set when it&#39;s executed.
+</span><span style="color:#65737e;"> */
+</span><span style="color:#b48ead;">class</span><span style="color:#ebcb8b;"> MDCPropagatingDispatcher</span><span>(</span><span style="color:#bf616a;">_configurator</span><span>: </span><span style="color:#ebcb8b;">MessageDispatcherConfigurator</span><span>,
+</span><span>                               </span><span style="color:#bf616a;">id</span><span>: </span><span style="color:#ebcb8b;">String</span><span>,
+</span><span>                               </span><span style="color:#bf616a;">throughput</span><span>: </span><span style="color:#b48ead;">Int</span><span>,
+</span><span>                               </span><span style="color:#bf616a;">throughputDeadlineTime</span><span>: </span><span style="color:#ebcb8b;">Duration</span><span>,
+</span><span>                               </span><span style="color:#bf616a;">executorServiceFactoryProvider</span><span>: </span><span style="color:#ebcb8b;">ExecutorServiceFactoryProvider</span><span>,
+</span><span>                               </span><span style="color:#bf616a;">shutdownTimeout</span><span>: </span><span style="color:#ebcb8b;">FiniteDuration</span><span>)
+</span><span>  </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">Dispatcher</span><span>(_configurator, id, throughput, throughputDeadlineTime, executorServiceFactoryProvider, shutdownTimeout ) </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#bf616a;">self </span><span style="color:#b48ead;">=&gt;
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">override def </span><span style="color:#8fa1b3;">prepare</span><span style="color:#eff1f5;">(): </span><span style="color:#ebcb8b;">ExecutionContext </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">ExecutionContext </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#65737e;">// capture the MDC
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">mdcContext </span><span>= </span><span style="color:#eff1f5;">MDC.getCopyOfContextMap
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">execute</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">r</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Runnable</span><span style="color:#eff1f5;">) </span><span>=</span><span style="color:#eff1f5;"> self.execute(</span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">Runnable </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">      </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">run</span><span style="color:#eff1f5;">() </span><span>= </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">        </span><span style="color:#65737e;">// backup the callee MDC context
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">oldMDCContext </span><span>= </span><span style="color:#eff1f5;">MDC.getCopyOfContextMap
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#65737e;">// Run the runnable with the captured context
+</span><span style="color:#eff1f5;">        setContextMap(mdcContext)
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">try </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">          r.run()
+</span><span style="color:#eff1f5;">        } </span><span style="color:#b48ead;">finally </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">          </span><span style="color:#65737e;">// restore the callee MDC context
+</span><span style="color:#eff1f5;">          setContextMap(oldMDCContext)
+</span><span style="color:#eff1f5;">        }
+</span><span style="color:#eff1f5;">      }
+</span><span style="color:#eff1f5;">    })
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">reportFailure</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">t</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Throwable</span><span style="color:#eff1f5;">) </span><span>=</span><span style="color:#eff1f5;"> self.reportFailure(t)
+</span><span style="color:#eff1f5;">  }
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">private</span><span style="color:#eff1f5;">[</span><span style="color:#bf616a;">this</span><span style="color:#eff1f5;">] </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">setContextMap</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">context</span><span style="color:#eff1f5;">: java.util.</span><span style="color:#ebcb8b;">Map</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">String</span><span style="color:#eff1f5;">, </span><span style="color:#ebcb8b;">String</span><span style="color:#eff1f5;">]) {
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">if </span><span style="color:#eff1f5;">(context </span><span>== </span><span style="color:#d08770;">null</span><span style="color:#eff1f5;">) {
+</span><span style="color:#eff1f5;">      MDC.clear()
+</span><span style="color:#eff1f5;">    } </span><span style="color:#b48ead;">else </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">      MDC.setContextMap(context)
+</span><span style="color:#eff1f5;">    }
+</span><span style="color:#eff1f5;">  }
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<h4 id="using-a-custom-akka-dispatcher-everywhere">Using a custom Akka dispatcher everywhere:</h4>
+<p>To use this custom Akka dispatcher everywhere, we just have to configure it:</p>
+<pre data-lang="bash application.conf" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash application.conf "><code class="language-bash application.conf" data-lang="bash application.conf"><span>play {
+</span><span>  akka {
+</span><span>    actor {
+</span><span>      default-dispatcher = {
+</span><span>        type = &quot;monitoring.MDCPropagatingDispatcherConfigurator&quot;
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>and that's all! ;)</p>
+<p>The MDC context is propagated when we use the play default <a href="https://www.playframework.com/documentation/2.3.x/api/scala/index.html#play.api.libs.concurrent.Execution$"><code>ExecutionContext</code></a>.</p>
+<h4 id="optimization">Optimization</h4>
+<p>So that this approach works in dev mode, simply make a library (jar) of this custom Akka dispatcher and add this as dependency in your play application.</p>
+<h2 id="second-solution-with-a-custom-execution-context">Second solution with a custom execution context</h2>
+<h4 id="defining-a-custom-execution-context">Defining a custom execution context</h4>
+<p>The dispatching of the jobs on different threads in done with an <code>ExecutionContext</code>. Each <code>ExecutionContext</code> manages a <a href="https://www.playframework.com/documentation/latest/ThreadPools">thread pool</a>.</p>
+<p>To use the MDC, we just have to use a custom <code>ExecutionContext</code> that propagates the MDC from the caller's thread to the callee's one.</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">import</span><span> org.slf4j.MDC
+</span><span style="color:#b48ead;">import</span><span> scala.concurrent.{ExecutionContextExecutor, ExecutionContext}
+</span><span>
+</span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;"> * slf4j provides a MDC [[http://logback.qos.ch/manual/mdc.html Mapped Diagnostic Context]]
+</span><span style="color:#65737e;"> * based on a [[ThreadLocal]]. In an asynchronous environment, the callbacks can be called
+</span><span style="color:#65737e;"> * in another thread, where the local thread variable does not exist anymore.
+</span><span style="color:#65737e;"> *
+</span><span style="color:#65737e;"> * This execution context fixes this problem:
+</span><span style="color:#65737e;"> * it propagates the MDC from the caller&#39;s thread to the callee&#39;s one.
+</span><span style="color:#65737e;"> */
+</span><span style="color:#b48ead;">object</span><span style="color:#ebcb8b;"> MDCHttpExecutionContext </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;">   * Create an MDCHttpExecutionContext with values from the current thread.
+</span><span style="color:#65737e;">   */
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">fromThread</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">delegate</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">ExecutionContext</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">ExecutionContextExecutor </span><span>=
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">MDCHttpExecutionContext</span><span style="color:#eff1f5;">(MDC.getCopyOfContextMap, delegate)
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">}
+</span><span>
+</span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;"> * Manages execution to ensure that the given MDC context are set correctly
+</span><span style="color:#65737e;"> * in the current thread. Actual execution is performed by a delegate ExecutionContext.
+</span><span style="color:#65737e;"> */
+</span><span style="color:#b48ead;">class</span><span style="color:#ebcb8b;"> MDCHttpExecutionContext</span><span>(</span><span style="color:#bf616a;">mdcContext</span><span>: java.util.</span><span style="color:#ebcb8b;">Map</span><span>[</span><span style="color:#bf616a;">_</span><span>, </span><span style="color:#bf616a;">_</span><span>], </span><span style="color:#bf616a;">delegate</span><span>: </span><span style="color:#ebcb8b;">ExecutionContext</span><span>) </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">ExecutionContextExecutor </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">execute</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">runnable</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Runnable</span><span style="color:#eff1f5;">) </span><span>=</span><span style="color:#eff1f5;"> delegate.execute(</span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">Runnable </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">run</span><span style="color:#eff1f5;">() {
+</span><span style="color:#eff1f5;">      </span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">oldMDCContext </span><span>= </span><span style="color:#eff1f5;">MDC.getCopyOfContextMap
+</span><span style="color:#eff1f5;">      setContextMap(mdcContext)
+</span><span style="color:#eff1f5;">      </span><span style="color:#b48ead;">try </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">        runnable.run()
+</span><span style="color:#eff1f5;">      } </span><span style="color:#b48ead;">finally </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">        setContextMap(oldMDCContext)
+</span><span style="color:#eff1f5;">      }
+</span><span style="color:#eff1f5;">    }
+</span><span style="color:#eff1f5;">  })
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">private</span><span style="color:#eff1f5;">[</span><span style="color:#bf616a;">this</span><span style="color:#eff1f5;">] </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">setContextMap</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">context</span><span style="color:#eff1f5;">: java.util.</span><span style="color:#ebcb8b;">Map</span><span style="color:#eff1f5;">[</span><span style="color:#bf616a;">_</span><span style="color:#eff1f5;">, </span><span style="color:#bf616a;">_</span><span style="color:#eff1f5;">]) {
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">if </span><span style="color:#eff1f5;">(context </span><span>== </span><span style="color:#d08770;">null</span><span style="color:#eff1f5;">) {
+</span><span style="color:#eff1f5;">      MDC.clear()
+</span><span style="color:#eff1f5;">    } </span><span style="color:#b48ead;">else </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">      MDC.setContextMap(context)
+</span><span style="color:#eff1f5;">    }
+</span><span style="color:#eff1f5;">  }
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">reportFailure</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">t</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Throwable</span><span style="color:#eff1f5;">) </span><span>=</span><span style="color:#eff1f5;"> delegate.reportFailure(t)
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>Then we can define the default ExecutionContext in our application:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">package </span><span>concurrent
+</span><span>
+</span><span style="color:#b48ead;">import</span><span> scala.concurrent.ExecutionContext
+</span><span>
+</span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;"> * The standard [[play.api.libs.concurrent.Execution.defaultContext]] loses the MDC context.
+</span><span style="color:#65737e;"> *
+</span><span style="color:#65737e;"> * This custom [[ExecutionContext]] propagates the MDC context, so that the request
+</span><span style="color:#65737e;"> * and the correlation IDs can be logged.
+</span><span style="color:#65737e;"> */
+</span><span style="color:#b48ead;">object</span><span style="color:#ebcb8b;"> Execution </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">object</span><span style="color:#ebcb8b;"> Implicits </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">implicit def </span><span style="color:#8fa1b3;">defaultContext</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">ExecutionContext </span><span>= </span><span style="color:#eff1f5;">Execution.defaultContext
+</span><span style="color:#eff1f5;">  }
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">defaultContext</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">ExecutionContext </span><span>= </span><span style="color:#eff1f5;">MDCHttpExecutionContext.fromThread(play.api.libs.concurrent.Execution.defaultContext)
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>Now we will use the <code>concurrent.Execution.defaultContext</code> instead of the one from play (<code>play.api.libs.concurrent.Execution.defaultContext</code>)</p>
+<h4 id="using-a-custom-execution-context-everywhere">Using a custom execution context everywhere</h4>
+<p>Using a custom execution context is sometimes as easy as replacing
+<code>import play.api.libs.concurrent.Execution.Implicits._</code> with <code>import concurrent.Execution.Implicits._</code></p>
+<p>The default <a href="https://www.playframework.com/documentation/latest/ScalaActions"><code>Action</code></a> uses the default <code>play.api.libs.concurrent.Execution.defaultContext</code>.
+We must define a custom <code>ActionBuilder</code> that uses our new <code>ExecutionContext</code>:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">package </span><span>controllers
+</span><span>
+</span><span style="color:#b48ead;">object</span><span style="color:#ebcb8b;"> Action </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">ActionBuilder</span><span>[</span><span style="color:#ebcb8b;">Request</span><span>] </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">invokeBlock</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">request</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Request</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">], </span><span style="color:#bf616a;">block</span><span style="color:#eff1f5;">: (</span><span style="color:#ebcb8b;">Request</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">]) </span><span>=&gt; </span><span style="color:#ebcb8b;">Future</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">SimpleResult</span><span style="color:#eff1f5;">]) </span><span>= </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    block(request)
+</span><span style="color:#eff1f5;">  }
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">  </span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;">   * The standard [[play.api.mvc.Action]] loses the MDC context.
+</span><span style="color:#65737e;">   *
+</span><span style="color:#65737e;">   * This action builder sets the [[ExecutionContext]] so that the
+</span><span style="color:#65737e;">   * MDC context is propagated.
+</span><span style="color:#65737e;">   * With this custom [[ExecutionContext]], the request and the correlation IDs
+</span><span style="color:#65737e;">   * can be logged.
+</span><span style="color:#65737e;">   */
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">override def </span><span style="color:#8fa1b3;">executionContext</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">ExecutionContext </span><span>= </span><span style="color:#eff1f5;">Execution.defaultContext
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>Instead of using of <code>play.api.mvc.Action</code>, we just have to use the newly defined <code>controllers.Action</code>.</p>
+<p>With each of these customizations, we are now able to use the Mapped Diagnostic Context (MDC) with asynchronous actions written in Scala.</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

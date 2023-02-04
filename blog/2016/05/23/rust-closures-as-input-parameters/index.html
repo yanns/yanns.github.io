@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Rust closures as input parameters</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>Rust closures as input parameters</h2>
+    	<div class="info">
+    		<span>5 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>23 May 2016</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<p><em>Edit:</em> <a href="https://yanns.github.io/blog/2016/05/23/rust-closures-as-input-parameters/#update-2016-05-25"><em>Update (May 25)</em></a></p>
+<p>I am learning <a href="https://www.rust-lang.org/">Rust</a> and, as a beginner, I have sometimes problems achieving some little tasks that would be so easy in other programming languages I know better.</p>
+<p>But when I met some Rust developers and they ask me about my difficulties, I often forget about them.</p>
+<p>I therefore decided to write about my difficulties in Rust to keep track of them.</p>
+<p>So today about closures.</p>
+<p>When reading a <a href="http://fredrik.anderzon.se/2016/05/10/rust-for-node-developers-part-1-introduction/">blog post introducing Rust for Node.js Developers</a> I made the same Todo application.</p>
+<p>At the end, the program contains such piece of code:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">remove_todo</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>	</span><span style="color:#b48ead;">if let </span><span>Some(todo) = todos.</span><span style="color:#96b5b4;">iter_mut</span><span>().</span><span style="color:#96b5b4;">find</span><span>(|</span><span style="color:#bf616a;">todo</span><span>| todo.id == todo_id) {
+</span><span>		todo.deleted = </span><span style="color:#d08770;">true</span><span>;
+</span><span>	}
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">mark_done</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>	</span><span style="color:#b48ead;">if let </span><span>Some(todo) = todos.</span><span style="color:#96b5b4;">iter_mut</span><span>().</span><span style="color:#96b5b4;">find</span><span>(|</span><span style="color:#bf616a;">todo</span><span>| todo.id == todo_id) {
+</span><span>		todo.completed = </span><span style="color:#d08770;">true</span><span>;
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p>The first function marks a Todo as deleted if it can be found by its ID in the vector.
+The second function marks a Todo as completed, also if it can be found in the vector of Todos.</p>
+<p>Some code is duplicated and I decided to refactor the common code in a third function, that would do <em>something</em> on a Todo if found in a vector.</p>
+<p>This third function would take a closure as input parameter, like in pseudo-code:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">with_todo_id</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>, </span><span style="color:#bf616a;">f</span><span>: &lt;closure </span><span style="background-color:#bf616a;color:#2b303b;">-</span><span> do something on a Todo&gt;) {
+</span><span>    </span><span style="color:#b48ead;">if let </span><span>Some(todo) = todos.</span><span style="color:#96b5b4;">iter_mut</span><span>().</span><span style="color:#96b5b4;">find</span><span>(|</span><span style="color:#bf616a;">todo</span><span>| todo.id == todo_id) {
+</span><span>        </span><span style="color:#96b5b4;">f</span><span>(todo);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>so that the 2 initial functions are simplified like that:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">remove_todo</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">with_todo_id</span><span>(todos, todo_id, |</span><span style="color:#bf616a;">todo</span><span>| todo.deleted = </span><span style="color:#d08770;">true</span><span>);
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">mark_done</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">with_todo_id</span><span>(todos, todo_id, |</span><span style="color:#bf616a;">todo</span><span>| todo.completed = </span><span style="color:#d08770;">true</span><span>);
+</span><span>}
+</span></code></pre>
+<p>This closure is a side-effect on a Todo. It should accept a mutable Todo as parameter and return nothing.</p>
+<p>One <a href="http://rustbyexample.com/fn/closures/input_parameters.html">source of documentation for closures as input parameters</a> mentions that there exist 3 kinds of closures:</p>
+<ul>
+<li>Fn: takes captures by reference (<code>&amp;T</code>)</li>
+<li>FnMut: takes captures by mutable reference (<code>&amp;mut T</code>)</li>
+<li>FnOnce: takes captures by value (<code>T</code>)</li>
+</ul>
+<p>This is a lot of information for a new developer.</p>
+<p>I tried different possibilities, like:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">with_todo_id</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>, </span><span style="color:#bf616a;">f</span><span>: &amp;Fn(&amp;</span><span style="color:#bf616a;">mut Todo</span><span>)) {
+</span><span>    </span><span style="color:#b48ead;">if let </span><span>Some(todo) = todos.</span><span style="color:#96b5b4;">iter_mut</span><span>().</span><span style="color:#96b5b4;">find</span><span>(|</span><span style="color:#bf616a;">todo</span><span>| todo.id == todo_id) {
+</span><span>        </span><span style="color:#96b5b4;">f</span><span>(todo);
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">remove_todo</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">with_todo_id</span><span>(todos, todo_id, |</span><span style="color:#bf616a;">todo</span><span>| todo.deleted = </span><span style="color:#d08770;">true</span><span>);
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">mark_done</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">with_todo_id</span><span>(todos, todo_id, |</span><span style="color:#bf616a;">todo</span><span>| todo.completed = </span><span style="color:#d08770;">true</span><span>);
+</span><span>}
+</span></code></pre>
+<p>Without any success:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cargo run
+</span><span>   </span><span style="color:#bf616a;">Compiling</span><span> todo-list v0.1.0 (file:///Users/yannsimon/projects/rust/rust-playground/todo-list)
+</span><span style="color:#bf616a;">src/main.rs:27:38:</span><span> 27:50 error: the type of this value must be known in this context
+</span><span style="color:#bf616a;">src/main.rs:27</span><span> 	with_todo_id(todos, todo_id, |</span><span style="color:#bf616a;">todo</span><span>| </span><span style="color:#bf616a;">todo.deleted</span><span> = true);
+</span><span>               	                                    </span><span style="color:#bf616a;">^~~~~~~~~~~~
+</span></code></pre>
+<p>The <a href="https://doc.rust-lang.org/book/closures.html#taking-closures-as-arguments">official documentation</a> was not so much help neither.</p>
+<p>I asked for help on <a href="https://client00.chat.mibbit.com/?server=irc.mozilla.org&amp;channel=%23rust-beginners">#rust-beginners</a>.
+People on this channel are <strong>very</strong> helpful and kind. The community of Rust is awesome!</p>
+<p>I was proposed 2 solutions. Both work, and I choose that one:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">with_todo_id</span><span>&lt;P&gt;(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>, </span><span style="color:#bf616a;">f</span><span>: P) </span><span style="color:#b48ead;">where</span><span> P: Fn(&amp;</span><span style="color:#b48ead;">mut</span><span> Todo) {
+</span><span>    </span><span style="color:#b48ead;">if let </span><span>Some(todo) = todos.</span><span style="color:#96b5b4;">iter_mut</span><span>().</span><span style="color:#96b5b4;">find</span><span>(|</span><span style="color:#bf616a;">todo</span><span>| todo.id == todo_id) {
+</span><span>        </span><span style="color:#96b5b4;">f</span><span>(todo);
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">remove_todo</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">with_todo_id</span><span>(todos, todo_id, |</span><span style="color:#bf616a;">todo</span><span>| todo.deleted = </span><span style="color:#d08770;">true</span><span>);
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">mark_done</span><span>(</span><span style="color:#bf616a;">todos</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>Vec&lt;Todo&gt;, </span><span style="color:#bf616a;">todo_id</span><span>: </span><span style="color:#b48ead;">i16</span><span>) {
+</span><span>    </span><span style="color:#96b5b4;">with_todo_id</span><span>(todos, todo_id, |</span><span style="color:#bf616a;">todo</span><span>| todo.completed = </span><span style="color:#d08770;">true</span><span>);
+</span><span>}
+</span></code></pre>
+<p>Compared to my previous attempt, the <code>f: &amp;Fn(&amp;mut Todo)</code> is replaced by <code>f: P where P: Fn(&amp;mut Todo)</code>.</p>
+<p>I still do not completely understand why this works and not the previous version. I was explained Rust can use the reference to the closure... I will continue reading documentation about it.... ;)</p>
+<p>If you have any good source for this, please <a href="https://twitter.com/simon_yann">tell me</a>.</p>
+<p>In conclusion I still find closure as input parameters quite complex in Rust. I surely need to more understand the theory behind the language to fully understand them.</p>
+<p>The Rust community is very helpful, but it may not scale if there are more and more beginners like me.</p>
+<h4 id="update-2016-05-25"><a href="https://yanns.github.io/blog/2016/05/23/rust-closures-as-input-parameters/#update-2016-05-25"><em>Update (May 25)</em></a></h4>
+<p>The following <a href="https://twitter.com/rustlang/status/734946700536774656">tweet</a> from <a href="https://twitter.com/rustlang">@rustlang</a> provided me the good keywords to search for:</p>
+<blockquote>
+    <p>it's about trait objects vs type parameters, which can be tough when you're learning</p>
+    <p>&mdash; <a href="https:&#x2F;&#x2F;twitter.com&#x2F;rustlang&#x2F;status&#x2F;734946700536774656">@rustlang</a></p>
+</blockquote>
+<p><a href="https://doc.rust-lang.org/book/trait-objects.html">Trait objects</a> are used for <a href="https://en.wikipedia.org/wiki/Dynamic_dispatch">dynamic dispatch</a>, feature found in most OO languages.</p>
+<p>With that in mind, I could understand the <a href="https://doc.rust-lang.org/book/closures.html#taking-closures-as-arguments">Rust book about closures</a>.</p>
+<p>If I use trait objects, this version works:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>fn with_todo_id(todos: &amp;mut Vec&lt;Todo&gt;, todo_id: i16, f: &amp;Fn(&amp;mut Todo)) {
+</span><span>    if let Some(todo) = todos.iter_mut().find(|todo| todo.id == todo_id) {
+</span><span>        f(todo);
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span>fn remove_todo(todos: &amp;mut Vec&lt;Todo&gt;, todo_id: i16) {
+</span><span>    with_todo_id(todos, todo_id, &amp;|todo| todo.deleted = true);
+</span><span>}
+</span><span>
+</span><span>fn mark_done(todos: &amp;mut Vec&lt;Todo&gt;, todo_id: i16) {
+</span><span>    with_todo_id(todos, todo_id, &amp;|todo| todo.completed = true);
+</span><span>}
+</span></code></pre>
+<p>Trait objects force Rust to use dynamic dispatch.</p>
+<p>If I use type parameter instead of a trait object:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>fn with_todo_id&lt;P&gt;(todos: &amp;mut Vec&lt;Todo&gt;, todo_id: i16, f: P) where P: Fn(&amp;mut Todo) {
+</span><span>    if let Some(todo) = todos.iter_mut().find(|todo| todo.id == todo_id) {
+</span><span>        f(todo);
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span>fn remove_todo(todos: &amp;mut Vec&lt;Todo&gt;, todo_id: i16) {
+</span><span>    with_todo_id(todos, todo_id, |todo| todo.deleted = true);
+</span><span>}
+</span><span>
+</span><span>fn mark_done(todos: &amp;mut Vec&lt;Todo&gt;, todo_id: i16) {
+</span><span>    with_todo_id(todos, todo_id, |todo| todo.completed = true);
+</span><span>}
+</span></code></pre>
+<p>then Rust is able to monomorphize the closure and use static dispatch, and does not need any object for the dyamic dispatch.</p>
+<p>Another great example of the <a href="http://blog.rust-lang.org/2015/05/11/traits.html">zero-cost abstraction</a> possible with Rust!</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

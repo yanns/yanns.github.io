@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Bitten by hash codes on production</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>Bitten by hash codes on production</h2>
+    	<div class="info">
+    		<span>4 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>24 February 2021</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<h1 id="hash-codes-can-be-surprising">Hash codes can be surprising</h1>
+<p>I'd like to write about a performance issue I found out on production.</p>
+<p>This issue is coming from change to a Scala function. That change looked totally innocent at the first place.</p>
+<p>The code in question is about fetching JSON object from external resources.
+The function accepts <code>ids</code> as input and returns a <code>Map</code> where the value is an <code>Option[JObject]</code> to represent, for each <code>id</code> if a JSON object could be found or not.</p>
+<p>I'll try to explain this with some code. I simplified the original code a lot to focus on the important port.</p>
+<p>First some code just to fake the data structures used later:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">case class</span><span style="color:#ebcb8b;"> Id</span><span>(</span><span style="color:#bf616a;">value</span><span>: </span><span style="color:#ebcb8b;">String</span><span>) 
+</span><span>
+</span><span style="color:#65737e;">// just to represent a JSON object
+</span><span style="color:#b48ead;">case class</span><span style="color:#ebcb8b;"> JObject</span><span>(</span><span style="color:#bf616a;">fields</span><span>: </span><span style="color:#ebcb8b;">List</span><span>[(</span><span style="color:#ebcb8b;">String</span><span>, </span><span style="color:#b48ead;">Any</span><span>)])
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">loadFromExternalServer</span><span>(</span><span style="color:#bf616a;">id</span><span>: </span><span style="color:#ebcb8b;">Id</span><span>): </span><span style="color:#ebcb8b;">Option</span><span>[</span><span style="color:#ebcb8b;">JObject</span><span>] = 
+</span><span>  </span><span style="color:#b48ead;">if </span><span>(id.value.hashCode() % </span><span style="color:#d08770;">2 </span><span>== </span><span style="color:#d08770;">0</span><span>) </span><span style="color:#65737e;">// simulate finding the external resource or not
+</span><span>    None
+</span><span>  </span><span style="color:#b48ead;">else 
+</span><span>    Some(JObject(List(&quot;</span><span style="color:#a3be8c;">id</span><span>&quot; -&gt; id.value, &quot;</span><span style="color:#a3be8c;">name</span><span>&quot; -&gt; &quot;</span><span style="color:#a3be8c;">a name</span><span>&quot;)))
+</span></code></pre>
+<h3 id="the-initial-implementation">The initial implementation</h3>
+<p>The function was initially implemented like this:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">loadRecords</span><span>(</span><span style="color:#bf616a;">ids</span><span>: </span><span style="color:#ebcb8b;">Seq</span><span>[</span><span style="color:#ebcb8b;">Id</span><span>]): </span><span style="color:#ebcb8b;">Map</span><span>[</span><span style="color:#ebcb8b;">Id</span><span>, </span><span style="color:#ebcb8b;">Option</span><span>[</span><span style="color:#ebcb8b;">JObject</span><span>]] =
+</span><span>  ids
+</span><span>    .map(</span><span style="color:#bf616a;">id </span><span style="color:#b48ead;">=&gt; </span><span>(id, loadFromExternalServer(id)))
+</span><span>    .toMap
+</span></code></pre>
+<p>If we call this function, we will get the expected <code>Map</code>:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">ids </span><span>= Seq(Id(&quot;</span><span style="color:#a3be8c;">id-1</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-2</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-3</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-4</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-5</span><span>&quot;))
+</span><span>
+</span><span>loadRecords(ids)
+</span><span style="color:#65737e;">// Map(Id(id-1) -&gt; Some(JObject(List((id,id-1), (name,a name)))), Id(id-5) -&gt; Some(JObject(List((id,id-5), (name,a name)))), Id(id-4) -&gt; None, Id(id-3) -&gt; Some(JObject(List((id,id-3), (name,a name)))), Id(id-2) -&gt; None)
+</span></code></pre>
+<h3 id="the-change">The change</h3>
+<p>At some point, one notices that we sometimes are calling <code>loadRecords</code> with duplicated ids. To avoid that, we changed the <code>Seq</code> to a <code>Set</code> to make sure that all ids are unique:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">loadRecords</span><span>(</span><span style="color:#bf616a;">ids</span><span>: </span><span style="color:#ebcb8b;">Set</span><span>[</span><span style="color:#ebcb8b;">Id</span><span>]): </span><span style="color:#ebcb8b;">Map</span><span>[</span><span style="color:#ebcb8b;">Id</span><span>, </span><span style="color:#ebcb8b;">Option</span><span>[</span><span style="color:#ebcb8b;">JObject</span><span>]] =
+</span><span>  ids
+</span><span>    .map(</span><span style="color:#bf616a;">id </span><span style="color:#b48ead;">=&gt; </span><span>(id, loadFromExternalServer(id)))
+</span><span>    .toMap
+</span></code></pre>
+<p>As you can notice, we only changed <code>ids: Seq[Id]</code> to <code>ids: Set[Id]</code> in the function signature.</p>
+<p>The result of calling this function does not change:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">ids </span><span>= Set(Id(&quot;</span><span style="color:#a3be8c;">id-1</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-2</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-3</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-4</span><span>&quot;), Id(&quot;</span><span style="color:#a3be8c;">id-5</span><span>&quot;))
+</span><span>
+</span><span>loadRecords(ids)
+</span><span style="color:#65737e;">// Map(Id(id-1) -&gt; Some(JObject(List((id,id-1), (name,a name)))), Id(id-5) -&gt; Some(JObject(List((id,id-5), (name,a name)))), Id(id-4) -&gt; None, Id(id-3) -&gt; Some(JObject(List((id,id-3), (name,a name)))), Id(id-2) -&gt; None)
+</span></code></pre>
+<h3 id="the-impact">The impact</h3>
+<p>When looking at the servers on production, I found a strange part in one flame graph:</p>
+<p><img src="&#x2F;assets&#x2F;2021-02-24&#x2F;flame-graph-productHash.png" alt="Flame graph showing an important portion of scala/util/hashing/MurmurHash3.productHash"/></p>
+<p>The servers were spending a significant amount of time computing the hash codes of JSON objects.</p>
+<h3 id="the-explanation">The explanation</h3>
+<p>It took me some time to figure out the issue.</p>
+<p>Let's focus on this part:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>  ids
+</span><span>    .map(</span><span style="color:#bf616a;">id </span><span style="color:#b48ead;">=&gt; </span><span>(id, loadFromExternalServer(id)))
+</span></code></pre>
+<p>This piece of code produced a <code>Seq[(Id, Option[JObject])]</code> before the change.
+After the change, it produces a <code>Set[(Id, Option[JObject])]</code>. </p>
+<p>For every item inserted, a <code>Set</code> must check for duplicates. It does that with the help of the hash code of each element.</p>
+<p>After the change, <code>Set</code> was also asking for the <code>hashCode()</code> of the <code>JObject</code>, computed recursively by traversing the whole JSON object. For large objects, this computation can be costly. (At least, costly enough to make it apparent in a flame graph)</p>
+<p>This change went unnoticed because the <code>hashCode()</code> method exists on all objects in Java.</p>
+<p>If we had used type classes, we may have noticed this issue before. By assuming that there is no instance of <code>def hashCode(): Int</code> for <code>JObject</code> (which seems fair), the compiler would have fail.</p>
+<h3 id="avoiding-intermediate-collections">Avoiding intermediate collections</h3>
+<p>To avoid computing intermediate collections, we can also use the <code>iterator()</code>:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">loadRecords</span><span>(</span><span style="color:#bf616a;">ids</span><span>: </span><span style="color:#ebcb8b;">Set</span><span>[</span><span style="color:#ebcb8b;">Id</span><span>]): </span><span style="color:#ebcb8b;">Map</span><span>[</span><span style="color:#ebcb8b;">Id</span><span>, </span><span style="color:#ebcb8b;">Option</span><span>[</span><span style="color:#ebcb8b;">JObject</span><span>]] =
+</span><span>  ids
+</span><span>    .iterator
+</span><span>    .map(</span><span style="color:#bf616a;">id </span><span style="color:#b48ead;">=&gt; </span><span>(id, loadFromExternalServer(id)))
+</span><span>    .toMap
+</span></code></pre>
+<p>That way, we avoid instantiating the intermediate <code>Seq</code> or <code>Set</code>.</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

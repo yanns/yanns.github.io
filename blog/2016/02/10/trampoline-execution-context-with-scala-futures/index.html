@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>trampoline execution context with scala Futures</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>trampoline execution context with scala Futures</h2>
+    	<div class="info">
+    		<span>5 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>10 February 2016</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<p>Disclaimer: I am continually learning, and this post reflects my current understanding of the topic. I may be wrong. Do not believe directly what I write. Test what you need. If you want to provide some precisions or corrections, please contact me on <a href="https://twitter.com/simon_yann">twitter</a>, and I'll fix this post.</p>
+<p><a href="https://twitter.com/runarorama">Rúnar</a> showed in a <a href="http://blog.higher-order.com/blog/2015/06/18/easy-performance-wins-with-scalaz/">blog post how Scalaz Tasks can perform better than the Scala Futures</a>.</p>
+<p>He explains the details very well. If you have not read that post, I recommend it highly.</p>
+<p>The main point if that Scala <code>Future</code> adds a context switching for each <code>map</code> or <code>flatMap</code>.
+With Scalaz <code>Task</code>, we have to describe which tasks need a new thread, the other ones are called on the same thread as the previous computation, avoiding these context switchings.</p>
+<p>With Scala Futures, if you want to multiply the result of a <code>Future[Int]</code> by 2, you need an <code>ExecutionContext</code> (EC):</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">import</span><span> scala.concurrent.ExecutionContext.global
+</span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">futureCount</span><span>: </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>] = futureCountOfUsers()
+</span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">result </span><span>= futureCount.map(</span><span style="color:#bf616a;">i </span><span style="color:#b48ead;">=&gt;</span><span> i * </span><span style="color:#d08770;">2</span><span>)(global)
+</span></code></pre>
+<p>or with an implicit resolution:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">import</span><span> scala.concurrent.ExecutionContext.Implicits.global
+</span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">futureCount</span><span>: </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>] = futureCountOfUsers()
+</span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">result </span><span>= futureCount.map(</span><span style="color:#bf616a;">i </span><span style="color:#b48ead;">=&gt;</span><span> i * </span><span style="color:#d08770;">2</span><span>)
+</span><span>
+</span></code></pre>
+<p>To compute the <code>i =&gt; i * 2</code>, the ExecutionContext may use a different thread than the one having the result of the <code>futureCountOfUsers</code>. We observe a context switching between the future and the callback in the <code>map</code>. And the thread executing <code>i =&gt; i * 2</code> can run on a different CPU/core than the one having the result of <code>futureCount</code>, meaning that the CPU cache is missed.</p>
+<p>This overhead is not problematic for simple computations. But if we do 100 or 1000 of them, then it can have a significant impact on performances.</p>
+<p>And in my opinion, Scala Futures have other downsides.</p>
+<p>For example, with the following code:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">for </span><span>{
+</span><span>  </span><span style="color:#bf616a;">value1 </span><span>&lt;- functionThatReturnsFutureValue1
+</span><span>  </span><span style="color:#bf616a;">value2 </span><span>&lt;- functionThatReturnsFutureValue2
+</span><span>} </span><span style="color:#b48ead;">yield </span><span>(value1, value2)
+</span></code></pre>
+<p><code>functionThatReturnsFutureValue1</code> and <code>functionThatReturnsFutureValue2</code> runs sequentially, even if there is no dependency between the two.</p>
+<p>On the other hand:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">val </span><span style="color:#bf616a;">futureValue1 </span><span>= functionThatReturnsFutureValue1
+</span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">futureValue2 </span><span>= functionThatReturnsFutureValue2
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>{
+</span><span>  </span><span style="color:#bf616a;">value1 </span><span>&lt;- futureValue1
+</span><span>  </span><span style="color:#bf616a;">value2 </span><span>&lt;- futureValue2
+</span><span>} </span><span style="color:#b48ead;">yield </span><span>(value1, value2)
+</span></code></pre>
+<p>computes <code>functionThatReturnsFutureValue1</code> and <code>functionThatReturnsFutureValue2</code> in parallel.</p>
+<p>It means that Scala Futures do not respect the principe of <a href="https://en.wikipedia.org/wiki/Referential_transparency">&quot;referential transparency&quot;</a>.
+It's not only a theoretical problem, new users of Scala Futures often have problems with that.</p>
+<p>And what I do not like about Scala Future is that we always need an ExecutionContext, even for small non-blocking computations.</p>
+<p>For example, instead of writing:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">multiplyBy2</span><span>(</span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>]): </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>] =
+</span><span>  f.map(</span><span style="color:#bf616a;">_</span><span> * </span><span style="color:#d08770;">2</span><span>)
+</span></code></pre>
+<p>We need either to import a ExecutionContext that is always used, or leave the liberty to the caller of the function and write:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">multiplyBy2</span><span>(</span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>])(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">ec</span><span>: </span><span style="color:#ebcb8b;">ExecutionContext</span><span>): </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>] =
+</span><span>  f.map(</span><span style="color:#bf616a;">_</span><span> * </span><span style="color:#d08770;">2</span><span>)
+</span></code></pre>
+<p>My first impression with Scalaz Tasks is that they have a better design than the Scala Futures.
+But I have not used Scalaz Tasks extensively and cannot say if they have other problems.</p>
+<p>But all in all, Scala Futures are here to stay. They are part of the standard API and are used everywhere.</p>
+<p>I'm still wondering why the Scala Futures were designed that way.
+I can only guess, but I think this avoids some common pitfalls:</p>
+<ul>
+<li>&quot;easy&quot; for new-comers: simply import the default execution context and that’s all</li>
+<li>safe by default: If a callback takes a long time (blocking IO and expensive computation), this callback will not block other ones. The execution context will be able to use a different thread for other computations.</li>
+<li>and a design like Scala Tasks works well if all parts of the system are non-blocking and using one thread pool. The reality is more complex. Each driver/http client can use its own thread pool. For example, an asynchronous http client may have its own thread pool because some parts of the networking API in Java is blocking like the standard ns lookup <code>InetAddress.getByName()</code>. Running a computation directly on the thread without forking it will run the computation of the thread pool of the http client. And that can lead to an exhaustion of the thread pool of the http client, and the http client cannot function anymore.</li>
+</ul>
+<h3 id="introducing-the-trampoline-execution-context">Introducing the trampoline execution context</h3>
+<p>This performance problem with the standard execution context is not new. The play framework team had this problem, especially with Iteratees that compute everything with a Future and uses callbacks extensively on stream of data.
+To solve this problem, James Roper introduced the <a href="https://github.com/playframework/playframework/blob/master/framework/src/iteratees/src/main/scala/play/api/libs/iteratee/Execution.scala#L31-L128">trampoline Execution Context</a>.
+This trampoline execution context is a great piece of software:</p>
+<ul>
+<li>it makes sure the callbacks are run on the same thread than the future to avoid context switchings.</li>
+<li>it does not overflow with recursive callbacks.</li>
+</ul>
+<p>To show the benefit of the trampoline execution context, let's call this function that does not make any sense, but simply calls <code>Future.map</code> n times:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">range</span><span>(</span><span style="color:#bf616a;">n</span><span>: </span><span style="color:#b48ead;">Int</span><span>)(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">ec</span><span>: </span><span style="color:#ebcb8b;">ExecutionContext</span><span>): </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Int</span><span>] =
+</span><span>  (</span><span style="color:#d08770;">0</span><span> to n).foldLeft[</span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Int</span><span>]](Future.successful(</span><span style="color:#d08770;">0</span><span>)) { </span><span style="color:#b48ead;">case </span><span>(</span><span style="color:#bf616a;">f</span><span>, </span><span style="color:#bf616a;">_</span><span>) </span><span style="color:#b48ead;">⇒</span><span> f.map(</span><span style="color:#bf616a;">_</span><span> + </span><span style="color:#d08770;">1</span><span>) }
+</span></code></pre>
+<p>With n = 5 000 000:</p>
+<ul>
+<li>Scala Futures with standard EC: 0.037 ops/s</li>
+<li>Scala Futures with trampoline EC: 1.397 ops/s</li>
+</ul>
+<h3 id="should-we-use-the-trampoline-ec">Should we use the trampoline EC?</h3>
+<p>When we are confident with execution contexts, I thing we can use this trampoline EC if:</p>
+<ul>
+<li>the callback is running very fast. For example:</li>
+</ul>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">multiplyBy2</span><span>(</span><span style="color:#bf616a;">f</span><span>: </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>]): </span><span style="color:#ebcb8b;">Future</span><span>[</span><span style="color:#b48ead;">Long</span><span>] =
+</span><span>  f.map(</span><span style="color:#bf616a;">_</span><span> * </span><span style="color:#d08770;">2</span><span>)(trampolineEC)
+</span></code></pre>
+<ul>
+<li>we never call some blocking IO. This point can be tricky: some scala libs can use some java libs that use InputStream or OutputStream that can block.</li>
+</ul>
+<p>If you are unsure, use the standard EC.</p>
+<p>If you want to try this yourself, the <a href="https://github.com/yanns/trampoline-EC">code is on github</a>.</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>

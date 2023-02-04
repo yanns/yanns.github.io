@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>Supporting heterogeneous types in Scala</title>
+
+      <!-- css -->
+      <link rel="stylesheet" href="/reset.css">
+      <link rel="stylesheet" href="/feather.css">
+
+      <!-- fonts -->
+      <link href="https://fonts.googleapis.com/css?family=Merriweather:300,400|Montserrat:400,700" rel="stylesheet">
+
+      
+
+      
+      <link rel="alternate" type="application/atom+xml" title="atom" href="https://yanns.github.io/atom.xml">
+      
+
+      
+      
+    </head>
+
+    <body>
+
+    <div class="container">
+      <section class="post">
+        <div class="title-and-info">
+          <h5>
+            <a class='header-link' href="/">Blog</a>
+          </h5>
+        </div>
+      </section>
+    </div>
+
+    
+<div class='container'>
+  <section class="post">
+  	<div class="title-and-info">
+    	<h2>Supporting heterogeneous types in Scala</h2>
+    	<div class="info">
+    		<span>5 minute read</span>
+    		
+    			<span class='divider'/>
+    			<span>18 October 2019</span>
+    		
+    		
+    		
+    	</div>
+    </div>
+  	<article>
+  		<h1 id="the-objective">The objective</h1>
+<p>We want to create a function that takes a list of scala classes as input, and outputs a list of all elements, each element being encoded as json.</p>
+<p>For encoding in json, we use <a href="https://circe.github.io/">circe</a>.</p>
+<p>This function should be generic and works for any type we can find a <a href="https://circe.github.io/circe/codec.html">circe</a> <code>Encoder</code> for it.</p>
+<p>Our first try could be something like the following function:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">import</span><span> io.circe.{Encoder, Json}
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encode</span><span>[</span><span style="color:#ebcb8b;">A</span><span>: </span><span style="color:#ebcb8b;">Encoder</span><span>](</span><span style="color:#bf616a;">l</span><span>: </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">A</span><span>]): </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">Json</span><span>] =
+</span><span>  l.map(Encoder[</span><span style="color:#ebcb8b;">A</span><span>].apply)
+</span></code></pre>
+<p>This <code>encode</code> function seems to work:</p>
+<ul>
+<li>to encode several Strings:</li>
+</ul>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>encode(List(&quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">world</span><span>&quot;))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(&quot;hello&quot;, &quot;world&quot;)
+</span></code></pre>
+<ul>
+<li>to encode several integers:</li>
+</ul>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>encode(List(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>, </span><span style="color:#d08770;">3</span><span>))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, 2, 3)
+</span></code></pre>
+<p>But this function cannot be used with a list of heterogeneous types:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>encode(List(</span><span style="color:#d08770;">1</span><span>, &quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, </span><span style="color:#d08770;">3</span><span>))
+</span><span style="color:#65737e;">/// error: diverging implicit expansion for type io.circe.Encoder[Any]
+</span></code></pre>
+<p>Indeed the scala compiler first resolves the type parameter <code>A</code> by finding a common type for <code>String</code> and <code>Int</code>. In this scala version, it chooses <code>Any</code>.</p>
+<p>Then the scala compiler tries to find an instance of <code>Encoder[Any]</code> and fails to do so.</p>
+<iframe height="280px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=lmeb8C8/1&theme=dark&layout=h74"></iframe>
+<h1 id="first-solution-replacing-type-parameters-with-path-dependent-types">First solution: replacing type parameters with path dependent types</h1>
+<h2 id="introducing-toencode-with-a-path-dependent-type-to-capture-the-type-of-each-element">Introducing <code>ToEncode</code> with a path dependent type to capture the type of each element</h2>
+<p>One solution is to force the scala compiler to capture the <code>Encoder</code> instance for each element, instead of using one generic <code>Encoder</code> for the whole list.</p>
+<p>For that, we introduce a trait to capture the value and the <code>Encoder</code> instance:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">trait</span><span style="color:#ebcb8b;"> ToEncode </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">type </span><span style="color:#eff1f5;">Value
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">value</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Value
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Encoder</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Value</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>Our <code>encode</code> function does not have any type parameter anymore as the type of each element is already captured in the instance of <code>ToEncode</code>:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encode</span><span>(</span><span style="color:#bf616a;">l</span><span>: </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">ToEncode</span><span>]): </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">Json</span><span>] =
+</span><span>  l.map(</span><span style="color:#bf616a;">v </span><span style="color:#b48ead;">=&gt;</span><span> v.encoder.apply(v.value))
+</span></code></pre>
+<p>Let's define some helper functions to create <code>ToEncode</code> instances:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">stringToEncode</span><span>(</span><span style="color:#bf616a;">v</span><span>: </span><span style="color:#ebcb8b;">String</span><span>)(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">instance</span><span>: </span><span style="color:#ebcb8b;">Encoder</span><span>[</span><span style="color:#ebcb8b;">String</span><span>]): </span><span style="color:#ebcb8b;">ToEncode </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">ToEncode </span><span>{
+</span><span>  </span><span style="color:#b48ead;">type </span><span>Value = </span><span style="color:#ebcb8b;">String
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">value </span><span>= v
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder </span><span>= instance
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">intToEncode</span><span>(</span><span style="color:#bf616a;">v</span><span>: </span><span style="color:#b48ead;">Int</span><span>)(</span><span style="color:#b48ead;">implicit </span><span style="color:#bf616a;">instance</span><span>: </span><span style="color:#ebcb8b;">Encoder</span><span>[</span><span style="color:#b48ead;">Int</span><span>]): </span><span style="color:#ebcb8b;">ToEncode </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">ToEncode </span><span>{
+</span><span>  </span><span style="color:#b48ead;">type </span><span>Value = </span><span style="color:#b48ead;">Int
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">value </span><span>= v
+</span><span>  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder </span><span>= instance
+</span><span>}
+</span></code></pre>
+<p>Now we can use <code>encode</code> with homogeneous or heterogeneous types:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>encode(List(stringToEncode(&quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;), stringToEncode(&quot;</span><span style="color:#a3be8c;">world</span><span>&quot;)))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(&quot;hello&quot;, &quot;world&quot;)
+</span><span>
+</span><span>encode(List(intToEncode(</span><span style="color:#d08770;">1</span><span>), intToEncode(</span><span style="color:#d08770;">2</span><span>), intToEncode(</span><span style="color:#d08770;">3</span><span>)))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, 2, 3)
+</span><span>
+</span><span>encode(List(intToEncode(</span><span style="color:#d08770;">1</span><span>), stringToEncode(&quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;), intToEncode(</span><span style="color:#d08770;">3</span><span>)))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, &quot;hello&quot;, 3)
+</span></code></pre>
+<p>By making our helpers <code>implicit</code>, we can avoid some boilerplate:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>encode(List(&quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">world</span><span>&quot;))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(&quot;hello&quot;, &quot;world&quot;)
+</span><span>
+</span><span>encode(List(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>, </span><span style="color:#d08770;">3</span><span>))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, 2, 3)
+</span><span>
+</span><span>encode(List(</span><span style="color:#d08770;">1</span><span>, &quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, </span><span style="color:#d08770;">3</span><span>))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, &quot;hello&quot;, 3)
+</span></code></pre>
+<iframe height="625px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=jfGglKO/1&theme=dark&layout=h74"></iframe>
+<h2 id="generic-solution">Generic solution</h2>
+<p>Instead of defining helper functions like <code>stringToEncode</code> or <code>intToEncode</code> for each type we need, we can also have a generic solution by building a <code>ToEncode</code> whenever we find an <code>Encoder</code> instance:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">trait</span><span style="color:#ebcb8b;"> ToEncode </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">type </span><span style="color:#eff1f5;">Value
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">value</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Value
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">Encoder</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">Value</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">}
+</span><span>
+</span><span style="color:#b48ead;">object</span><span style="color:#ebcb8b;"> ToEncode </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">implicit def </span><span style="color:#8fa1b3;">fromEncoder</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span>: </span><span style="color:#ebcb8b;">Encoder</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">a</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">ToEncode </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">ToEncode </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">type </span><span style="color:#eff1f5;">Value </span><span>= </span><span style="color:#ebcb8b;">A
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">value </span><span>=</span><span style="color:#eff1f5;"> a
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encoder </span><span>= </span><span style="color:#eff1f5;">Encoder[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">]
+</span><span style="color:#eff1f5;">  }
+</span><span style="color:#eff1f5;">}
+</span><span>
+</span><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encode</span><span>(</span><span style="color:#bf616a;">l</span><span>: </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">ToEncode</span><span>]): </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">Json</span><span>] =
+</span><span>  l.map(</span><span style="color:#bf616a;">v </span><span style="color:#b48ead;">=&gt;</span><span> v.encoder.apply(v.value))
+</span></code></pre>
+<p>Now we can use our <code>encode</code> function with any kind of type that has an <code>Encoder</code> instance.</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span>encode(List(&quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">world</span><span>&quot;))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(&quot;hello&quot;, &quot;world&quot;)
+</span><span>
+</span><span>encode(List(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, 2)
+</span><span>
+</span><span>encode(List(</span><span style="color:#d08770;">1</span><span>, &quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, </span><span style="color:#d08770;">3</span><span>))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, &quot;hello&quot;, 3)
+</span></code></pre>
+<iframe height="550px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=IMTlBrw/2&theme=dark&layout=h74"></iframe>
+<h2 id="disadvantage">Disadvantage</h2>
+<p>To use this approach, we need one instance of <code>ToEncode</code> for each element in the list.</p>
+<p>Calling <code>encode</code> with a list of 500 strings will create 500 instances of <code>ToEncode</code>!</p>
+<h1 id="second-solution-using-value-classes-to-encode-each-element">Second solution: using value classes to encode each element</h1>
+<p>After great feedback from <a href="https://twitter.com/travisbrown/status/1186062469850112002">Travis</a>, I could get rid of the <code>ToEncode</code> instances.</p>
+<p>Let's introduce a value class that will contain the <code>Json</code> instance for each element:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">class</span><span style="color:#ebcb8b;"> AsJson</span><span>(</span><span style="color:#b48ead;">val </span><span style="color:#bf616a;">json</span><span>: </span><span style="color:#ebcb8b;">Json</span><span>) </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">AnyVal
+</span></code></pre>
+<p>We use a value class to (hopefully) avoid runtime instances. A version with Dotty could use phantom type.</p>
+<p>Instead of encoding each value in the <code>encode</code> function, we encode directly when converting each element to a <code>AsJson</code>:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">object</span><span style="color:#ebcb8b;"> AsJson </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">  </span><span style="color:#b48ead;">implicit def </span><span style="color:#8fa1b3;">toAsJson</span><span style="color:#eff1f5;">[</span><span style="color:#ebcb8b;">A</span><span>: </span><span style="color:#ebcb8b;">Encoder</span><span style="color:#eff1f5;">](</span><span style="color:#bf616a;">a</span><span style="color:#eff1f5;">: </span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">): </span><span style="color:#ebcb8b;">AsJson </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">AsJson</span><span style="color:#eff1f5;">(Encoder[</span><span style="color:#ebcb8b;">A</span><span style="color:#eff1f5;">].apply(a))
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>The <code>encode</code> function has almost nothing to do except forcing the compiler to encode each element:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">def </span><span style="color:#8fa1b3;">encode</span><span>(</span><span style="color:#bf616a;">l</span><span>: </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">AsJson</span><span>]): </span><span style="color:#ebcb8b;">List</span><span>[</span><span style="color:#ebcb8b;">Json</span><span>] =
+</span><span>  l.map(</span><span style="color:#bf616a;">_</span><span>.json)
+</span></code></pre>
+<p>By making <code>AsJson.toAsJson</code> visible in the scope, we can now use our <code>encode</code> function with heterogeneous types:</p>
+<pre data-lang="scala" style="background-color:#2b303b;color:#c0c5ce;" class="language-scala "><code class="language-scala" data-lang="scala"><span style="color:#b48ead;">import</span><span> AsJson.</span><span style="color:#bf616a;">_
+</span><span>
+</span><span>encode(List(&quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">world</span><span>&quot;))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(&quot;hello&quot;, &quot;world&quot;)
+</span><span>
+</span><span>encode(List(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">2</span><span>))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, 2)
+</span><span>
+</span><span>encode(List(</span><span style="color:#d08770;">1</span><span>, &quot;</span><span style="color:#a3be8c;">hello</span><span>&quot;, </span><span style="color:#d08770;">3</span><span>))
+</span><span style="color:#65737e;">// List[io.circe.Json] = List(1, &quot;hello&quot;, 3)
+</span></code></pre>
+<iframe height="400px" frameborder="0" style="width: 100%" src="https://embed.scalafiddle.io/embed?sfid=XcTtE5u/1&theme=dark&layout=h74"></iframe>
+<h1 id="feedback-welcome">Feedback welcome</h1>
+<p>If you know a better solution, please do not hesitate to tell <a href="https://twitter.com/simon_yann/status/1185276156561506304">me</a>.</p>
+
+  	</article>
+  </section>
+
+  
+
+</div>
+
+
+    <footer>
+      Feather theme by <a href="https://github.com/piedoom/feather">doomy</a>&nbsp;&nbsp;-&nbsp;&nbsp; Built with <a href="https://www.getzola.org/">Zola</a><br />
+      <a rel="me" href="https://mstdn.social/@yanns">@yanns on Mastodon</a>
+      
+    </footer>
+
+    </body>
+
+</html>
